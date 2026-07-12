@@ -75,8 +75,16 @@ export default function GalleryPage(): ReactElement {
           <PlayingCard key={card.id} card={card} label={cardLabel(card)} />
         ))}
         <PlayingCard faceDown />
-        <PlayingCard card={mkCard('spades', 'ace')} size="sm" label={cardLabel(mkCard('spades', 'ace'))} />
-        <PlayingCard card={mkCard('diamonds', '10')} size="lg" label={cardLabel(mkCard('diamonds', '10'))} />
+        <PlayingCard
+          card={mkCard('spades', 'ace')}
+          size="sm"
+          label={cardLabel(mkCard('spades', 'ace'))}
+        />
+        <PlayingCard
+          card={mkCard('diamonds', '10')}
+          size="lg"
+          label={cardLabel(mkCard('diamonds', '10'))}
+        />
       </Section>
 
       <Section title="Player seats">

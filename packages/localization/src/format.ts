@@ -15,11 +15,7 @@ const PLACEHOLDER = /\{(\w+)\}/g;
  * constructs used by the message catalogue. The plural rule is one-vs-other,
  * which matches the `one`/`other` categories authored for en/gu/hi.
  */
-export function formatMessage(
-  locale: Locale,
-  key: MessageKey,
-  values: MessageValues = {},
-): string {
+export function formatMessage(locale: Locale, key: MessageKey, values: MessageValues = {}): string {
   const template = getMessages(locale)[key];
 
   const withPlurals = template.replace(PLURAL_BLOCK, (_match, arg, one, other) => {
