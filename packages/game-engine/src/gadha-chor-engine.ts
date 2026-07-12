@@ -14,6 +14,7 @@ import type {
   Rng,
 } from '@lazy-patta/game-contracts';
 
+import { chooseBotAction } from './bot';
 import { buildDeck } from './deck';
 import { removeSameRankPairs } from './pairs';
 import { shuffle } from './shuffle';
@@ -163,9 +164,9 @@ export class GadhaChorEngine implements Engine {
   }
 
   botMove(state: GameState, actor: PlayerId, rng: Rng): GameAction | null {
-    const moves = this.legalMoves(state, actor);
-    if (moves.length === 0) return null;
-    return moves[Math.floor(rng.next() * moves.length)]!;
+    const validActions = this.legalMoves(state, actor);
+    if (validActions.length === 0) return null;
+    return chooseBotAction({ gameState: state, actorId: actor, validActions, rng }).action;
   }
 
   projectPublic(state: GameState): PublicSnapshot {
