@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "Lazy Patta",
+    "slug": "lazy-patta",
+    "scheme": "lazypatta",
+    "version": "0.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

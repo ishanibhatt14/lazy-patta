@@ -77,6 +77,13 @@ web_modules/
 .cache
 .parcel-cache
 
+# Turborepo
+.turbo
+
+# Expo
+.expo
+*.expo-shared
+
 # Next.js build output
 .next
 out
