@@ -6,11 +6,13 @@
   "scripts": {
     "lint": "eslint src --max-warnings 0",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:rls": "SUPABASE_RLS_LIVE=1 vitest run rls-behavioral"
   },
   "devDependencies": {
     "@lazy-patta/eslint-config": "workspace:*",
     "@lazy-patta/typescript-config": "workspace:*",
+    "@supabase/supabase-js": "^2.110.2",
     "@types/node": "^20.17.10",
     "eslint": "^8.57.0",
     "typescript": "^5.7.2",
