@@ -6,6 +6,10 @@ coverage
 pnpm-lock.yaml
 .turbo
 
+# Playwright test artifacts (regenerated each E2E run)
+test-results
+playwright-report
+
 # Next.js regenerates this on every build ("should not be edited"); keep it
 # out of Prettier so a local build doesn't fight the format:check gate.
 apps/web/next-env.d.ts

@@ -82,6 +82,34 @@ jobs:
       - name: Build web
         run: pnpm --filter web build
 
+  e2e:
+    name: Playwright E2E (computer game)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browser (chromium)
+        run: pnpm --filter web exec playwright install --with-deps chromium
+
+      - name: Build web
+        run: pnpm --filter web build
+
+      - name: Run E2E
+        run: pnpm --filter web test:e2e
+
   mobile:
     name: Expo Doctor + Android/iOS export
     runs-on: ubuntu-latest
