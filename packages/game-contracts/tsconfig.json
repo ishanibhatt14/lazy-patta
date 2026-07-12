@@ -1,0 +1,8 @@
+{
+  "extends": "@lazy-patta/typescript-config/base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "noEmit": true
+  },
+  "include": ["src"]
+}

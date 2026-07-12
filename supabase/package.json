@@ -1,0 +1,19 @@
+{
+  "name": "@lazy-patta/supabase",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@lazy-patta/eslint-config": "workspace:*",
+    "@lazy-patta/typescript-config": "workspace:*",
+    "@types/node": "^20.17.10",
+    "eslint": "^8.57.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
