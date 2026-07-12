@@ -16,6 +16,8 @@
   "result.winner": "{name} wins!",
   "result.gadhaChor": "{name} is the Gadha Chor!",
   "lobby.playerCount": "{count, plural, one {# player} other {# players}}",
+  "lobby.hostedBy": "Hosted by {name}",
+  "label.gadhaChor": "Gadha Chor",
   "suit.clubs": "Clubs",
   "suit.diamonds": "Diamonds",
   "suit.hearts": "Hearts",

@@ -16,6 +16,8 @@
   "result.winner": "{name} जीते!",
   "result.gadhaChor": "{name} गधा चोर है!",
   "lobby.playerCount": "{count, plural, one {# खिलाड़ी} other {# खिलाड़ी}}",
+  "lobby.hostedBy": "{name} द्वारा होस्ट किया गया",
+  "label.gadhaChor": "गधा चोर",
   "suit.clubs": "चिड़ी",
   "suit.diamonds": "ईंट",
   "suit.hearts": "पान",
