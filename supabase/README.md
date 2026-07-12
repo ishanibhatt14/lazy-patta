@@ -3,18 +3,18 @@
 Phase 0 database foundation. Three migrations, each a single user-accessible
 table with Row Level Security enabled and owner-scoped policies:
 
-| Migration                              | Table                        | Purpose                                   |
-| -------------------------------------- | ---------------------------- | ----------------------------------------- |
-| `0001_profiles.sql`                    | `profiles`                   | 1:1 account profile (display name, avatar) |
-| `0002_user_preferences.sql`            | `user_preferences`           | locale + sound/haptics/motion settings     |
-| `0003_account_deletion_requests.sql`   | `account_deletion_requests`  | user-initiated, auditable deletion queue   |
+| Migration                            | Table                       | Purpose                                    |
+| ------------------------------------ | --------------------------- | ------------------------------------------ |
+| `0001_profiles.sql`                  | `profiles`                  | 1:1 account profile (display name, avatar) |
+| `0002_user_preferences.sql`          | `user_preferences`          | locale + sound/haptics/motion settings     |
+| `0003_account_deletion_requests.sql` | `account_deletion_requests` | user-initiated, auditable deletion queue   |
 
 ## Security model
 
 - **RLS on every table.** Nothing is readable/writable without a policy.
 - **Owner scoping via `auth.uid()`.** A user only ever touches their own rows.
 - **Cascading ownership.** Every table references `auth.users(id) on delete
-  cascade`, so account removal cleans up dependent rows.
+cascade`, so account removal cleans up dependent rows.
 - **No client-side privilege escalation.** Advancing a deletion request past
   `pending`, and the deletion itself, happen server-side under the service role.
 

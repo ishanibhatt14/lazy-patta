@@ -5,7 +5,7 @@
 ## Context
 
 In Gadha Chor a player draws a **face-down** card from another player's hand. The
-client must be able to *point at* a specific hidden card to draw it, **without**
+client must be able to _point at_ a specific hidden card to draw it, **without**
 learning its identity or the layout of the opponent's hand — otherwise the core
 anti-cheat guarantee (no client sees hidden state) is broken. Naive designs (send card
 ids, or stable positional indices) leak information or enable inference across turns.
@@ -32,7 +32,7 @@ single-use per turn and not reusable to correlate cards across turns.
 ## Consequences
 
 - **+** Clients can select a hidden card to draw with zero information leakage.
-- **+** Defense-in-depth: RLS hides the private row *and* tokens hide position/identity.
+- **+** Defense-in-depth: RLS hides the private row _and_ tokens hide position/identity.
 - **−** Server must mint/track per-turn tokens and validate them within the
   transaction; tokens must expire with the turn/version to prevent replay.
 - Analytics/logs must **never** record card hands, tokens, or OTP values.

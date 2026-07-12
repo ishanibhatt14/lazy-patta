@@ -13,16 +13,16 @@ the "grandparents' house" feeling, so it gets the same care as the visuals.
 
 ## Tone by moment
 
-| Moment | Tone | Example (EN) |
-|--------|------|--------------|
-| Onboarding | welcoming, reassuring | "No cash. No betting. Just family fun." |
-| Your turn | clear, encouraging | "Your turn — pick one card." |
-| Found a pair | celebratory | "Jodi mali gai! You found a pair." |
-| You win | joyful, shared | "Shabash! You win this round." |
-| Gadha Chor (loss) | gentle, funny, kind | "You're the Gadha Chor this round! 🫏 Rematch?" |
-| Invite | warm, simple | "Room ready. Share the code with family." |
-| Disconnect | calm, reassuring | "Connection lost. Rejoining your table…" |
-| Error | honest, no blame | "Something slipped. Let's try that again." |
+| Moment            | Tone                  | Example (EN)                                    |
+| ----------------- | --------------------- | ----------------------------------------------- |
+| Onboarding        | welcoming, reassuring | "No cash. No betting. Just family fun."         |
+| Your turn         | clear, encouraging    | "Your turn — pick one card."                    |
+| Found a pair      | celebratory           | "Jodi mali gai! You found a pair."              |
+| You win           | joyful, shared        | "Shabash! You win this round."                  |
+| Gadha Chor (loss) | gentle, funny, kind   | "You're the Gadha Chor this round! 🫏 Rematch?" |
+| Invite            | warm, simple          | "Room ready. Share the code with family."       |
+| Disconnect        | calm, reassuring      | "Connection lost. Rejoining your table…"        |
+| Error             | honest, no blame      | "Something slipped. Let's try that again."      |
 
 ## The three languages
 
@@ -32,13 +32,13 @@ the "grandparents' house" feeling, so it gets the same care as the visuals.
 
 Signature Gujarati phrases used across the app (with English support lines):
 
-| Gujarati | Meaning / English line |
-|----------|------------------------|
-| **Tamaro varo!** | "Your turn!" |
-| **Jodi mali gai!** | "You found a pair!" |
-| **Shabash!** | "Well done!" |
+| Gujarati                         | Meaning / English line                     |
+| -------------------------------- | ------------------------------------------ |
+| **Tamaro varo!**                 | "Your turn!"                               |
+| **Jodi mali gai!**               | "You found a pair!"                        |
+| **Shabash!**                     | "Well done!"                               |
 | **Ghar ni ramato. Badha sathe.** | "Home games. Everyone together." (tagline) |
-| **Ramat phari?** | "Rematch?" |
+| **Ramat phari?**                 | "Rematch?"                                 |
 
 ## Localization implementation rules
 

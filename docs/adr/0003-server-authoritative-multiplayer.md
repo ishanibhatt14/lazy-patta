@@ -24,7 +24,7 @@ hidden-card reveal.
 
 - **Client-authoritative / peer-to-peer.** Rejected: trivially cheatable; hidden hands
   would be visible to clients; no serialization guarantee.
-- **Optimistic client apply with server reconciliation.** Rejected for *hidden* state
+- **Optimistic client apply with server reconciliation.** Rejected for _hidden_ state
   (would leak/guess cards); optimistic UI is allowed only for **non-hidden** feedback.
 - **Dedicated stateful game server (WebSocket process).** Rejected for MVP: Edge
   Functions + Postgres row locks + Realtime fan-out meet the need statelessly and

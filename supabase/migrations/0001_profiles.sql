@@ -25,3 +25,10 @@ create policy "profiles_update_own"
   on public.profiles for update
   using (auth.uid() = id)
   with check (auth.uid() = id);
+
+-- Base table privileges. RLS above restricts *which* rows a caller sees; these
+-- grants decide *whether* a role may touch the table at all. Without them the
+-- authenticated role gets "permission denied" before any policy is evaluated.
+-- Guests (anon) are granted nothing by design — they own no profile. No DELETE:
+-- removal flows through account_deletion_requests and the auth.users cascade.
+grant select, insert, update on public.profiles to authenticated, service_role;

@@ -20,20 +20,20 @@ SFX first, recorded voice pack later).
 
 ## Core cue list
 
-| Cue | Trigger | Character | Notes |
-|-----|---------|-----------|-------|
-| **Shuffle** | deal start | riffle + soft swoosh | organic, tactile |
-| **Deal** | each card dealt | light _tick_ | subtle; can be one soft sweep for the whole deal |
-| **Card lift/select** | tap opponent card | gentle _tap_ | pairs with the visual lift/glow |
-| **Draw** | card drawn | soft slide | 400ms, matches motion token |
-| **Pair found** | _jodi_ removed | warm chime + tabla accent | the happy signature sound |
-| **Your turn** | turn passes to you | soft harmonium note + light haptic | never nagging; one-shot |
-| **Turn warning** | timer low | gentle tick-up | calm, not alarming |
-| **Win** | you win the round | warm santoor flourish + light confetti whoosh | celebratory, human |
-| **Gadha Chor reveal** | you lose | comedic, affectionate "hee-haw"-adjacent sting | funny, kind, never harsh |
-| **Reaction sent** | preset reaction | tiny pop | matches emoji personality |
-| **Reconnect** | rejoined | soft resolve chime | reassuring |
-| **Error** | action failed | low, soft "nope" | never harsh/buzzer |
+| Cue                   | Trigger            | Character                                      | Notes                                            |
+| --------------------- | ------------------ | ---------------------------------------------- | ------------------------------------------------ |
+| **Shuffle**           | deal start         | riffle + soft swoosh                           | organic, tactile                                 |
+| **Deal**              | each card dealt    | light _tick_                                   | subtle; can be one soft sweep for the whole deal |
+| **Card lift/select**  | tap opponent card  | gentle _tap_                                   | pairs with the visual lift/glow                  |
+| **Draw**              | card drawn         | soft slide                                     | 400ms, matches motion token                      |
+| **Pair found**        | _jodi_ removed     | warm chime + tabla accent                      | the happy signature sound                        |
+| **Your turn**         | turn passes to you | soft harmonium note + light haptic             | never nagging; one-shot                          |
+| **Turn warning**      | timer low          | gentle tick-up                                 | calm, not alarming                               |
+| **Win**               | you win the round  | warm santoor flourish + light confetti whoosh  | celebratory, human                               |
+| **Gadha Chor reveal** | you lose           | comedic, affectionate "hee-haw"-adjacent sting | funny, kind, never harsh                         |
+| **Reaction sent**     | preset reaction    | tiny pop                                       | matches emoji personality                        |
+| **Reconnect**         | rejoined           | soft resolve chime                             | reassuring                                       |
+| **Error**             | action failed      | low, soft "nope"                               | never harsh/buzzer                               |
 
 ## Music
 
@@ -54,14 +54,14 @@ it slots in as an alternate audio set per locale without touching gameplay.
 
 Subtle haptics reinforce touch and key beats (mobile):
 
-| Event | Haptic |
-|-------|--------|
-| Card select | light impact |
-| Draw confirmed | light impact |
-| Pair found | success notification |
-| Your turn begins | light impact |
-| Win | success notification |
-| Error / invalid | warning notification (soft) |
+| Event            | Haptic                      |
+| ---------------- | --------------------------- |
+| Card select      | light impact                |
+| Draw confirmed   | light impact                |
+| Pair found       | success notification        |
+| Your turn begins | light impact                |
+| Win              | success notification        |
+| Error / invalid  | warning notification (soft) |
 
 Respect the OS "reduce/disable haptics" setting and provide an in-app toggle.
 

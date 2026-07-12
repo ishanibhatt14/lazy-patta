@@ -86,5 +86,5 @@ Each screen in the [UX spec](../03-ux-specification/) must document:
 ## Non-negotiables (quick list)
 
 1. 48×48 targets. 2. No drag-only actions. 3. Never color-only. 4. SR label on every
-control & card action. 5. Reduced-motion + mute always available. 6. 200% text, no
-clipping. 7. Visible keyboard focus. 8. Three languages, correct scripts.
+   control & card action. 5. Reduced-motion + mute always available. 6. 200% text, no
+   clipping. 7. Visible keyboard focus. 8. Three languages, correct scripts.

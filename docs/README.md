@@ -22,16 +22,16 @@ The docs are ordered the way the product should be built: **brand and design
 system first**, then games, experience, engineering, and go-to-market. Every
 screen and component downstream references the tokens and rules defined upstream.
 
-| # | Section | What it answers | Status |
-|---|---------|-----------------|--------|
-| 00 | [Product Bible](./00-product-bible/) | Why this exists, who it's for, how we win, when we ship | 🟢 v1 complete |
-| 01 | [Brand](./01-brand/) | How it looks, sounds, and speaks; the mascot | 🟢 v1 complete |
-| 02 | [Design System](./02-design-system/) | Tokens, components, motion, themes, accessibility | 🟢 v1 complete |
-| 03 | [UX Specification](./03-ux-specification/) | Information architecture, flows, every screen | 🟢 v1 complete |
-| 04 | [Games](./04-games/) | Rules, rule packs, bots, scoring, tutorials | 🟢 Gadha Chor complete; others outlined |
-| 05 | [Architecture](./05-architecture/) | Engine, data, API, multiplayer authority, security | 🟢 v1 complete |
-| 06 | [Developer Handbook](./06-developer-handbook/) | Repo layout, standards, git, testing, releases | 🟢 v1 complete |
-| 07 | [Product Strategy](./07-product-strategy/) | Roadmap, monetization, analytics, ASO, launch | 🟢 v1 complete |
+| #   | Section                                        | What it answers                                         | Status                                  |
+| --- | ---------------------------------------------- | ------------------------------------------------------- | --------------------------------------- |
+| 00  | [Product Bible](./00-product-bible/)           | Why this exists, who it's for, how we win, when we ship | 🟢 v1 complete                          |
+| 01  | [Brand](./01-brand/)                           | How it looks, sounds, and speaks; the mascot            | 🟢 v1 complete                          |
+| 02  | [Design System](./02-design-system/)           | Tokens, components, motion, themes, accessibility       | 🟢 v1 complete                          |
+| 03  | [UX Specification](./03-ux-specification/)     | Information architecture, flows, every screen           | 🟢 v1 complete                          |
+| 04  | [Games](./04-games/)                           | Rules, rule packs, bots, scoring, tutorials             | 🟢 Gadha Chor complete; others outlined |
+| 05  | [Architecture](./05-architecture/)             | Engine, data, API, multiplayer authority, security      | 🟢 v1 complete                          |
+| 06  | [Developer Handbook](./06-developer-handbook/) | Repo layout, standards, git, testing, releases          | 🟢 v1 complete                          |
+| 07  | [Product Strategy](./07-product-strategy/)     | Roadmap, monetization, analytics, ASO, launch           | 🟢 v1 complete                          |
 
 Legend: 🟢 complete · 🟡 in progress · ⬜ planned
 
@@ -64,15 +64,15 @@ products stay in independent repos.
 
 ## Product at a glance
 
-| | |
-|---|---|
-| **Product name** | Lazy Patta — Desi Card Games |
-| **First game** | Gadha Chor (a.k.a. Gulam Chor) |
-| **Primary surface** | `play.lazytraveler.app` (web/PWA), then iOS + Android via Expo |
-| **Audience** | Gujarati & Indian families in IN / US / CA / UK, and the diaspora |
-| **Modes** | Play vs computer (guest OK) · Private online rooms (login required) |
-| **Languages** | English, ગુજરાતી (Gujarati), हिन्दी (Hindi) |
-| **Never** | Cash, betting, wagering, coins, loot boxes, casino styling |
+|                     |                                                                     |
+| ------------------- | ------------------------------------------------------------------- |
+| **Product name**    | Lazy Patta — Desi Card Games                                        |
+| **First game**      | Gadha Chor (a.k.a. Gulam Chor)                                      |
+| **Primary surface** | `play.lazytraveler.app` (web/PWA), then iOS + Android via Expo      |
+| **Audience**        | Gujarati & Indian families in IN / US / CA / UK, and the diaspora   |
+| **Modes**           | Play vs computer (guest OK) · Private online rooms (login required) |
+| **Languages**       | English, ગુજરાતી (Gujarati), हिन्दी (Hindi)                         |
+| **Never**           | Cash, betting, wagering, coins, loot boxes, casino styling          |
 
 ---
 

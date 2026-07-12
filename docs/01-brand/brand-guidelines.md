@@ -11,13 +11,13 @@ If Lazy Patta were a person, they'd be the fun aunt/uncle (_kaka/kaki_, _mama/ma
 who keeps the whole family playing late into the night — warm, a little cheeky,
 never mean, and quietly excellent at making everyone feel included.
 
-| Trait | We are… | We are not… |
-|-------|---------|-------------|
-| Warmth | homely, affectionate, inviting | cold, corporate, clinical |
-| Humor | gentle, playful, self-aware (the donkey!) | mocking, edgy, crude |
-| Craft | premium, considered, handmade-feeling | cheap, cluttered, templated |
-| Energy | cozy and unhurried | frantic, hype, "win big" |
-| Tone | plainspoken, family-first | jargon-y, salesy, aggressive |
+| Trait  | We are…                                   | We are not…                  |
+| ------ | ----------------------------------------- | ---------------------------- |
+| Warmth | homely, affectionate, inviting            | cold, corporate, clinical    |
+| Humor  | gentle, playful, self-aware (the donkey!) | mocking, edgy, crude         |
+| Craft  | premium, considered, handmade-feeling     | cheap, cluttered, templated  |
+| Energy | cozy and unhurried                        | frantic, hype, "win big"     |
+| Tone   | plainspoken, family-first                 | jargon-y, salesy, aggressive |
 
 ### The five brand values, applied
 

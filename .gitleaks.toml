@@ -1,0 +1,18 @@
+# Gitleaks config for the secret-scan CI job.
+# Extends the upstream default ruleset and allowlists the *public* local
+# Supabase demo keys, which are identical on every machine and are NOT secrets.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Local Supabase demo keys and test fixtures (not real secrets)"
+paths = [
+  '''supabase/src/rls-harness\.ts''',
+  '''supabase/config\.toml''',
+]
+regexes = [
+  # supabase-demo signed JWTs (anon / service_role) printed by `supabase start`
+  '''eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]*c3VwYWJhc2UtZGVtb[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+''',
+  '''super-secret-jwt-token-with-at-least-32-characters-long''',
+]

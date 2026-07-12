@@ -1,13 +1,7 @@
 import type { GameAction, GameEvent } from './actions';
 import type { Rng } from './rng';
 import type { RulePack } from './rule-pack';
-import type {
-  GameResult,
-  GameState,
-  PlayerId,
-  PrivateView,
-  PublicSnapshot,
-} from './state';
+import type { GameResult, GameState, PlayerId, PrivateView, PublicSnapshot } from './state';
 
 /**
  * The pure, deterministic engine contract. Implemented in @lazy-patta/game-engine.

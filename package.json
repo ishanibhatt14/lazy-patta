@@ -16,11 +16,20 @@
     "test": "turbo run test",
     "check-links": "node scripts/check-links.mjs",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "test:rls": "pnpm --filter @lazy-patta/supabase test:rls"
   },
   "devDependencies": {
     "prettier": "^3.4.2",
+    "supabase": "^2.109.1",
     "turbo": "^2.3.3",
     "typescript": "^5.7.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "@expo/metro-runtime": "57.0.3"
+    }
   }
 }

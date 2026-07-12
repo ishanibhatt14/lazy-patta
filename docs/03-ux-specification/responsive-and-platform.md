@@ -5,12 +5,12 @@ adapts; components and tokens do not fork.
 
 ## Breakpoints & frames
 
-| Target | Frame | Breakpoint token |
-|--------|-------|------------------|
-| Android phone (design floor) | 360×800 | `bp.sm` |
-| iPhone | 390×844 | `bp.md` |
-| Tablet | 768×1024 | `bp.lg` |
-| Desktop web | 1440×1024 | `bp.xl` |
+| Target                       | Frame     | Breakpoint token |
+| ---------------------------- | --------- | ---------------- |
+| Android phone (design floor) | 360×800   | `bp.sm`          |
+| iPhone                       | 390×844   | `bp.md`          |
+| Tablet                       | 768×1024  | `bp.lg`          |
+| Desktop web                  | 1440×1024 | `bp.xl`          |
 
 Design to the **360-wide floor** first (smallest common Android), then scale up.
 
@@ -41,11 +41,11 @@ Design to the **360-wide floor** first (smallest common Android), then scale up.
 
 ## Shared vs platform-specific
 
-| Shared (write once) | Platform-specific (thin) |
-|---------------------|--------------------------|
-| Game engine, contracts, tokens, localization | Auth provider wiring (Apple/Google) |
-| Component API + design tokens | Navigation shell (Expo Router vs Next routes) |
-| Copy, i18n, animations spec | Haptics, push registration, safe areas |
+| Shared (write once)                          | Platform-specific (thin)                      |
+| -------------------------------------------- | --------------------------------------------- |
+| Game engine, contracts, tokens, localization | Auth provider wiring (Apple/Google)           |
+| Component API + design tokens                | Navigation shell (Expo Router vs Next routes) |
+| Copy, i18n, animations spec                  | Haptics, push registration, safe areas        |
 
 ## Density & input
 

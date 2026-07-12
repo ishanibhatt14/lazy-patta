@@ -9,26 +9,26 @@ essential information. Implemented with **Framer Motion** (web) and **Reanimated
 
 ### Durations (`motion.duration.*`)
 
-| Token | ms | Use |
-|-------|----|-----|
-| `instant` | 0 | reduced-motion position updates |
-| `fast` | 120 | micro-interactions (press, toggle) |
-| `base` | 200 | standard UI transitions |
-| `deal` | 320 | card deal (ease-out) |
-| `draw` | 400 | card draw (ease-in-out) |
-| `pair` | 500 | pair-found pop (spring) |
-| `pulse` | 800 | turn pulse (subtle loop) |
-| `reveal` | 1000–1200 | result reveal |
+| Token     | ms        | Use                                |
+| --------- | --------- | ---------------------------------- |
+| `instant` | 0         | reduced-motion position updates    |
+| `fast`    | 120       | micro-interactions (press, toggle) |
+| `base`    | 200       | standard UI transitions            |
+| `deal`    | 320       | card deal (ease-out)               |
+| `draw`    | 400       | card draw (ease-in-out)            |
+| `pair`    | 500       | pair-found pop (spring)            |
+| `pulse`   | 800       | turn pulse (subtle loop)           |
+| `reveal`  | 1000–1200 | result reveal                      |
 
 ### Easing (`motion.ease.*`)
 
-| Token | Curve | Use |
-|-------|-------|-----|
-| `standard` | ease-in-out | most transitions |
-| `entrance` | ease-out | elements arriving (deal) |
-| `exit` | ease-in | elements leaving |
-| `spring` | spring/pop | pair found, celebrations |
-| `linear` | linear | timers, progress |
+| Token      | Curve       | Use                      |
+| ---------- | ----------- | ------------------------ |
+| `standard` | ease-in-out | most transitions         |
+| `entrance` | ease-out    | elements arriving (deal) |
+| `exit`     | ease-in     | elements leaving         |
+| `spring`   | spring/pop  | pair found, celebrations |
+| `linear`   | linear      | timers, progress         |
 
 ## Reduced motion (global rule)
 
@@ -94,14 +94,14 @@ When `prefers-reduced-motion` (or the in-app toggle) is on:
 
 ## Micro-interactions
 
-| Element | Motion |
-|---------|--------|
-| Button press | scale 0.98, `fast`, `ease.standard` + light haptic |
-| Toggle | thumb slide `fast`; color+icon change |
-| Sheet open/close | slide-up/down `base`, `ease.entrance/exit` |
-| Toast | slide+fade in, auto-dismiss fade out |
-| Card select | lift + glow `fast` |
-| Reaction | emote pops from seat, floats, fades (`base`) |
+| Element          | Motion                                             |
+| ---------------- | -------------------------------------------------- |
+| Button press     | scale 0.98, `fast`, `ease.standard` + light haptic |
+| Toggle           | thumb slide `fast`; color+icon change              |
+| Sheet open/close | slide-up/down `base`, `ease.entrance/exit`         |
+| Toast            | slide+fade in, auto-dismiss fade out               |
+| Card select      | lift + glow `fast`                                 |
+| Reaction         | emote pops from seat, floats, fades (`base`)       |
 
 ## Performance & implementation rules
 

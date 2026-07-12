@@ -46,17 +46,17 @@ gambling** — no real-money stakes, wagering, or casino mechanics, ever.
 Dependencies flow **apps → packages**, and within packages toward `game-contracts`.
 Never introduce a reverse or cyclic edge (a package must not import an app).
 
-| Package                        | May depend on                                                    |
-| ------------------------------ | ---------------------------------------------------------------- |
-| `packages/game-contracts`      | (leaf — shared types only, no runtime deps)                      |
-| `packages/game-engine`         | `game-contracts` only (`test-fixtures` in tests)                 |
-| `packages/test-fixtures`       | `game-contracts` (seeded RNG + rule packs for tests)             |
-| `packages/design-tokens`       | (leaf — cross-platform token contract)                           |
-| `packages/localization`        | (leaf — ICU messages for en/gu/hi)                               |
-| `packages/auth`                | provider-agnostic interfaces (no concrete provider SDK leakage)  |
-| `apps/web` (Next.js)           | `design-tokens`, `localization`, (later) `game-contracts`/engine |
-| `apps/mobile` (Expo)           | `design-tokens`, `localization`, (later) `game-contracts`/engine |
-| `supabase`                     | migrations + RLS policies + verification tests                   |
+| Package                   | May depend on                                                    |
+| ------------------------- | ---------------------------------------------------------------- |
+| `packages/game-contracts` | (leaf — shared types only, no runtime deps)                      |
+| `packages/game-engine`    | `game-contracts` only (`test-fixtures` in tests)                 |
+| `packages/test-fixtures`  | `game-contracts` (seeded RNG + rule packs for tests)             |
+| `packages/design-tokens`  | (leaf — cross-platform token contract)                           |
+| `packages/localization`   | (leaf — ICU messages for en/gu/hi)                               |
+| `packages/auth`           | provider-agnostic interfaces (no concrete provider SDK leakage)  |
+| `apps/web` (Next.js)      | `design-tokens`, `localization`, (later) `game-contracts`/engine |
+| `apps/mobile` (Expo)      | `design-tokens`, `localization`, (later) `game-contracts`/engine |
+| `supabase`                | migrations + RLS policies + verification tests                   |
 
 ## Prohibited dependencies
 

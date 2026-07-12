@@ -40,9 +40,7 @@ describe('supabase RLS foundation', () => {
 
   it.each(TABLES)('$table owns rows via a cascading FK to auth.users', ({ file, ownerColumn }) => {
     const sql = sqlFor(file).toLowerCase();
-    expect(sql).toMatch(
-      new RegExp(`${ownerColumn}\\s+uuid[\\s\\S]*?references\\s+auth\\.users`),
-    );
+    expect(sql).toMatch(new RegExp(`${ownerColumn}\\s+uuid[\\s\\S]*?references\\s+auth\\.users`));
     expect(sql).toContain('on delete cascade');
   });
 

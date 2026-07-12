@@ -6,22 +6,22 @@ hands are readable only by their owner.
 
 ## Core tables
 
-| Table | Purpose |
-|-------|---------|
-| `profiles` | user identity: display name, avatar, language |
-| `user_preferences` | sound, theme, accessibility, notification opt-ins |
-| `rooms` | private rooms: code, host, settings, status |
-| `room_members` | membership + role (host/guest) + seat intent |
-| `games` | a match: status, rule pack, current player, `state_version` |
-| `game_players` | seats in a game + player status |
-| `game_public_snapshots` | the public, shareable view of a game state |
-| `game_player_private_state` | **per-player private hand** (RLS: owner only) |
-| `game_events` | append-only event log (audit + replay) |
-| `game_actions` | submitted actions (idempotency + accept/reject) |
-| `push_tokens` | per-device push tokens (opt-in) |
-| `blocks` | user block relationships |
-| `reports` | player reports (moderation) |
-| `account_deletion_requests` | deletion queue + status |
+| Table                       | Purpose                                                     |
+| --------------------------- | ----------------------------------------------------------- |
+| `profiles`                  | user identity: display name, avatar, language               |
+| `user_preferences`          | sound, theme, accessibility, notification opt-ins           |
+| `rooms`                     | private rooms: code, host, settings, status                 |
+| `room_members`              | membership + role (host/guest) + seat intent                |
+| `games`                     | a match: status, rule pack, current player, `state_version` |
+| `game_players`              | seats in a game + player status                             |
+| `game_public_snapshots`     | the public, shareable view of a game state                  |
+| `game_player_private_state` | **per-player private hand** (RLS: owner only)               |
+| `game_events`               | append-only event log (audit + replay)                      |
+| `game_actions`              | submitted actions (idempotency + accept/reject)             |
+| `push_tokens`               | per-device push tokens (opt-in)                             |
+| `blocks`                    | user block relationships                                    |
+| `reports`                   | player reports (moderation)                                 |
+| `account_deletion_requests` | deletion queue + status                                     |
 
 ## Key constraints
 
@@ -87,11 +87,11 @@ See [security-and-privacy](./security-and-privacy.md) for the full RLS + anti-ch
 ## State model (stored)
 
 - **Game states:** `LOBBY, DEALING, REMOVING_INITIAL_PAIRS, IN_PROGRESS,
-  PAUSED_RECONNECT, COMPLETED, ABANDONED`.
+PAUSED_RECONNECT, COMPLETED, ABANDONED`.
 - **Player states:** `INVITED, JOINED, READY, ACTIVE, FINISHED, DISCONNECTED, LEFT`.
 - **Events:** `ROOM_CREATED, PLAYER_JOINED, PLAYER_READY_CHANGED, GAME_STARTED,
-  CARDS_DEALT, PAIR_REMOVED, CARD_DRAWN, TURN_ADVANCED, PLAYER_FINISHED,
-  PLAYER_DISCONNECTED, PLAYER_RECONNECTED, GAME_COMPLETED, REMATCH_REQUESTED`.
+CARDS_DEALT, PAIR_REMOVED, CARD_DRAWN, TURN_ADVANCED, PLAYER_FINISHED,
+PLAYER_DISCONNECTED, PLAYER_RECONNECTED, GAME_COMPLETED, REMATCH_REQUESTED`.
 
 ## Data lifecycle
 

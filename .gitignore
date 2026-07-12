@@ -83,6 +83,12 @@ web_modules/
 # Expo
 .expo
 *.expo-shared
+apps/mobile/dist-android/
+apps/mobile/dist-ios/
+
+# Supabase local stack artifacts
+supabase/.branches/
+supabase/.temp/
 
 # Next.js build output
 .next

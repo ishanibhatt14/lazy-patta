@@ -21,16 +21,16 @@ Start here:
 
 ### 👉 [docs/README.md](./docs/README.md)
 
-| Section | Contents |
-|---------|----------|
-| [00 · Product Bible](./docs/00-product-bible/) | Vision, audience, decisions log |
-| [01 · Brand](./docs/01-brand/) | Guidelines, mascot, illustration, sound, voice |
-| [02 · Design System](./docs/02-design-system/) | Tokens, color, type, components, motion, themes, a11y |
-| [03 · UX Specification](./docs/03-ux-specification/) | IA, flows, screen catalog, game-table contract |
-| [04 · Games](./docs/04-games/) | Framework + Gadha Chor GDD (+ Lal Satti, Judgement) |
-| [05 · Architecture](./docs/05-architecture/) | Engine, DB, API, multiplayer authority, security, CI/CD |
-| [06 · Developer Handbook](./docs/06-developer-handbook/) | Setup, structure, standards, git, testing, releases |
-| [07 · Product Strategy](./docs/07-product-strategy/) | Roadmap, monetization, analytics, ASO, launch |
+| Section                                                  | Contents                                                |
+| -------------------------------------------------------- | ------------------------------------------------------- |
+| [00 · Product Bible](./docs/00-product-bible/)           | Vision, audience, decisions log                         |
+| [01 · Brand](./docs/01-brand/)                           | Guidelines, mascot, illustration, sound, voice          |
+| [02 · Design System](./docs/02-design-system/)           | Tokens, color, type, components, motion, themes, a11y   |
+| [03 · UX Specification](./docs/03-ux-specification/)     | IA, flows, screen catalog, game-table contract          |
+| [04 · Games](./docs/04-games/)                           | Framework + Gadha Chor GDD (+ Lal Satti, Judgement)     |
+| [05 · Architecture](./docs/05-architecture/)             | Engine, DB, API, multiplayer authority, security, CI/CD |
+| [06 · Developer Handbook](./docs/06-developer-handbook/) | Setup, structure, standards, git, testing, releases     |
+| [07 · Product Strategy](./docs/07-product-strategy/)     | Roadmap, monetization, analytics, ASO, launch           |
 
 ## Status
 

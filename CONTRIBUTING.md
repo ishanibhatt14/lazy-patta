@@ -19,15 +19,15 @@ pnpm install
 
 All commands run from the repo root and fan out across the workspace via Turborepo.
 
-| Command             | What it does                                                        |
-| ------------------- | ------------------------------------------------------------------- |
-| `pnpm dev`          | Run every app's dev server (Next.js web, Expo mobile)               |
-| `pnpm lint`         | ESLint across all packages/apps (zero warnings allowed)             |
-| `pnpm typecheck`    | `tsc --noEmit` across all packages/apps                             |
-| `pnpm test`         | Vitest suites (engine invariants, tokens, i18n key-sync, RLS shape) |
-| `pnpm build`        | Production build (web)                                               |
-| `pnpm check-links`  | Validate all internal Markdown links + anchors in `docs/`           |
-| `pnpm format`       | Prettier write                                                      |
+| Command            | What it does                                                        |
+| ------------------ | ------------------------------------------------------------------- |
+| `pnpm dev`         | Run every app's dev server (Next.js web, Expo mobile)               |
+| `pnpm lint`        | ESLint across all packages/apps (zero warnings allowed)             |
+| `pnpm typecheck`   | `tsc --noEmit` across all packages/apps                             |
+| `pnpm test`        | Vitest suites (engine invariants, tokens, i18n key-sync, RLS shape) |
+| `pnpm build`       | Production build (web)                                              |
+| `pnpm check-links` | Validate all internal Markdown links + anchors in `docs/`           |
+| `pnpm format`      | Prettier write                                                      |
 
 Run a single project with a filter, e.g. `pnpm --filter @lazy-patta/web build`.
 

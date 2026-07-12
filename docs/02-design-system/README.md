@@ -21,15 +21,15 @@ Primitives  →  Semantic tokens  →  Components  →  Patterns  →  Screens
 
 ## Documents
 
-| Doc | Purpose |
-|-----|---------|
-| [Design Tokens](./design-tokens.md) | The token model + spacing, radius, elevation, z-index, breakpoints |
-| [Color](./color.md) | Palette, semantic roles, contrast rules |
-| [Typography](./typography.md) | Type scale, fonts, multi-script rules |
-| [Components](./components.md) | Full component inventory, states, and props |
-| [Motion & Animation](./motion-and-animation.md) | Motion tokens + every game animation spec |
-| [Themes](./themes.md) | Classic Cream, Night Table, festival themes |
-| [Accessibility](./accessibility.md) | WCAG criteria + card/turn-specific rules |
+| Doc                                             | Purpose                                                            |
+| ----------------------------------------------- | ------------------------------------------------------------------ |
+| [Design Tokens](./design-tokens.md)             | The token model + spacing, radius, elevation, z-index, breakpoints |
+| [Color](./color.md)                             | Palette, semantic roles, contrast rules                            |
+| [Typography](./typography.md)                   | Type scale, fonts, multi-script rules                              |
+| [Components](./components.md)                   | Full component inventory, states, and props                        |
+| [Motion & Animation](./motion-and-animation.md) | Motion tokens + every game animation spec                          |
+| [Themes](./themes.md)                           | Classic Cream, Night Table, festival themes                        |
+| [Accessibility](./accessibility.md)             | WCAG criteria + card/turn-specific rules                           |
 
 ## Code mapping (how tokens become code)
 

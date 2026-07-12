@@ -31,3 +31,8 @@ create policy "account_deletion_requests_update_own_pending"
   on public.account_deletion_requests for update
   using (auth.uid() = user_id and status = 'pending')
   with check (auth.uid() = user_id);
+
+-- Base table privileges (see 0001_profiles.sql). Authenticated users file and
+-- cancel their own requests; RLS scopes rows to the owner. No DELETE — status
+-- transitions to processing/completed happen server-side under the service role.
+grant select, insert, update on public.account_deletion_requests to authenticated, service_role;

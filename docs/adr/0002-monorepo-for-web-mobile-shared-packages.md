@@ -40,7 +40,7 @@ lint-enforced.
 
 - **+** One source of truth for engine/contracts/tokens/i18n; atomic cross-cutting
   changes; cached builds.
-- **+** Edge Functions import the *same* engine as clients.
+- **+** Edge Functions import the _same_ engine as clients.
 - **−** Monorepo tooling discipline required (boundary lint, version pinning).
 - Phase 0 intentionally scaffolds a **subset** of packages and adds tooling packages
   (`eslint-config`, `typescript-config`); `shared-ui/types/utils` are created on first

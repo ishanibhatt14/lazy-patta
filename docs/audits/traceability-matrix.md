@@ -8,12 +8,12 @@ Purpose: prove every capability is designed end-to-end (or expose where it is no
 Cells marked **⚠️ GAP** are not yet designed and are tracked in
 [unresolved-questions](./unresolved-questions.md).
 
-Legend: *Screen* numbers refer to
-[screen-catalog](../03-ux-specification/screen-catalog.md). *Engine* refers to
+Legend: _Screen_ numbers refer to
+[screen-catalog](../03-ux-specification/screen-catalog.md). _Engine_ refers to
 `packages/game-engine` capabilities in
-[game-engine](../05-architecture/game-engine.md). *Edge Fn* = a
-`supabase/functions` server-authoritative action. *DB* tables per
-[database-schema](../05-architecture/database-schema.md). *Events* per
+[game-engine](../05-architecture/game-engine.md). _Edge Fn_ = a
+`supabase/functions` server-authoritative action. _DB_ tables per
+[database-schema](../05-architecture/database-schema.md). _Events_ per
 [analytics-and-kpis](../07-product-strategy/analytics-and-kpis.md).
 
 ---
@@ -21,6 +21,7 @@ Legend: *Screen* numbers refer to
 ## Matrix (18 capabilities)
 
 ### 1. Guest computer play
+
 - **Flow:** Welcome → Play as guest → Play Computer → game loop.
 - **Screens:** 3 Welcome, 8 Home, 9 Game details, 11 Play-mode, 16–19 game table.
 - **Components:** `ModeCard`, `HandFan`, `PlayerSeat`, `TurnBanner`.
@@ -31,6 +32,7 @@ Legend: *Screen* numbers refer to
 - **Test:** engine unit + determinism fixtures; web e2e "guest completes a match."
 
 ### 2. Pass-and-play (single device) — ⚠️ PARTIAL
+
 - **Flow:** ⚠️ GAP (no flow authored).
 - **Screens:** ⚠️ GAP (no catalog screen; reuse 16–19 with per-turn handoff).
 - **Components:** ⚠️ handoff/"pass device" screen not in inventory.
@@ -42,6 +44,7 @@ Legend: *Screen* numbers refer to
 - **Status:** mode **locked (D-12b)** but unthreaded — tracked UQ-1 / risk R-1.
 
 ### 3. Sign-in (authenticated)
+
 - **Flow:** Welcome → Get started → Sign-in options → provider or email OTP.
 - **Screens:** 4 Sign-in options, 5 Email entry, 6 OTP verification.
 - **Components:** `Button` (Apple/Google/Email), `EmailInput`, `OTPInput`.
@@ -53,6 +56,7 @@ Legend: *Screen* numbers refer to
 - **Privacy:** never log OTP or provider tokens.
 
 ### 4. Profile setup (first login)
+
 - **Flow:** first successful sign-in → Profile setup → Home.
 - **Screens:** 7 Profile setup.
 - **Components:** `Input` (name, profanity-filtered), `AvatarPicker`, `LanguageChip`, sound `Toggle`.
@@ -63,6 +67,7 @@ Legend: *Screen* numbers refer to
 - **Test:** RLS test (user can only write own profile); profanity-filter unit.
 
 ### 5. Create private room
+
 - **Flow:** Game details → Create Room (sign-in gate for guests) → Host lobby.
 - **Screens:** 12 Create room, 14 Host lobby.
 - **Components:** player-count stepper, allow-bots `Toggle`, turn-timer select, rule-pack select, `RoomCode`.
@@ -73,6 +78,7 @@ Legend: *Screen* numbers refer to
 - **Test:** unique-open-code constraint test; RLS host-only settings.
 
 ### 6. Join through invite link
+
 - **Flow:** deep link / code → Join room → Guest lobby.
 - **Screens:** 13 Join room, 15 Guest lobby.
 - **Components:** code `Input`, `Button`; deep-link pre-fill.
@@ -83,6 +89,7 @@ Legend: *Screen* numbers refer to
 - **Test:** join rejection cases; blocked-user cannot join.
 
 ### 7. Ready lobby
+
 - **Flow:** in lobby → toggle ready → host sees all-ready.
 - **Screens:** 14 Host lobby, 15 Guest lobby.
 - **Components:** `PlayerSeat` ready indicators, `Toggle` (ready).
@@ -93,6 +100,7 @@ Legend: *Screen* numbers refer to
 - **Test:** ready-state RLS; start disabled until min players ready.
 
 ### 8. Start game
+
 - **Flow:** host lobby all-ready → Start → deal.
 - **Screens:** 14 Host lobby → 16 game table.
 - **Components:** host controls, `Button` (Start).
@@ -103,6 +111,7 @@ Legend: *Screen* numbers refer to
 - **Test:** deal invariant (card conservation, one Jack removed); host-only start.
 
 ### 9. Draw card
+
 - **Flow:** my turn → tap eligible opponent back → server confirms → reveal to drawer.
 - **Screens:** 16 my turn, 18 draw-card interaction.
 - **Components:** opponent backs lift+teal glow, `HandFan`, `TurnBanner`.
@@ -113,6 +122,7 @@ Legend: *Screen* numbers refer to
 - **Test:** idempotency (dup client_action_id), stale `expectedVersion` reject, positionToken opacity (no hidden info leaked), one version bump per accepted action.
 
 ### 10. Automatic pair removal
+
 - **Flow:** after deal and after each draw, same-rank pairs auto-discard.
 - **Screens:** 19 pair-found state.
 - **Components:** pair-to-center flip + Bandhani dissolve animation.
@@ -123,6 +133,7 @@ Legend: *Screen* numbers refer to
 - **Test:** property — after removal no two same-rank cards co-held; exactly one unmatched removed-rank card persists to end.
 
 ### 11. Player finish
+
 - **Flow:** a player's hand empties → marked finished → turn skips them.
 - **Screens:** 16/17 (seat shows finished).
 - **Components:** `PlayerSeat` finished state.
@@ -133,6 +144,7 @@ Legend: *Screen* numbers refer to
 - **Test:** turn-skip unit; finished player receives no legal moves.
 
 ### 12. Final Gadha Chor result
+
 - **Flow:** one player left holding the odd Jack → game completes → result.
 - **Screens:** 22 Result winner, 23 Result Gadha Chor.
 - **Components:** `ResultCard` (winner / gadhaChor variants), mascot, confetti.
@@ -143,6 +155,7 @@ Legend: *Screen* numbers refer to
 - **Test:** result correctness across seat counts; determinism golden fixtures.
 
 ### 13. Reconnect
+
 - **Flow:** drop → `PAUSED_RECONNECT` → client refetches snapshot + own hand.
 - **Screens:** 20 Player disconnected, 21 Reconnecting.
 - **Components:** `ReconnectOverlay`, `PlayerSeat` disconnected state.
@@ -153,6 +166,7 @@ Legend: *Screen* numbers refer to
 - **Test:** reconnect success rate metric; snapshot re-fetch e2e; no hidden-state leak on rejoin.
 
 ### 14. Bot replacement
+
 - **Flow:** 60s grace after disconnect → host may replace with bot.
 - **Screens:** 20 Player disconnected (host action).
 - **Components:** host control (replace-with-bot).
@@ -163,6 +177,7 @@ Legend: *Screen* numbers refer to
 - **Test:** bot only makes legal moves; replacement gated by grace timer + host role.
 
 ### 15. Rematch
+
 - **Flow:** result → Rematch → rematch lobby → new game, same group.
 - **Screens:** 22/23 (Rematch button), 24 Rematch lobby.
 - **Components:** `Button` (Rematch), seats, ready.
@@ -173,6 +188,7 @@ Legend: *Screen* numbers refer to
 - **Test:** rematch preserves roster; new game independent state.
 
 ### 16. Report player
+
 - **Flow:** in-game/profile → Report → reason → confirm.
 - **Screens:** 30 Report / block player.
 - **Components:** preset reason list, `ConfirmationSheet`.
@@ -183,6 +199,7 @@ Legend: *Screen* numbers refer to
 - **Test:** RLS (reporter identity), preset-only reasons.
 
 ### 17. Block player
+
 - **Flow:** Report/block → Block → enforced in matchmaking/rooms.
 - **Screens:** 30 Report / block player.
 - **Components:** confirm `ConfirmationSheet`.
@@ -193,6 +210,7 @@ Legend: *Screen* numbers refer to
 - **Test:** blocked users separated in room join (ties to capability 6).
 
 ### 18. Account deletion
+
 - **Flow:** Settings → Privacy/account deletion → re-auth → confirm; mirrored public `/delete-account`.
 - **Screens:** 31 Privacy / account deletion.
 - **Components:** `ConfirmationSheet` + re-auth, links.
@@ -206,10 +224,10 @@ Legend: *Screen* numbers refer to
 
 ## Coverage summary
 
-| Status | Capabilities |
-|--------|-------------|
-| Fully traced end-to-end | 1, 3–18 (17 of 18) |
-| Partial / gap | **2 Pass-and-play** — engine-supported but no flow/screen/component/event (UQ-1, R-1) |
+| Status                  | Capabilities                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------- |
+| Fully traced end-to-end | 1, 3–18 (17 of 18)                                                                    |
+| Partial / gap           | **2 Pass-and-play** — engine-supported but no flow/screen/component/event (UQ-1, R-1) |
 
 All 18 capabilities have an owning DB entity or an explicit "no persistence"
 rationale (guest/pass-and-play are client-only). The only structural gap is

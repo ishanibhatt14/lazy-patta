@@ -5,3 +5,7 @@ dist
 coverage
 pnpm-lock.yaml
 .turbo
+
+# Next.js regenerates this on every build ("should not be edited"); keep it
+# out of Prettier so a local build doesn't fight the format:check gate.
+apps/web/next-env.d.ts

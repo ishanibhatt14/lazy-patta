@@ -29,15 +29,15 @@ table at night.
 
 Remapping intent (author exact values against AA):
 
-| Semantic token | Night Table intent |
-|----------------|--------------------|
-| `bg.canvas` | deep warm brown/near-black (not cold gray/black) |
-| `surface` | slightly lifted warm dark |
-| `text.primary` | warm off-white (`text.onDark`) |
-| `brand.primary` | maroon lightened for contrast on dark |
-| `brand.accent` | saffron holds (still dark text on saffron fills) |
-| `game.felt` | deeper felt green |
-| shadows | replaced by subtle light/borders (shadows read poorly on dark) |
+| Semantic token  | Night Table intent                                             |
+| --------------- | -------------------------------------------------------------- |
+| `bg.canvas`     | deep warm brown/near-black (not cold gray/black)               |
+| `surface`       | slightly lifted warm dark                                      |
+| `text.primary`  | warm off-white (`text.onDark`)                                 |
+| `brand.primary` | maroon lightened for contrast on dark                          |
+| `brand.accent`  | saffron holds (still dark text on saffron fills)               |
+| `game.felt`     | deeper felt green                                              |
+| shadows         | replaced by subtle light/borders (shadows read poorly on dark) |
 
 Rules: keep neutrals **warm**; re-check every foreground/background pair; card
 faces stay high-contrast and legible; mascot/festival dressing recolor via tokens.

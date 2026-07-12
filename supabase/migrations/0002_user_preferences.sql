@@ -25,3 +25,8 @@ create policy "user_preferences_update_own"
   on public.user_preferences for update
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+-- Base table privileges (see 0001_profiles.sql). RLS restricts rows to the
+-- owner; these grants let the authenticated role reach the table. anon gets
+-- nothing — guests keep preferences locally, not server-side.
+grant select, insert, update on public.user_preferences to authenticated, service_role;

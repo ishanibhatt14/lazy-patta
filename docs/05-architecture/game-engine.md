@@ -11,16 +11,16 @@ The engine controls (per the product goal): **shuffle, deal, pairs, draw, AI/bot
 turn order, winner/loser, and future games**. The UI only renders the state the
 engine produces.
 
-| Concern | Engine owns |
-|---------|-------------|
-| Deck & shuffle | compose deck, remove cards, shuffle (injected RNG) |
-| Deal | distribute per rule pack |
-| Legal moves | given `(state, actor)` → valid actions |
-| Apply | `reduce(state, action) → { state, events }` |
-| Turn model | order, direction, skip finished, timeouts |
-| End & result | detect completion, compute winner/loser (Gadha Chor) |
-| Bots | choose a legal action + humanized pacing policy |
-| Projection | derive **public snapshot** + **per-player private view** |
+| Concern        | Engine owns                                              |
+| -------------- | -------------------------------------------------------- |
+| Deck & shuffle | compose deck, remove cards, shuffle (injected RNG)       |
+| Deal           | distribute per rule pack                                 |
+| Legal moves    | given `(state, actor)` → valid actions                   |
+| Apply          | `reduce(state, action) → { state, events }`              |
+| Turn model     | order, direction, skip finished, timeouts                |
+| End & result   | detect completion, compute winner/loser (Gadha Chor)     |
+| Bots           | choose a legal action + humanized pacing policy          |
+| Projection     | derive **public snapshot** + **per-player private view** |
 
 ## Design rules
 
@@ -60,7 +60,9 @@ Types (`GameState`, `GameAction`, `RulePack`, `PublicSnapshot`, `PrivateView`,
 ## RNG contract
 
 ```ts
-export interface Rng { next(): number; /* [0,1) */ }
+export interface Rng {
+  next(): number; /* [0,1) */
+}
 // tests: seeded PRNG (e.g. mulberry32) for reproducible shuffles
 // prod:  crypto-backed RNG on the server only
 ```

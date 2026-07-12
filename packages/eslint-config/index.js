@@ -33,10 +33,7 @@ module.exports = {
       { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
     ],
     '@typescript-eslint/no-explicit-any': 'error',
-    'import/order': [
-      'warn',
-      { 'newlines-between': 'always', alphabetize: { order: 'asc' } },
-    ],
+    'import/order': ['warn', { 'newlines-between': 'always', alphabetize: { order: 'asc' } }],
     'no-console': ['warn', { allow: ['warn', 'error'] }],
   },
   ignorePatterns: ['dist/**', '.next/**', '.expo/**', 'coverage/**', 'node_modules/**'],
