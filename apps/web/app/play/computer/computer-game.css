@@ -1,0 +1,111 @@
+.computer-table-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.14;
+  background:
+    radial-gradient(circle, var(--lp-action-secondary) 0 0.11rem, transparent 0.12rem) 0 0 / 1.5rem
+      1.5rem,
+    radial-gradient(circle, var(--lp-background-canvas) 0 0.08rem, transparent 0.09rem) 0.75rem
+      0.75rem / 1.5rem 1.5rem;
+  pointer-events: none;
+}
+
+.computer-hidden-card--selectable {
+  transform: translateY(-0.35rem);
+  filter: drop-shadow(0 0 0.75rem var(--lp-brand-accent));
+}
+
+.computer-center-action {
+  border: 0.12rem solid color-mix(in srgb, var(--lp-action-secondary), transparent 32%);
+}
+
+.computer-pair-animation,
+.computer-pair-reduced {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 6rem;
+}
+
+.computer-pair-animation {
+  animation: computer-pair-pop 500ms ease-in-out both;
+}
+
+.computer-pair-reduced {
+  animation: computer-pair-fade 200ms ease-in-out both;
+}
+
+.computer-bandhani-dot {
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999rem;
+  background: var(--lp-action-secondary);
+  opacity: 0;
+  animation: computer-bandhani 500ms ease-out both;
+}
+
+.computer-bandhani-dot--one {
+  top: 0.5rem;
+  left: 25%;
+}
+
+.computer-bandhani-dot--two {
+  top: 1rem;
+  right: 24%;
+  animation-delay: 80ms;
+}
+
+.computer-bandhani-dot--three {
+  bottom: 0.75rem;
+  left: 50%;
+  animation-delay: 120ms;
+}
+
+[data-reduced-motion='true'] .computer-hidden-card--selectable,
+[data-reduced-motion='true'] .computer-pair-animation,
+[data-reduced-motion='true'] .computer-bandhani-dot {
+  animation: none;
+  transform: none;
+  filter: none;
+}
+
+[data-reduced-motion='true'] .computer-bandhani-dot {
+  opacity: 0.75;
+}
+
+@keyframes computer-pair-pop {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes computer-pair-fade {
+  0% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes computer-bandhani {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  60% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
