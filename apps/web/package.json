@@ -7,11 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings 0",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@lazy-patta/design-tokens": "workspace:*",
     "@lazy-patta/game-contracts": "workspace:*",
+    "@lazy-patta/game-engine": "workspace:*",
     "@lazy-patta/localization": "workspace:*",
     "next": "^16.2.10",
     "react": "^19.2.0",
@@ -19,14 +23,22 @@
   },
   "devDependencies": {
     "@lazy-patta/eslint-config": "workspace:*",
+    "@lazy-patta/test-fixtures": "workspace:*",
     "@lazy-patta/typescript-config": "workspace:*",
+    "@playwright/test": "^1.49.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/node": "^22.10.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "eslint": "^8.57.0",
+    "jsdom": "^25.0.1",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.9"
   }
 }
