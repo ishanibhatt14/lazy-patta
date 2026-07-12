@@ -10,10 +10,7 @@ function card(suit: Suit, rank: Rank): Card {
 
 describe('removeSameRankPairs', () => {
   it('removes a same-rank pair', () => {
-    const { hand, removed } = removeSameRankPairs([
-      card('hearts', '7'),
-      card('spades', '7'),
-    ]);
+    const { hand, removed } = removeSameRankPairs([card('hearts', '7'), card('spades', '7')]);
     expect(hand).toHaveLength(0);
     expect(removed).toHaveLength(2);
   });

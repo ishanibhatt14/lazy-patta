@@ -5,11 +5,11 @@ seniors and kids. Legibility outranks flourish everywhere except large display.
 
 ## Type families
 
-| Role | Font | Notes |
-|------|------|-------|
-| **UI / body** | **Noto Sans** | superb legibility, huge script coverage |
-| **Gujarati** | **Noto Sans Gujarati** | mandatory glyph coverage |
-| **Hindi** | **Noto Sans Devanagari** | mandatory glyph coverage |
+| Role                   | Font                                     | Notes                                                                                                                                                                                        |
+| ---------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **UI / body**          | **Noto Sans**                            | superb legibility, huge script coverage                                                                                                                                                      |
+| **Gujarati**           | **Noto Sans Gujarati**                   | mandatory glyph coverage                                                                                                                                                                     |
+| **Hindi**              | **Noto Sans Devanagari**                 | mandatory glyph coverage                                                                                                                                                                     |
 | **Display / headings** | a warm **rounded** licensed display face | **only** if it renders all three scripts well; **otherwise fall back to Noto Sans SemiBold**. Never ship a display face that lacks Gujarati/Devanagari — mixed-script fallback looks broken. |
 
 Font tokens: `font.body`, `font.display`, `font.gujarati`, `font.devanagari`.
@@ -21,18 +21,18 @@ automatically (font stacks + `:lang()` / per-locale families in RN).
 Modular, mapped to `text.*` size tokens. Sizes in px (rem in code). Line-height via
 `leading.*`. Weight via `weight.*` (`400` regular, `600` semibold, `700` bold).
 
-| Token | Size | Line-height | Weight | Use |
-|-------|------|-------------|--------|-----|
-| `text.display` | 40 | 48 | 700 | splash, big reveals |
-| `text.h1` | 32 | 40 | 700 | screen titles |
-| `text.h2` | 24 | 32 | 600 | section headers |
-| `text.h3` | 20 | 28 | 600 | card titles, sheet headers |
-| `text.bodyLg` | 18 | 28 | 400 | primary reading, senior-friendly default |
-| `text.body` | 16 | 24 | 400 | default UI text |
-| `text.bodySm` | 14 | 20 | 400 | secondary/meta |
-| `text.caption` | 12 | 16 | 400/600 | labels, captions (use sparingly) |
-| `text.button` | 16 | 24 | 600 | button labels |
-| `text.overline` | 12 | 16 | 600 | eyebrows/tags (tracking +) |
+| Token           | Size | Line-height | Weight  | Use                                      |
+| --------------- | ---- | ----------- | ------- | ---------------------------------------- |
+| `text.display`  | 40   | 48          | 700     | splash, big reveals                      |
+| `text.h1`       | 32   | 40          | 700     | screen titles                            |
+| `text.h2`       | 24   | 32          | 600     | section headers                          |
+| `text.h3`       | 20   | 28          | 600     | card titles, sheet headers               |
+| `text.bodyLg`   | 18   | 28          | 400     | primary reading, senior-friendly default |
+| `text.body`     | 16   | 24          | 400     | default UI text                          |
+| `text.bodySm`   | 14   | 20          | 400     | secondary/meta                           |
+| `text.caption`  | 12   | 16          | 400/600 | labels, captions (use sparingly)         |
+| `text.button`   | 16   | 24          | 600     | button labels                            |
+| `text.overline` | 12   | 16          | 600     | eyebrows/tags (tracking +)               |
 
 **Senior mode / large text:** the whole scale steps up (e.g. body → 18/20) via a
 single accessibility setting; layouts must not clip. Support OS Dynamic Type

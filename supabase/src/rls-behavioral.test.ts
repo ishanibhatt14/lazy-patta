@@ -149,10 +149,7 @@ describe.skipIf(!LIVE)('RLS behavioural (live Supabase)', () => {
     });
 
     it('the service role bypasses RLS (sees both users’ rows)', async () => {
-      const read = await h.admin
-        .from('profiles')
-        .select('id')
-        .in('id', [h.userA.id, h.userB.id]);
+      const read = await h.admin.from('profiles').select('id').in('id', [h.userA.id, h.userB.id]);
       expect(read.error).toBeNull();
       expect(read.data).toHaveLength(2);
     });

@@ -20,17 +20,17 @@ system's "define once, compose many."
 
 ## What a game must define
 
-| Contract | Description |
-|----------|-------------|
-| **Rule pack** | Typed config (see below) with sane defaults + allowed ranges |
-| **Setup** | Deck composition, removals, deal distribution |
-| **Legal moves** | Given a state + actor, what actions are valid |
-| **Reducer** | Apply an accepted action → next state + emitted events |
-| **Turn model** | Order, direction, skipping finished players, timeouts |
-| **End condition** | How the game completes; who wins/loses; scoring |
-| **Bot policy** | How a bot picks a legal action + humanized pacing |
-| **View projections** | Public snapshot + each player's private view (no leakage) |
-| **Content** | Localized copy, tutorial steps, animation hooks, sounds |
+| Contract             | Description                                                  |
+| -------------------- | ------------------------------------------------------------ |
+| **Rule pack**        | Typed config (see below) with sane defaults + allowed ranges |
+| **Setup**            | Deck composition, removals, deal distribution                |
+| **Legal moves**      | Given a state + actor, what actions are valid                |
+| **Reducer**          | Apply an accepted action → next state + emitted events       |
+| **Turn model**       | Order, direction, skipping finished players, timeouts        |
+| **End condition**    | How the game completes; who wins/loses; scoring              |
+| **Bot policy**       | How a bot picks a legal action + humanized pacing            |
+| **View projections** | Public snapshot + each player's private view (no leakage)    |
+| **Content**          | Localized copy, tutorial steps, animation hooks, sounds      |
 
 ## Shared engine surface (game-agnostic)
 
@@ -52,8 +52,8 @@ Each game defines a typed rule pack. Shared fields + game-specific fields. Examp
 
 ```ts
 interface RulePack {
-  id: string;                 // e.g. 'classic-gulam-chor'
-  gameId: string;             // 'gadha-chor'
+  id: string; // e.g. 'classic-gulam-chor'
+  gameId: string; // 'gadha-chor'
   minPlayers: number;
   maxPlayers: number;
   direction: 'clockwise' | 'counterclockwise';

@@ -5,28 +5,28 @@ like a Gujarati family home _and_ pass WCAG AA for a multi-generational audience
 
 ## Semantic palette (Classic Cream — production default)
 
-| Semantic token | Hex | Notes |
-|----------------|-----|-------|
-| `bg.canvas` | `#FFF7E8` | cream paper — app background |
-| `surface` | `#FFFFFF` | cards, sheets, panels |
-| `surface.sunken` | `#F6ECD8` | wells/inputs on cream |
-| `brand.primary` | `#7A1F2B` | deep maroon — primary action/brand |
-| `brand.primary.ink` | `#FFFFFF` | text on maroon (AA+) |
-| `brand.accent` | `#F6A623` | saffron — accent; **dark text only on it** |
-| `brand.accent.ink` | `#1F1B16` | text on saffron |
-| `action.secondary` | `#0F766E` | teal — secondary action + playable glow |
-| `action.secondary.ink` | `#FFFFFF` | text on teal (AA+) |
-| `game.felt` | `#1F6B4F` | felt green — the table |
-| `game.felt.ink` | `#FFFFFF` | text on felt (AA+) |
-| `text.primary` | `#1F1B16` | ink |
-| `text.secondary` | `#5B534A` | muted text (verify AA on cream/surface) |
-| `text.onDark` | `#FFF7E8` | text on dark surfaces |
-| `border.subtle` | `#E7DcC4` | hairlines on cream |
-| `status.error` | `#C62828` | errors/destructive |
-| `status.success` | `#1F6B4F` | success (reuses felt family) |
-| `status.warning` | `#B26A00` | warnings (dark saffron for contrast) |
-| `status.info` | `#0F766E` | info (teal) |
-| `focus.ring` | `#0F766E` | visible keyboard focus (≥3:1 on adjacent colors) |
+| Semantic token         | Hex       | Notes                                            |
+| ---------------------- | --------- | ------------------------------------------------ |
+| `bg.canvas`            | `#FFF7E8` | cream paper — app background                     |
+| `surface`              | `#FFFFFF` | cards, sheets, panels                            |
+| `surface.sunken`       | `#F6ECD8` | wells/inputs on cream                            |
+| `brand.primary`        | `#7A1F2B` | deep maroon — primary action/brand               |
+| `brand.primary.ink`    | `#FFFFFF` | text on maroon (AA+)                             |
+| `brand.accent`         | `#F6A623` | saffron — accent; **dark text only on it**       |
+| `brand.accent.ink`     | `#1F1B16` | text on saffron                                  |
+| `action.secondary`     | `#0F766E` | teal — secondary action + playable glow          |
+| `action.secondary.ink` | `#FFFFFF` | text on teal (AA+)                               |
+| `game.felt`            | `#1F6B4F` | felt green — the table                           |
+| `game.felt.ink`        | `#FFFFFF` | text on felt (AA+)                               |
+| `text.primary`         | `#1F1B16` | ink                                              |
+| `text.secondary`       | `#5B534A` | muted text (verify AA on cream/surface)          |
+| `text.onDark`          | `#FFF7E8` | text on dark surfaces                            |
+| `border.subtle`        | `#E7DcC4` | hairlines on cream                               |
+| `status.error`         | `#C62828` | errors/destructive                               |
+| `status.success`       | `#1F6B4F` | success (reuses felt family)                     |
+| `status.warning`       | `#B26A00` | warnings (dark saffron for contrast)             |
+| `status.info`          | `#0F766E` | info (teal)                                      |
+| `focus.ring`           | `#0F766E` | visible keyboard focus (≥3:1 on adjacent colors) |
 
 ## Contrast & usage rules (hard)
 
@@ -40,14 +40,14 @@ like a Gujarati family home _and_ pass WCAG AA for a multi-generational audience
 
 ## Approved foreground/background pairings
 
-| Background | Allowed text | For |
-|-----------|--------------|-----|
-| `bg.canvas` (cream) | `text.primary`, `brand.primary` | body, headings |
-| `surface` (white) | `text.primary`, `text.secondary` | cards, sheets |
-| `brand.primary` (maroon) | `brand.primary.ink` (white) | primary buttons, headers |
-| `brand.accent` (saffron) | `brand.accent.ink` (dark) | accent chips, highlights |
-| `action.secondary` (teal) | white | secondary buttons |
-| `game.felt` (green) | white | table labels |
+| Background                | Allowed text                     | For                      |
+| ------------------------- | -------------------------------- | ------------------------ |
+| `bg.canvas` (cream)       | `text.primary`, `brand.primary`  | body, headings           |
+| `surface` (white)         | `text.primary`, `text.secondary` | cards, sheets            |
+| `brand.primary` (maroon)  | `brand.primary.ink` (white)      | primary buttons, headers |
+| `brand.accent` (saffron)  | `brand.accent.ink` (dark)        | accent chips, highlights |
+| `action.secondary` (teal) | white                            | secondary buttons        |
+| `game.felt` (green)       | white                            | table labels             |
 
 ## Primitive scales (author these for token tiers/themes)
 

@@ -64,17 +64,17 @@ celebrated with affection and immediately offered a rematch (see
 
 Default = `classic-gulam-chor`. All fields validated server-side.
 
-| Field | Type | Default | Range / options | Notes |
-|-------|------|---------|-----------------|-------|
-| `minPlayers` | int | 2 | 2 | — |
-| `maxPlayers` | int | 6 | 2–6 | table + layout limit |
-| `removedRank` | Rank | `J` | any rank | which rank becomes the "gadha" (Gulam=Jack) |
-| `removedCount` | int | 1 | 1 | ensures exactly one unpairable card |
-| `pairing` | enum | `same-rank` | `same-rank` \| (future: `same-rank-color`) | pair definition |
-| `autoRemovePairs` | bool | `true` | true/false | auto-discard on deal + on draw |
-| `direction` | enum | `clockwise` | `clockwise` \| `counterclockwise` | draw/turn direction |
-| `turnSeconds` | int\|null | `null` | null or 10–60 | untimed by default (family-friendly) |
-| `drawSource` | enum | `next-active` | `next-active` \| (future: `any-active`) | who you draw from |
+| Field             | Type      | Default       | Range / options                            | Notes                                       |
+| ----------------- | --------- | ------------- | ------------------------------------------ | ------------------------------------------- |
+| `minPlayers`      | int       | 2             | 2                                          | —                                           |
+| `maxPlayers`      | int       | 6             | 2–6                                        | table + layout limit                        |
+| `removedRank`     | Rank      | `J`           | any rank                                   | which rank becomes the "gadha" (Gulam=Jack) |
+| `removedCount`    | int       | 1             | 1                                          | ensures exactly one unpairable card         |
+| `pairing`         | enum      | `same-rank`   | `same-rank` \| (future: `same-rank-color`) | pair definition                             |
+| `autoRemovePairs` | bool      | `true`        | true/false                                 | auto-discard on deal + on draw              |
+| `direction`       | enum      | `clockwise`   | `clockwise` \| `counterclockwise`          | draw/turn direction                         |
+| `turnSeconds`     | int\|null | `null`        | null or 10–60                              | untimed by default (family-friendly)        |
+| `drawSource`      | enum      | `next-active` | `next-active` \| (future: `any-active`)    | who you draw from                           |
 
 **Named variants** (families pick one): `classic-gulam-chor` (default),
 `quick-4` (4 players, `turnSeconds: 20`), plus custom via room settings. Variants
@@ -85,11 +85,11 @@ are versioned so saved matches stay reproducible.
 Reuses the shared engine states (see [game-state](../05-architecture/)):
 
 - **Game:** `LOBBY → DEALING → REMOVING_INITIAL_PAIRS → IN_PROGRESS →
-  (PAUSED_RECONNECT) → COMPLETED | ABANDONED`.
+(PAUSED_RECONNECT) → COMPLETED | ABANDONED`.
 - **Player:** `INVITED → JOINED → READY → ACTIVE → FINISHED` (`DISCONNECTED`/`LEFT`
   as needed).
 - **Events:** `GAME_STARTED, CARDS_DEALT, PAIR_REMOVED, CARD_DRAWN, TURN_ADVANCED,
-  PLAYER_FINISHED, GAME_COMPLETED, REMATCH_REQUESTED` (+ connection events).
+PLAYER_FINISHED, GAME_COMPLETED, REMATCH_REQUESTED` (+ connection events).
 
 ## 6. Bot behavior
 

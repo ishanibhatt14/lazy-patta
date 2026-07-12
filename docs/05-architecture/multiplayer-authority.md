@@ -58,11 +58,11 @@ the contract the [game-table UI](../03-ux-specification/game-table-contract.md) 
 
 ## What clients may and may not do
 
-| Clients MAY | Clients MUST NOT |
-|-------------|------------------|
-| render public snapshot + own private hand | decide shuffle/deal/card identity |
-| request actions via envelopes | mutate game state directly |
-| show presence-based online/offline UI | read another player's hand (API or Realtime) |
+| Clients MAY                               | Clients MUST NOT                                 |
+| ----------------------------------------- | ------------------------------------------------ |
+| render public snapshot + own private hand | decide shuffle/deal/card identity                |
+| request actions via envelopes             | mutate game state directly                       |
+| show presence-based online/offline UI     | read another player's hand (API or Realtime)     |
 | run the engine locally for **guest** play | treat local state as authoritative in live rooms |
 
 ## Why this is safe & scalable

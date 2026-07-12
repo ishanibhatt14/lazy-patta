@@ -23,11 +23,11 @@ together from anywhere** — warm, premium, and unmistakably _not_ a casino.
 
 Every design and engineering decision is judged against a single feeling:
 
-| We want players to think… | We never want players to think… |
-|---|---|
-| "This feels like playing cards at my grandparents' house." | "This is just another Teen Patti / rummy app." |
-| "I could hand this to my mom and she'd get it." | "Where's the catch / what are they selling me?" |
-| "That donkey reveal made me laugh." | "This feels like a slot machine." |
+| We want players to think…                                  | We never want players to think…                 |
+| ---------------------------------------------------------- | ----------------------------------------------- |
+| "This feels like playing cards at my grandparents' house." | "This is just another Teen Patti / rummy app."  |
+| "I could hand this to my mom and she'd get it."            | "Where's the catch / what are they selling me?" |
+| "That donkey reveal made me laugh."                        | "This feels like a slot machine."               |
 
 That emotional difference — nostalgia and family warmth — is far harder for a
 competitor to copy than a set of game rules. It is our moat.

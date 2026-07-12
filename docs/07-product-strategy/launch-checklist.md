@@ -24,7 +24,7 @@ every box is checked.
 - [ ] Reduced-motion + mute available; every essential sound captioned.
 - [ ] Dynamic text to **200%** without clipping; senior mode works.
 - [ ] Colorblind-friendly suit option.
-(Full criteria: [accessibility](../02-design-system/accessibility.md).)
+      (Full criteria: [accessibility](../02-design-system/accessibility.md).)
 
 ## Privacy & compliance gate
 

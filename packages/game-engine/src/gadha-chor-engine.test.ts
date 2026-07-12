@@ -85,26 +85,29 @@ describe('GadhaChorEngine full game', () => {
     [2, ['a', 'b', 'c']],
     [3, ['a', 'b', 'c', 'd']],
     [4, ['a', 'b', 'c', 'd', 'e', 'f']],
-  ] as const)('completes with exactly one loser holding the odd card (seed %i)', (seed, players) => {
-    const { engine, state } = playToCompletion(seed, [...players]);
+  ] as const)(
+    'completes with exactly one loser holding the odd card (seed %i)',
+    (seed, players) => {
+      const { engine, state } = playToCompletion(seed, [...players]);
 
-    expect(engine.isComplete(state)).toBe(true);
-    const active = state.players.filter((p) => p.status === 'active');
-    expect(active).toHaveLength(1);
+      expect(engine.isComplete(state)).toBe(true);
+      const active = state.players.filter((p) => p.status === 'active');
+      expect(active).toHaveLength(1);
 
-    const result = engine.result(state);
-    expect(result).not.toBeNull();
-    expect(result!.loser).toBe(active[0]!.id);
-    expect(result!.winners).toEqual(
-      state.players.filter((p) => p.status === 'finished').map((p) => p.id),
-    );
+      const result = engine.result(state);
+      expect(result).not.toBeNull();
+      expect(result!.loser).toBe(active[0]!.id);
+      expect(result!.winners).toEqual(
+        state.players.filter((p) => p.status === 'finished').map((p) => p.id),
+      );
 
-    // The loser holds every remaining removed-rank card, an odd count >= 1.
-    const loserJacks = rankCount([...active[0]!.hand], REMOVED);
-    expect(loserJacks % 2).toBe(1);
-    expect(loserJacks).toBeGreaterThanOrEqual(1);
-    expect(rankCount(inPlayCards(state), REMOVED)).toBe(loserJacks);
-  });
+      // The loser holds every remaining removed-rank card, an odd count >= 1.
+      const loserJacks = rankCount([...active[0]!.hand], REMOVED);
+      expect(loserJacks % 2).toBe(1);
+      expect(loserJacks).toBeGreaterThanOrEqual(1);
+      expect(rankCount(inPlayCards(state), REMOVED)).toBe(loserJacks);
+    },
+  );
 
   it('is deterministic: same seed + same bot policy yields identical outcomes', () => {
     const a = playToCompletion(123, ['a', 'b', 'c']);

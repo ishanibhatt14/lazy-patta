@@ -29,7 +29,7 @@ future shared code would be published as a versioned package, not a repo merge.
 - **+** Simpler permissions and CODEOWNERS.
 - **−** Any genuinely shared utility must be published as a package rather than
   imported directly — acceptable, and none exists today.
-- Within *this* repo we still use a monorepo for web + mobile + shared packages
+- Within _this_ repo we still use a monorepo for web + mobile + shared packages
   ([ADR-0002](./0002-monorepo-for-web-mobile-shared-packages.md)).
 
 ## Verification method

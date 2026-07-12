@@ -48,12 +48,12 @@
 
 ## Jobs to be done
 
-| When… | I want to… | So I can… |
-|-------|-----------|-----------|
-| I'm far from family on a festival | play the game we always played | feel close despite the distance |
-| my parent is bored/alone | start a game in seconds and invite them | share a light, recurring ritual |
-| my kids ask "what did you play as a kid?" | show and play it with them | pass the tradition on |
-| I have 5 idle minutes | play a quick round vs the computer | relax without commitment or risk |
+| When…                                     | I want to…                              | So I can…                        |
+| ----------------------------------------- | --------------------------------------- | -------------------------------- |
+| I'm far from family on a festival         | play the game we always played          | feel close despite the distance  |
+| my parent is bored/alone                  | start a game in seconds and invite them | share a light, recurring ritual  |
+| my kids ask "what did you play as a kid?" | show and play it with them              | pass the tradition on            |
+| I have 5 idle minutes                     | play a quick round vs the computer      | relax without commitment or risk |
 
 ## Contexts of play (design for these)
 

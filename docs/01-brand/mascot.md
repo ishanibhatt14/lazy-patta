@@ -28,15 +28,15 @@ rematch. Kids and grandparents both need to feel safe being the donkey.
 Design as a small, reusable sprite/lottie set so it maps cleanly to components
 (see [components](../02-design-system/components.md)):
 
-| Expression | Used in | Feeling |
-|-----------|---------|---------|
-| **Wave / hello** | splash, empty states, guest welcome | friendly invite |
-| **Cheer** | you found a pair (_jodi mali gai_), you win | shared joy |
-| **Oops / sheepish** | you're the Gadha Chor | gentle, self-deprecating |
-| **Think** | bot's turn, loading, tutorial hints | patient, cozy |
-| **Point / teach** | how-to-play, first-run coaching | helpful guide |
-| **Sleep / zzz** | disconnect, idle, "lazy" brand nod | calm, unbothered |
-| **Peek** | app icon, headers, card-back accent | charming, curious |
+| Expression          | Used in                                     | Feeling                  |
+| ------------------- | ------------------------------------------- | ------------------------ |
+| **Wave / hello**    | splash, empty states, guest welcome         | friendly invite          |
+| **Cheer**           | you found a pair (_jodi mali gai_), you win | shared joy               |
+| **Oops / sheepish** | you're the Gadha Chor                       | gentle, self-deprecating |
+| **Think**           | bot's turn, loading, tutorial hints         | patient, cozy            |
+| **Point / teach**   | how-to-play, first-run coaching             | helpful guide            |
+| **Sleep / zzz**     | disconnect, idle, "lazy" brand nod          | calm, unbothered         |
+| **Peek**            | app icon, headers, card-back accent         | charming, curious        |
 
 ## Usage rules
 

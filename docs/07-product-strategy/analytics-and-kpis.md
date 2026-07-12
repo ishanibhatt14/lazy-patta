@@ -11,19 +11,19 @@ core promise: recurring, cross-generation play. Everything below ladders up to i
 
 ## KPI tree
 
-| Layer | Metric | Why |
-|-------|--------|-----|
-| **Activation** | guest completes first match vs computer | the "aha" |
-| | tutorial completion rate | teaching works |
-| **Conversion** | guest → signed-in (when they want live rooms) | intent, not force |
-| | invite link → joined room rate | the diaspora loop works |
-| **Engagement** | matches per active user / week | habit |
-| | rematch rate | fun + group cohesion |
-| | live rooms per week; players per room | the social core |
-| **Retention** | D1 / D7 / D30; weekly returning family play (NSM) | do they come back |
-| **Quality** | reconnect success rate | trust on flaky networks |
-| | state-version conflict rate; action latency p50/p95 | correctness + speed |
-| | crash-free sessions | polish |
+| Layer          | Metric                                              | Why                     |
+| -------------- | --------------------------------------------------- | ----------------------- |
+| **Activation** | guest completes first match vs computer             | the "aha"               |
+|                | tutorial completion rate                            | teaching works          |
+| **Conversion** | guest → signed-in (when they want live rooms)       | intent, not force       |
+|                | invite link → joined room rate                      | the diaspora loop works |
+| **Engagement** | matches per active user / week                      | habit                   |
+|                | rematch rate                                        | fun + group cohesion    |
+|                | live rooms per week; players per room               | the social core         |
+| **Retention**  | D1 / D7 / D30; weekly returning family play (NSM)   | do they come back       |
+| **Quality**    | reconnect success rate                              | trust on flaky networks |
+|                | state-version conflict rate; action latency p50/p95 | correctness + speed     |
+|                | crash-free sessions                                 | polish                  |
 
 ## Product events (client → analytics)
 

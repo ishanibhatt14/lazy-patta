@@ -2,13 +2,13 @@
 
 ## Platforms
 
-| Layer | Technology | Notes |
-|-------|-----------|-------|
-| Web / marketing / PWA | **Next.js** on **Vercel** | SSR marketing + app; `play.lazytraveler.app` |
-| Mobile | **Expo React Native** + **Expo Router** | iOS + Android from shared TS |
-| Shared code | **TypeScript packages** in one monorepo | engine, contracts, tokens, i18n |
-| Backend | **Supabase** | Auth, Postgres, Realtime, Storage, Edge Functions |
-| Analytics/observability | privacy-conscious product analytics + error monitoring | never logs hands/tokens/OTP |
+| Layer                   | Technology                                             | Notes                                             |
+| ----------------------- | ------------------------------------------------------ | ------------------------------------------------- |
+| Web / marketing / PWA   | **Next.js** on **Vercel**                              | SSR marketing + app; `play.lazytraveler.app`      |
+| Mobile                  | **Expo React Native** + **Expo Router**                | iOS + Android from shared TS                      |
+| Shared code             | **TypeScript packages** in one monorepo                | engine, contracts, tokens, i18n                   |
+| Backend                 | **Supabase**                                           | Auth, Postgres, Realtime, Storage, Edge Functions |
+| Analytics/observability | privacy-conscious product analytics + error monitoring | never logs hands/tokens/OTP                       |
 
 ## Monorepo layout
 
@@ -36,7 +36,7 @@ lazy-patta/
 ```
 
 > The provided v1 spec used `apps/{web,mobile}` + `packages/{game-engine,
-> game-contracts,design-tokens,localization,test-fixtures}`. This Bible keeps those and
+game-contracts,design-tokens,localization,test-fixtures}`. This Bible keeps those and
 > adds `shared-ui`, `shared-types`, `shared-utils` so the design system and shared
 > code have clear homes. The exact final package boundaries are confirmed in the
 > [developer handbook](../06-developer-handbook/folder-structure.md).

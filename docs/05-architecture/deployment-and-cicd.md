@@ -5,12 +5,12 @@ Ship safely and often. Web on **Vercel**, backend on **Supabase**, mobile via
 
 ## Environments
 
-| Env | Web | Backend | Mobile |
-|-----|-----|---------|--------|
-| **Local** | `next dev` | Supabase local (Docker) + `seed.sql` | Expo dev client |
-| **Preview** | Vercel preview per PR | Supabase staging | EAS internal (as needed) |
-| **Staging** | Vercel (staging) | Supabase staging (migrations auto-applied) | EAS internal / TestFlight |
-| **Production** | Vercel prod (`play.lazytraveler.app`) | Supabase prod (migrations w/ approval) | App Store / Play (staged) |
+| Env            | Web                                   | Backend                                    | Mobile                    |
+| -------------- | ------------------------------------- | ------------------------------------------ | ------------------------- |
+| **Local**      | `next dev`                            | Supabase local (Docker) + `seed.sql`       | Expo dev client           |
+| **Preview**    | Vercel preview per PR                 | Supabase staging                           | EAS internal (as needed)  |
+| **Staging**    | Vercel (staging)                      | Supabase staging (migrations auto-applied) | EAS internal / TestFlight |
+| **Production** | Vercel prod (`play.lazytraveler.app`) | Supabase prod (migrations w/ approval)     | App Store / Play (staged) |
 
 Secrets live only in each platform's env store (Vercel/Supabase/EAS), never in the repo.
 

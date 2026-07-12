@@ -16,14 +16,14 @@ clip-art, never casino.
 
 ## Motif library
 
-| Motif | Origin | Where it's used | Notes |
-|-------|--------|-----------------|-------|
-| **Bandhani dots** | Gujarati tie-dye | dividers, card backs, particle bursts on pairs | small, rhythmic dot fields; the pair-removal "confetti" is Bandhani dots, not casino sparkles |
-| **Ajrakh block-print** | Kutch/Sindh printing | hero panels, section headers, splash | geometric, indigo/maroon/saffron; subtle at low opacity |
-| **Folk geometric borders** | pan-Indian | cards, sheets, badges | frame elements with restraint |
-| **Toran / string lights** | festival doorways | lobby, festival themes, winner reveal | dressing only; off by default outside festival theme |
-| **Diya / warm glow** | festival | celebrations, achievements | soft, never neon |
-| **Chai / khakhra / wood grain** | home | empty states, "cozy" moments | signals _home_, not venue |
+| Motif                           | Origin               | Where it's used                                | Notes                                                                                         |
+| ------------------------------- | -------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **Bandhani dots**               | Gujarati tie-dye     | dividers, card backs, particle bursts on pairs | small, rhythmic dot fields; the pair-removal "confetti" is Bandhani dots, not casino sparkles |
+| **Ajrakh block-print**          | Kutch/Sindh printing | hero panels, section headers, splash           | geometric, indigo/maroon/saffron; subtle at low opacity                                       |
+| **Folk geometric borders**      | pan-Indian           | cards, sheets, badges                          | frame elements with restraint                                                                 |
+| **Toran / string lights**       | festival doorways    | lobby, festival themes, winner reveal          | dressing only; off by default outside festival theme                                          |
+| **Diya / warm glow**            | festival             | celebrations, achievements                     | soft, never neon                                                                              |
+| **Chai / khakhra / wood grain** | home                 | empty states, "cozy" moments                   | signals _home_, not venue                                                                     |
 
 ## Playing-card art
 
@@ -44,13 +44,13 @@ The cards are the product's hero object — treat them as craft, not stock.
 Each non-content state gets a small **Gaddo** vignette + one warm line of copy —
 these are brand moments, not dead ends:
 
-| State | Illustration idea | Tone |
-|-------|-------------------|------|
-| Empty match history | Gaddo shuffling a fresh deck | inviting: "Your first game is waiting." |
-| Empty friends/family | Gaddo holding a toran of empty photo frames | warm: "Invite family to fill the table." |
-| Loading | Gaddo "think" pose, cards riffling | patient, cozy |
-| Offline | Gaddo napping (zzz) under a diya | calm: "You're offline. We'll reconnect you." |
-| Generic error | Gaddo sheepish with a dropped card | gentle: "Something slipped. Let's try again." |
+| State                | Illustration idea                           | Tone                                          |
+| -------------------- | ------------------------------------------- | --------------------------------------------- |
+| Empty match history  | Gaddo shuffling a fresh deck                | inviting: "Your first game is waiting."       |
+| Empty friends/family | Gaddo holding a toran of empty photo frames | warm: "Invite family to fill the table."      |
+| Loading              | Gaddo "think" pose, cards riffling          | patient, cozy                                 |
+| Offline              | Gaddo napping (zzz) under a diya            | calm: "You're offline. We'll reconnect you."  |
+| Generic error        | Gaddo sheepish with a dropped card          | gentle: "Something slipped. Let's try again." |
 
 ## Achievement & badge system
 

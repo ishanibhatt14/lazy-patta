@@ -57,14 +57,14 @@ Lazy Patta
 
 Per [decisions D-21](../00-product-bible/decisions-log.md):
 
-| Area | Guest | Requires login |
-|------|-------|----------------|
-| Play vs computer | ✅ | — |
-| How-to-play, rules, legal | ✅ | — |
-| Create/Join private room | — | ✅ |
-| Profile, stats, history | — | ✅ |
-| Family groups, report/block | — | ✅ |
-| Notifications | — | ✅ |
+| Area                        | Guest | Requires login |
+| --------------------------- | ----- | -------------- |
+| Play vs computer            | ✅    | —              |
+| How-to-play, rules, legal   | ✅    | —              |
+| Create/Join private room    | —     | ✅             |
+| Profile, stats, history     | —     | ✅             |
+| Family groups, report/block | —     | ✅             |
+| Notifications               | —     | ✅             |
 
 Guests hitting a gated action see a friendly sign-in prompt with the rationale
 ("Sign in to play live with family and save your stats") — never a hard wall.

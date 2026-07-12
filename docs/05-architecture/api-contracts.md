@@ -8,9 +8,13 @@ envelopes; reads of game state go through RLS-protected snapshots.
 
 ```ts
 export type Suit = 'clubs' | 'diamonds' | 'hearts' | 'spades';
-export type Rank = 'A'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'10'|'J'|'Q'|'K';
+export type Rank = 'A' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | 'J' | 'Q' | 'K';
 
-export interface Card { id: string; suit: Suit; rank: Rank; }
+export interface Card {
+  id: string;
+  suit: Suit;
+  rank: Rank;
+}
 
 export interface RulePack {
   id: 'classic-gulam-chor' | string;
@@ -26,15 +30,15 @@ export interface RulePack {
 export interface GameActionEnvelope<TPayload> {
   gameId: string;
   actorId: string;
-  clientActionId: string;      // client-generated UUID → idempotency
-  expectedVersion: number;     // optimistic concurrency
+  clientActionId: string; // client-generated UUID → idempotency
+  expectedVersion: number; // optimistic concurrency
   type: 'DRAW_CARD' | 'READY' | 'START_GAME' | 'REMATCH' | 'LEAVE';
   payload: TPayload;
 }
 
 export interface DrawCardPayload {
   sourcePlayerId: string;
-  positionToken: string;       // server-issued, opaque, expires on version change
+  positionToken: string; // server-issued, opaque, expires on version change
 }
 ```
 
@@ -46,19 +50,19 @@ there is **one** definition of the wire format.
 
 ## Edge Functions
 
-| Function | Purpose |
-|----------|---------|
-| `create-room` | create a private room + host membership |
-| `join-room` | join by code / deep link (membership, block checks) |
-| `leave-room` | leave a room |
-| `set-ready` | toggle ready state in lobby |
-| `start-game` | host starts; server shuffles/deals/removes initial pairs |
-| `submit-game-action` | the authoritative action path (DRAW_CARD, etc.) |
-| `request-rematch` | set up a rematch with the same group |
-| `register-push-token` | store a device push token (opt-in) |
-| `report-player` | file a report (moderation) |
-| `block-player` | block a user |
-| `delete-account` | queue account deletion, revoke tokens |
+| Function              | Purpose                                                  |
+| --------------------- | -------------------------------------------------------- |
+| `create-room`         | create a private room + host membership                  |
+| `join-room`           | join by code / deep link (membership, block checks)      |
+| `leave-room`          | leave a room                                             |
+| `set-ready`           | toggle ready state in lobby                              |
+| `start-game`          | host starts; server shuffles/deals/removes initial pairs |
+| `submit-game-action`  | the authoritative action path (DRAW_CARD, etc.)          |
+| `request-rematch`     | set up a rematch with the same group                     |
+| `register-push-token` | store a device push token (opt-in)                       |
+| `report-player`       | file a report (moderation)                               |
+| `block-player`        | block a user                                             |
+| `delete-account`      | queue account deletion, revoke tokens                    |
 
 All mutating functions: verify JWT + membership, enforce rate limits, run inside a
 locked DB transaction, use the **service role** only after validating the user, and

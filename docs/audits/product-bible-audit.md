@@ -14,16 +14,16 @@ internal-link check, and terminology/consistency scans. Where a claim below says
 **51 markdown files** under `docs/` plus root `README.md`. Enumerated by
 `find docs -name "*.md" | wc -l` → **51**.
 
-| Section | Files |
-|---------|-------|
-| `00-product-bible` | README, decisions-log, glossary, principles, scope (index + core) |
-| `01-brand` | README, voice-and-copywriting, illustration-and-texture, sound, mascot, visual-identity |
-| `02-design-system` | README, design-tokens, color, typography, components, motion-and-animation, themes, accessibility |
-| `03-ux-specification` | README, information-architecture, user-flows, screen-catalog, game-table-contract, responsive-and-platform |
-| `04-games` | README, game-design-framework, gadha-chor, judgement, lal-satti |
-| `05-architecture` | README, system-architecture, game-engine, multiplayer-authority, database-schema, api-contracts, security-and-privacy, deployment-and-cicd |
-| `06-developer-handbook` | README, getting-started, folder-structure, coding-standards, testing-strategy |
-| `07-product-strategy` | README, roadmap, monetization, analytics-and-kpis, marketing-and-aso, launch-checklist |
+| Section                 | Files                                                                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `00-product-bible`      | README, decisions-log, glossary, principles, scope (index + core)                                                                          |
+| `01-brand`              | README, voice-and-copywriting, illustration-and-texture, sound, mascot, visual-identity                                                    |
+| `02-design-system`      | README, design-tokens, color, typography, components, motion-and-animation, themes, accessibility                                          |
+| `03-ux-specification`   | README, information-architecture, user-flows, screen-catalog, game-table-contract, responsive-and-platform                                 |
+| `04-games`              | README, game-design-framework, gadha-chor, judgement, lal-satti                                                                            |
+| `05-architecture`       | README, system-architecture, game-engine, multiplayer-authority, database-schema, api-contracts, security-and-privacy, deployment-and-cicd |
+| `06-developer-handbook` | README, getting-started, folder-structure, coding-standards, testing-strategy                                                              |
+| `07-product-strategy`   | README, roadmap, monetization, analytics-and-kpis, marketing-and-aso, launch-checklist                                                     |
 
 (Full list is the source of truth; the table groups them by section for readability.)
 
@@ -49,10 +49,10 @@ a low risk in §6.
 
 ## 3. Corrections made during audit
 
-| # | Issue | Action taken |
-|---|-------|--------------|
+| #   | Issue                                                                                                                                                | Action taken                                                                                                                                                                                                                                              |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | C-1 | Package name drift: docs referenced `packages/ui-tokens` in some places, `packages/design-tokens` in others. Phase 0 locks `packages/design-tokens`. | Renamed `ui-tokens` → `design-tokens` across **6 files** (design-system/README, design-system/themes, developer-handbook/getting-started, coding-standards, folder-structure, architecture/system-architecture). Re-ran link check after: still 0 broken. |
-| C-2 | Committed OS cruft: `.DS_Store` present at repo root and in `docs/`. | Removed and added to `.gitignore` as part of the Stage A commit (see decisions-log commit). |
+| C-2 | Committed OS cruft: `.DS_Store` present at repo root and in `docs/`.                                                                                 | Removed and added to `.gitignore` as part of the Stage A commit (see decisions-log commit).                                                                                                                                                               |
 
 No other automated rewrites were applied; everything else below is recorded as a
 finding rather than silently changed, because it needs a decision or belongs in
@@ -63,6 +63,7 @@ Stage B.
 ## 4. Contradictions, gaps & divergences found
 
 ### G-1 — Pass-and-play is entirely absent from the doc suite (GAP)
+
 `grep -rli "pass.and.play" docs/` → **no matches.** Pass-and-play (one device,
 players hand it around) is being **locked as a guest mode** in this Stage A pass
 (new decision D-12b), yet it appears in **no** IA node, screen in the catalog (32
@@ -74,6 +75,7 @@ invented here to avoid speculative docs per the standing directive); flagged as 
 remaining risk (§6, R-1).
 
 ### G-2 — Semantic-token alias naming differs between docs and the Phase 0 spec
+
 The design-system docs use aliases like `bg.canvas`, `surface`, `brand.primary`,
 `brand.accent`, `game.felt`. The Phase 0 scaffold spec calls for
 `background.canvas`, `surface.primary`, `action.primary`, `action.secondary`,
@@ -86,6 +88,7 @@ one alias set and update whichever side loses. Recorded as unresolved-question U
 Not a blocker (theming is remap-only).
 
 ### G-3 — Package set: docs vs Phase 0 subset (DIVERGENCE, not conflict)
+
 `system-architecture.md` / `folder-structure.md` list `shared-ui`, `shared-types`,
 `shared-utils`. Phase 0 intentionally scaffolds a **narrower** set and adds
 `eslint-config` + `typescript-config` tooling packages. This is a phased-rollout
@@ -94,13 +97,15 @@ divergence: the docs describe the target monorepo; Phase 0 builds a lean subset.
 packages when first needed. No doc rewrite required. Recorded as UQ-3.
 
 ### G-4 — First-game spelling / aliases (KNOWN-OPEN, tracked)
+
 `Gadha Chor` is canonical; `Gulam Chor` accepted as regional synonym (D-04, D-10
 rule-pack id is `classic-gulam-chor`). Additional community spellings seen in the
-wild — *Gaddha Chor*, *Donkey card game* — are not yet enumerated as search/alias
+wild — _Gaddha Chor_, _Donkey card game_ — are not yet enumerated as search/alias
 terms. Low impact (ASO/glossary only).
 **Resolution:** add alias list at brand-asset/ASO time; tracked as D-04 open + UQ-4.
 
 ### G-5 — Rule-pack id vs canonical name mismatch (COSMETIC)
+
 Canonical game name is `Gadha Chor` but the default rule-pack id is
 `classic-gulam-chor`. Intentional (id uses the synonym) but worth an explicit note so
 a future reader doesn't "fix" it. Recorded, no change.
@@ -109,16 +114,16 @@ a future reader doesn't "fix" it. Recorded, no change.
 
 ## 5. Checks that PASSED (no issue found)
 
-| Check | Result |
-|-------|--------|
-| Accidental gambling/casino presentation | **Clean.** Casino/gambling/betting terms appear **only** as explicit prohibitions or positioning contrasts (`grep` reviewed). No screen, currency, wager, or odds surface exists. |
-| "All UI can be shared directly" anti-pattern | **Not present.** Architecture consistently says share **tokens, contracts, engine, logic, selected primitives** — RN mirrors the design system; apps are thin shells. No claim that web/mobile UI is shared wholesale. |
-| Screens referenced but missing from catalog | None found. Report/block (30), account deletion (31), reconnect (21), rematch (24) all present. |
-| Components referenced but absent from inventory | Spot-checked catalog components (`HandFan`, `PlayerSeat`, `TurnBanner`, `ReactionPicker`, `ResultCard`, `ReconnectOverlay`, `RoomCode`) against components.md — present. |
-| Analytics events without a flow | Enumerated events (`guest_game_*`, `room_*`, `game_*`, `reconnect_*`, `rematch_*`) all map to catalogued flows/screens. **Exception:** no pass-and-play event (folds into G-1). |
-| DB entities without ownership/retention | `game_player_private_state` RLS owner-only; `game_events` append-only + prune; account-deletion anonymization path defined. Covered. |
-| Terminology consistency (Gaddo mascot, "jodi", "Tamaro varo") | Consistent across brand + UX docs. |
-| Conflicting tech selections | None. Next.js/Vercel, Expo/Expo Router, Supabase, pnpm+Turborepo consistent throughout. |
+| Check                                                         | Result                                                                                                                                                                                                                 |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Accidental gambling/casino presentation                       | **Clean.** Casino/gambling/betting terms appear **only** as explicit prohibitions or positioning contrasts (`grep` reviewed). No screen, currency, wager, or odds surface exists.                                      |
+| "All UI can be shared directly" anti-pattern                  | **Not present.** Architecture consistently says share **tokens, contracts, engine, logic, selected primitives** — RN mirrors the design system; apps are thin shells. No claim that web/mobile UI is shared wholesale. |
+| Screens referenced but missing from catalog                   | None found. Report/block (30), account deletion (31), reconnect (21), rematch (24) all present.                                                                                                                        |
+| Components referenced but absent from inventory               | Spot-checked catalog components (`HandFan`, `PlayerSeat`, `TurnBanner`, `ReactionPicker`, `ResultCard`, `ReconnectOverlay`, `RoomCode`) against components.md — present.                                               |
+| Analytics events without a flow                               | Enumerated events (`guest_game_*`, `room_*`, `game_*`, `reconnect_*`, `rematch_*`) all map to catalogued flows/screens. **Exception:** no pass-and-play event (folds into G-1).                                        |
+| DB entities without ownership/retention                       | `game_player_private_state` RLS owner-only; `game_events` append-only + prune; account-deletion anonymization path defined. Covered.                                                                                   |
+| Terminology consistency (Gaddo mascot, "jodi", "Tamaro varo") | Consistent across brand + UX docs.                                                                                                                                                                                     |
+| Conflicting tech selections                                   | None. Next.js/Vercel, Expo/Expo Router, Supabase, pnpm+Turborepo consistent throughout.                                                                                                                                |
 
 ---
 
@@ -157,8 +162,8 @@ a future reader doesn't "fix" it. Recorded, no change.
 
 ## 8. Verification statement
 
-Per the standing constraint — *do not claim a command/test/link-check passed unless
-it was actually run* — the following were executed and their output inspected during
+Per the standing constraint — _do not claim a command/test/link-check passed unless
+it was actually run_ — the following were executed and their output inspected during
 this audit: the file count (`find | wc -l` → 51), the internal link check (236 links,
 0 broken, run both before and after the C-1 rename), the pass-and-play grep (no
 matches), and the casino-term grep (prohibitions only). No build, deploy, or app test
