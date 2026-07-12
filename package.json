@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "description": "Premium, nostalgic Indian family card-game platform. Not gambling.",
-  "packageManager": "pnpm@9.15.0",
+  "packageManager": "pnpm@10.34.5",
   "engines": {
-    "node": ">=20.0.0",
-    "pnpm": ">=9.0.0"
+    "node": ">=22.13.0",
+    "pnpm": ">=10.0.0"
   },
   "scripts": {
     "build": "turbo run build",
