@@ -1,8 +1,5 @@
 {
   "extends": "@lazy-patta/typescript-config/react-native.json",
-  "compilerOptions": {
-    "baseUrl": "."
-  },
   "include": ["expo-env.d.ts", "**/*.ts", "**/*.tsx", ".expo/types/**/*.ts"],
   "exclude": ["node_modules"]
 }

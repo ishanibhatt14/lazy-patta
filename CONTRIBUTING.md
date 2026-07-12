@@ -6,8 +6,8 @@ constraint in mind for every change.
 
 ## Prerequisites
 
-- **Node 20** (see [`.nvmrc`](.nvmrc)) — `nvm use`
-- **pnpm 9** — `corepack enable pnpm`
+- **Node 22.13+ (Node 22 LTS "Jod")** (see [`.nvmrc`](.nvmrc)) — `nvm use`
+- **pnpm 10** — `corepack enable pnpm`
 
 ## Getting started
 
