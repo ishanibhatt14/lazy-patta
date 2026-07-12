@@ -16,6 +16,13 @@ export const semanticColorTokens = {
   'brand.accent': 'teal',
   'game.table': 'feltGreen',
   'status.error': 'errorRed',
+  // Playing-card face roles. Cards are a first-class surface in this product, so
+  // their colors are named semantically rather than reaching for status/text
+  // roles. Red/black suit inks reuse existing primitives; a theme can remap them.
+  'card.face': 'white',
+  'card.back': 'maroon',
+  'card.suitRed': 'errorRed',
+  'card.suitBlack': 'ink',
 } as const satisfies Record<string, ColorPrimitive>;
 
 export type SemanticColorToken = keyof typeof semanticColorTokens;

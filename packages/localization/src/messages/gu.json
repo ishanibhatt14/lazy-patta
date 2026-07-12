@@ -16,6 +16,8 @@
   "result.winner": "{name} જીત્યા!",
   "result.gadhaChor": "{name} ગધા ચોર છે!",
   "lobby.playerCount": "{count, plural, one {# ખેલાડી} other {# ખેલાડીઓ}}",
+  "lobby.hostedBy": "{name} દ્વારા યજમાની",
+  "label.gadhaChor": "ગધા ચોર",
   "suit.clubs": "ચોકટ",
   "suit.diamonds": "કાતરી",
   "suit.hearts": "લાલ",

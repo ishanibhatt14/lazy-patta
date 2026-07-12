@@ -87,6 +87,9 @@ importers:
       '@lazy-patta/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      '@lazy-patta/game-contracts':
+        specifier: workspace:*
+        version: link:../../packages/game-contracts
       '@lazy-patta/localization':
         specifier: workspace:*
         version: link:../../packages/localization

@@ -19,3 +19,6 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
 export function getMessages(locale: Locale): Record<MessageKey, string> {
   return messages[locale];
 }
+
+export { formatMessage } from './format';
+export type { MessageValues } from './format';
