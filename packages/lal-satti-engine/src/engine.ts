@@ -1,9 +1,10 @@
-import type { Card, PlayerId, Rng } from '@lazy-patta/game-contracts';
+import { cardId, type Card, type PlayerId, type Rng, type Suit } from '@lazy-patta/game-contracts';
 
 import { buildLalSattiDeck, shuffle, sortCards } from './cards';
 import {
   addCardToTableau,
-  createOpeningTableau,
+  createAllSevensTableau,
+  createEmptyTableau,
   isLegalTableauPlay,
   LAL_SATTI_CLASSIC,
   playableCards,
@@ -11,11 +12,13 @@ import {
 import type {
   LalSattiAction,
   LalSattiEvent,
+  LalSattiInvariantError,
   LalSattiPlayerState,
   LalSattiResult,
   LalSattiRulePack,
   LalSattiState,
 } from './types';
+import { LalSattiInvariantError as BlockedCycleError } from './types';
 
 function activePlayers(state: LalSattiState): readonly LalSattiPlayerState[] {
   return state.players.filter((player) => player.status === 'active');
@@ -45,9 +48,33 @@ function remainingCards(state: LalSattiState): Readonly<Record<PlayerId, number>
   return Object.fromEntries(state.players.map((player) => [player.id, player.hand.length]));
 }
 
-function blockedWinnerIds(players: readonly LalSattiPlayerState[]): readonly PlayerId[] {
-  const fewest = Math.min(...players.map((player) => player.hand.length));
-  return players.filter((player) => player.hand.length === fewest).map((player) => player.id);
+function findCardHolder(players: readonly LalSattiPlayerState[], cardIdToFind: string): number {
+  return players.findIndex((player) => player.hand.some((card) => card.id === cardIdToFind));
+}
+
+function isOpeningMoveRequired(state: LalSattiState): boolean {
+  return (
+    state.rulePack.opening === 'classic-seven-of-hearts' &&
+    state.stateVersion === 0 &&
+    state.tableau.hearts.length === 0
+  );
+}
+
+function openSuits(state: LalSattiState): readonly Suit[] {
+  return Object.entries(state.tableau)
+    .filter(([, cards]) => cards.length > 0)
+    .map(([suit]) => suit as Suit);
+}
+
+function blockedCycleError(state: LalSattiState, actor: PlayerId): LalSattiInvariantError {
+  return new BlockedCycleError({
+    code: 'BLOCKED_CYCLE',
+    stateVersion: state.stateVersion,
+    currentPlayerId: actor,
+    activePlayerCount: activePlayers(state).length,
+    consecutivePasses: state.consecutivePasses + 1,
+    openSuits: openSuits(state),
+  });
 }
 
 export class LalSattiEngine {
@@ -65,9 +92,12 @@ export class LalSattiEngine {
     assertUniquePlayers(players);
 
     const botSet = new Set(botIds);
-    const tableau = createOpeningTableau();
+    const tableau =
+      rulePack.opening === 'all-sevens-open' ? createAllSevensTableau() : createEmptyTableau();
     const dealDeck = shuffle(
-      buildLalSattiDeck().filter((card) => card.rank !== '7'),
+      buildLalSattiDeck().filter(
+        (card) => rulePack.opening === 'classic-seven-of-hearts' || card.rank !== '7',
+      ),
       rng,
     );
     const hands: Card[][] = players.map(() => []);
@@ -83,10 +113,16 @@ export class LalSattiEngine {
       isBot: botSet.has(id),
     }));
 
+    const openingIndex =
+      rulePack.opening === 'classic-seven-of-hearts'
+        ? findCardHolder(playerStates, cardId('hearts', '7'))
+        : 0;
+    if (openingIndex === -1) throw new Error('OPENING_CARD_NOT_DEALT');
+
     return {
       rulePack,
       players: playerStates,
-      currentPlayerIndex: 0,
+      currentPlayerIndex: openingIndex,
       tableau,
       phase: 'in_progress',
       stateVersion: 0,
@@ -101,6 +137,12 @@ export class LalSattiEngine {
 
     const current = currentPlayer(state);
     if (!current || current.id !== actor || current.status !== 'active') return [];
+
+    if (isOpeningMoveRequired(state)) {
+      return current.hand.some((card) => card.id === cardId('hearts', '7'))
+        ? [{ type: 'PLAY_CARD', actor, cardId: cardId('hearts', '7') }]
+        : [];
+    }
 
     const playable = playableCards(state.tableau, current.hand);
     if (playable.length === 0) return [{ type: 'PASS', actor }];
@@ -138,14 +180,21 @@ export class LalSattiEngine {
   private playCard(
     state: LalSattiState,
     actor: PlayerId,
-    cardId: string,
+    cardIdToPlay: string,
   ): { readonly state: LalSattiState; readonly events: readonly LalSattiEvent[] } {
     const current = state.players[state.currentPlayerIndex]!;
-    const card = current.hand.find((candidate) => candidate.id === cardId);
-    if (!card || !isLegalTableauPlay(state.tableau, card)) throw new Error('ILLEGAL_CARD');
+    const card = current.hand.find((candidate) => candidate.id === cardIdToPlay);
+    if (
+      !card ||
+      (isOpeningMoveRequired(state)
+        ? card.id !== cardId('hearts', '7')
+        : !isLegalTableauPlay(state.tableau, card))
+    ) {
+      throw new Error('ILLEGAL_CARD');
+    }
 
     const nextVersion = state.stateVersion + 1;
-    const hand = current.hand.filter((candidate) => candidate.id !== cardId);
+    const hand = current.hand.filter((candidate) => candidate.id !== cardIdToPlay);
     const finished = hand.length === 0;
     const phase = finished ? 'completed' : 'in_progress';
     const nextIndex = finished
@@ -212,37 +261,26 @@ export class LalSattiEngine {
     const nextVersion = state.stateVersion + 1;
     const passCount = state.consecutivePasses + 1;
     const active = activePlayers(state);
-    const blocked = passCount >= active.length;
-    const winnerIds = blocked ? blockedWinnerIds(active) : state.winnerIds;
-    const nextIndex = blocked
-      ? state.currentPlayerIndex
-      : nextActiveIndex(state.players, state.currentPlayerIndex);
+    if (passCount >= active.length) throw blockedCycleError(state, actor);
+
+    const nextIndex = nextActiveIndex(state.players, state.currentPlayerIndex);
     const events: LalSattiEvent[] = [{ type: 'PLAYER_PASSED', actor, stateVersion: nextVersion }];
 
-    if (blocked) {
-      events.push({
-        type: 'GAME_COMPLETED',
-        winnerIds,
-        reason: 'blocked',
-        stateVersion: nextVersion,
-      });
-    } else {
-      events.push({
-        type: 'TURN_ADVANCED',
-        actor: nextIndex === -1 ? null : (state.players[nextIndex]?.id ?? null),
-        stateVersion: nextVersion,
-      });
-    }
+    events.push({
+      type: 'TURN_ADVANCED',
+      actor: nextIndex === -1 ? null : (state.players[nextIndex]?.id ?? null),
+      stateVersion: nextVersion,
+    });
 
     return {
       state: {
         ...state,
         currentPlayerIndex: nextIndex === -1 ? state.currentPlayerIndex : nextIndex,
-        phase: blocked ? 'completed' : 'in_progress',
+        phase: 'in_progress',
         stateVersion: nextVersion,
         consecutivePasses: passCount,
-        winnerIds,
-        completionReason: blocked ? 'blocked' : null,
+        winnerIds: state.winnerIds,
+        completionReason: null,
       },
       events,
     };

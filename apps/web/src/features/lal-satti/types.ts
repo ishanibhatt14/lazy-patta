@@ -52,7 +52,6 @@ export interface LalSattiViewState {
   readonly statusValues?: MessageValues;
   readonly events: readonly LalSattiViewEvent[];
   readonly winnerNames: readonly string[];
-  readonly blockedResult: boolean;
 }
 
 export type LalSattiIntent =

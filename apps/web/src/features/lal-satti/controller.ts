@@ -1,7 +1,7 @@
 import { type Card, type Rng } from '@lazy-patta/game-contracts';
 import {
   chooseLalSattiBotAction,
-  createOpeningTableau,
+  createEmptyTableau,
   LalSattiEngine,
   toTableauLanes,
 } from '@lazy-patta/lal-satti-engine';
@@ -241,7 +241,7 @@ export function selectLalSattiViewState(state: LalSattiControllerState): LalSatt
     locale: state.locale,
     reducedMotion: state.reducedMotion,
     seats: seatsFor(state),
-    lanes: toTableauLanes(state.game ? state.game.tableau : createOpeningTableau()),
+    lanes: toTableauLanes(state.game ? state.game.tableau : createEmptyTableau()),
     ownHand: humanHand(state),
     playableCardIds,
     currentPlayerName,
@@ -268,7 +268,6 @@ export function selectLalSattiViewState(state: LalSattiControllerState): LalSatt
     statusValues: current ? { name: currentPlayerName } : undefined,
     events: state.events,
     winnerNames: winnerNames(state),
-    blockedResult: state.game?.completionReason === 'blocked',
   };
 }
 

@@ -1,6 +1,28 @@
-import { type Card, cardId, RANKS, type Rng, SUITS, type Suit } from '@lazy-patta/game-contracts';
+import {
+  type Card,
+  cardId,
+  type Rank,
+  RANKS,
+  type Rng,
+  SUITS,
+  type Suit,
+} from '@lazy-patta/game-contracts';
 
-export const LAL_SATTI_RANKS = RANKS;
+export const LAL_SATTI_RANKS = [
+  'ace',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  '10',
+  'jack',
+  'queen',
+  'king',
+] as const satisfies readonly Rank[];
 export const LAL_SATTI_SUITS = SUITS;
 
 const SUIT_ORDER = new Map<Suit, number>(SUITS.map((suit, index) => [suit, index]));
@@ -29,7 +51,7 @@ export function shuffle<T>(items: readonly T[], rng: Rng): T[] {
 }
 
 export function rankIndex(rank: Card['rank']): number {
-  return RANKS.indexOf(rank);
+  return LAL_SATTI_RANKS.indexOf(rank);
 }
 
 export function compareCards(a: Card, b: Card): number {

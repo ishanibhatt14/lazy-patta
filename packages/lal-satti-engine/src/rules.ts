@@ -1,18 +1,38 @@
-import { cardId, RANKS, SUITS, type Card, type Rank, type Suit } from '@lazy-patta/game-contracts';
+import { cardId, SUITS, type Card, type Rank, type Suit } from '@lazy-patta/game-contracts';
 
-import { rankIndex, sortCards } from './cards';
+import { LAL_SATTI_RANKS, rankIndex, sortCards } from './cards';
 import type { LalSattiRulePack, LalSattiTableau, LalSattiTableauLane } from './types';
 
 export const LAL_SATTI_CLASSIC: LalSattiRulePack = {
-  id: 'lal-satti-classic',
+  id: 'lal-satti-classic-seven-of-hearts',
   minPlayers: 2,
   maxPlayers: 6,
-  opening: 'all-sevens',
+  opening: 'classic-seven-of-hearts',
   passRule: 'blocked-only',
+  blockedCycle: 'invariant-error',
   scoring: 'win-only',
 };
 
-export function createOpeningTableau(): LalSattiTableau {
+export const LAL_SATTI_ALL_SEVENS_OPEN: LalSattiRulePack = {
+  id: 'lal-satti-all-sevens-open',
+  minPlayers: 2,
+  maxPlayers: 6,
+  opening: 'all-sevens-open',
+  passRule: 'blocked-only',
+  blockedCycle: 'invariant-error',
+  scoring: 'win-only',
+};
+
+export function createEmptyTableau(): LalSattiTableau {
+  return {
+    clubs: [],
+    diamonds: [],
+    hearts: [],
+    spades: [],
+  };
+}
+
+export function createAllSevensTableau(): LalSattiTableau {
   return {
     clubs: [{ id: cardId('clubs', '7'), suit: 'clubs', rank: '7' }],
     diamonds: [{ id: cardId('diamonds', '7'), suit: 'diamonds', rank: '7' }],
@@ -29,6 +49,7 @@ function laneBounds(cards: readonly Card[]): { low: number; high: number } {
 export function isLegalTableauPlay(tableau: LalSattiTableau, card: Card): boolean {
   const lane = tableau[card.suit];
   if (lane.some((played) => played.id === card.id)) return false;
+  if (lane.length === 0) return card.rank === '7';
 
   const value = rankIndex(card.rank);
   const { low, high } = laneBounds(lane);
@@ -56,9 +77,11 @@ export function toTableauLanes(tableau: LalSattiTableau): readonly LalSattiTable
 }
 
 export function nextNeededRanks(tableau: LalSattiTableau, suit: Suit): readonly Rank[] {
+  if (tableau[suit].length === 0) return ['7'];
+
   const { low, high } = laneBounds(tableau[suit]);
   const ranks: Rank[] = [];
-  if (low > 0) ranks.push(RANKS[low - 1]!);
-  if (high < RANKS.length - 1) ranks.push(RANKS[high + 1]!);
+  if (low > 0) ranks.push(LAL_SATTI_RANKS[low - 1]!);
+  if (high < LAL_SATTI_RANKS.length - 1) ranks.push(LAL_SATTI_RANKS[high + 1]!);
   return ranks;
 }

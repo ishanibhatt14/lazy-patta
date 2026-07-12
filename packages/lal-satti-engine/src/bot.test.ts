@@ -2,7 +2,7 @@ import { cardId, type Card, type Rank, type Suit } from '@lazy-patta/game-contra
 import { describe, expect, it } from 'vitest';
 
 import { chooseLalSattiBotAction } from './bot';
-import { createOpeningTableau, LAL_SATTI_CLASSIC } from './rules';
+import { createAllSevensTableau, LAL_SATTI_CLASSIC } from './rules';
 import type { LalSattiPlayerState, LalSattiState } from './types';
 
 function card(suit: Suit, rank: Rank): Card {
@@ -18,9 +18,9 @@ function stateWith(players: readonly LalSattiPlayerState[]): LalSattiState {
     rulePack: LAL_SATTI_CLASSIC,
     players,
     currentPlayerIndex: 0,
-    tableau: createOpeningTableau(),
+    tableau: createAllSevensTableau(),
     phase: 'in_progress',
-    stateVersion: 0,
+    stateVersion: 1,
     consecutivePasses: 0,
     winnerIds: [],
     completionReason: null,

@@ -5,7 +5,14 @@ import {
   LalSattiEngine,
   toTableauLanes,
 } from '@lazy-patta/lal-satti-engine';
-import { DEFAULT_LOCALE, formatMessage, getMessages } from '@lazy-patta/localization';
+import {
+  DEFAULT_LOCALE,
+  formatMessage,
+  getMessages,
+  LOCALES,
+  type Locale,
+  type MessageKey,
+} from '@lazy-patta/localization';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -15,10 +22,10 @@ const engine = new LalSattiEngine();
 const HUMAN_ID = 'you';
 const BOT_IDS = ['ba', 'kaka', 'krina'];
 const PLAYER_IDS = [HUMAN_ID, ...BOT_IDS];
-const BOT_NAMES: Record<string, string> = {
-  ba: 'Ba',
-  kaka: 'Kaka',
-  krina: 'Krina',
+const BOT_NAME_KEYS: Record<string, MessageKey> = {
+  ba: 'lalSatti.botBa',
+  kaka: 'lalSatti.botKaka',
+  krina: 'lalSatti.botKrina',
 };
 
 function seededRng(seed: number): Rng {
@@ -48,22 +55,43 @@ function suitGlyph(suit: Suit): string {
   return '♠';
 }
 
-function playerName(id: string): string {
-  return id === HUMAN_ID ? t['computer.youName'] : (BOT_NAMES[id] ?? id);
+function playerName(messages: Record<MessageKey, string>, id: string): string {
+  return id === HUMAN_ID
+    ? messages['computer.youName']
+    : (messages[BOT_NAME_KEYS[id] ?? 'computer.botSeat'] ?? id);
 }
 
-const t = getMessages(DEFAULT_LOCALE);
+function messageKey(prefix: 'rank' | 'suit', value: Rank | Suit): MessageKey {
+  return `${prefix}.${value}` as MessageKey;
+}
+
+function cardAccessibleLabel(
+  messages: Record<MessageKey, string>,
+  locale: Locale,
+  card: Card,
+): string {
+  return formatMessage(locale, 'card.accessibleFace', {
+    rank: messages[messageKey('rank', card.rank)],
+    suit: messages[messageKey('suit', card.suit)],
+  });
+}
 
 function CardTile({
   card,
   playable = false,
+  label,
 }: {
   readonly card: Card;
   readonly playable?: boolean;
+  readonly label: string;
 }) {
   const red = card.suit === 'hearts' || card.suit === 'diamonds';
   return (
-    <View style={[styles.card, playable ? styles.cardPlayable : null]}>
+    <View
+      accessibilityLabel={label}
+      accessibilityRole="image"
+      style={[styles.card, playable ? styles.cardPlayable : null]}
+    >
       <Text style={[styles.cardRank, red ? styles.redSuit : styles.blackSuit]}>
         {rankText(card.rank)}
       </Text>
@@ -76,6 +104,8 @@ function CardTile({
 
 export function LalSattiComputerScreen(): ReactElement {
   const rngRef = useRef(seededRng(Date.now()));
+  const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE);
+  const messages = useMemo(() => getMessages(locale), [locale]);
   const [game, setGame] = useState(() =>
     engine.init(PLAYER_IDS, rngRef.current, undefined, BOT_IDS),
   );
@@ -121,16 +151,37 @@ export function LalSattiComputerScreen(): ReactElement {
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <StatusBar style="dark" />
       <View style={styles.header}>
-        <Text style={styles.mode}>{t['lalSatti.modeLabel']}</Text>
+        <Text style={styles.mode}>{messages['lalSatti.modeLabel']}</Text>
         <Text style={styles.title}>
           {game.phase === 'completed'
-            ? t['lalSatti.roundComplete']
+            ? messages['lalSatti.roundComplete']
             : currentPlayer?.id === HUMAN_ID
-              ? t['lalSatti.yourTurnInstruction']
-              : formatMessage(DEFAULT_LOCALE, 'lalSatti.waitingInstruction', {
-                  name: playerName(currentPlayer?.id ?? ''),
+              ? messages['lalSatti.yourTurnInstruction']
+              : formatMessage(locale, 'lalSatti.waitingInstruction', {
+                  name: playerName(messages, currentPlayer?.id ?? ''),
                 })}
         </Text>
+      </View>
+
+      <View style={styles.localeRow} accessibilityLabel={messages['settings.language']}>
+        {LOCALES.map((option) => (
+          <Pressable
+            key={option}
+            accessibilityRole="button"
+            accessibilityState={{ selected: locale === option }}
+            style={[styles.localeButton, locale === option ? styles.localeButtonActive : null]}
+            onPress={() => setLocale(option)}
+          >
+            <Text
+              style={[
+                styles.localeButtonText,
+                locale === option ? styles.localeButtonTextActive : null,
+              ]}
+            >
+              {option.toUpperCase()}
+            </Text>
+          </Pressable>
+        ))}
       </View>
 
       <View style={styles.seats}>
@@ -139,9 +190,9 @@ export function LalSattiComputerScreen(): ReactElement {
             key={player.id}
             style={[styles.seat, player.id === currentPlayer?.id ? styles.activeSeat : null]}
           >
-            <Text style={styles.seatName}>{playerName(player.id)}</Text>
+            <Text style={styles.seatName}>{playerName(messages, player.id)}</Text>
             <Text style={styles.seatCount}>
-              {formatMessage(DEFAULT_LOCALE, 'game.cardsRemainingCount', {
+              {formatMessage(locale, 'game.cardsRemainingCount', {
                 count: player.hand.length,
               })}
             </Text>
@@ -156,7 +207,11 @@ export function LalSattiComputerScreen(): ReactElement {
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.laneCards}>
                 {lane.cards.map((card) => (
-                  <CardTile key={card.id} card={card} />
+                  <CardTile
+                    key={card.id}
+                    card={card}
+                    label={cardAccessibleLabel(messages, locale, card)}
+                  />
                 ))}
               </View>
             </ScrollView>
@@ -165,22 +220,37 @@ export function LalSattiComputerScreen(): ReactElement {
       </View>
 
       <View style={styles.handHeader}>
-        <Text style={styles.sectionTitle}>{t['lalSatti.yourCards']}</Text>
+        <Text style={styles.sectionTitle}>{messages['lalSatti.yourCards']}</Text>
         {canPass ? (
-          <Pressable style={styles.secondaryButton} onPress={pass}>
-            <Text style={styles.secondaryButtonText}>{t['lalSatti.passTurn']}</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={messages['lalSatti.passTurn']}
+            style={styles.secondaryButton}
+            onPress={pass}
+          >
+            <Text style={styles.secondaryButtonText}>{messages['lalSatti.passTurn']}</Text>
           </Pressable>
         ) : (
-          <Text style={styles.playableText}>{t['lalSatti.playableNow']}</Text>
+          <Text style={styles.playableText}>{messages['lalSatti.playableNow']}</Text>
         )}
       </View>
 
       <View style={styles.hand}>
         {human.hand.map((card) => {
           const playable = playableIds.includes(card.id);
+          const label = cardAccessibleLabel(messages, locale, card);
           return (
-            <Pressable key={card.id} disabled={!playable} onPress={() => play(card.id)}>
-              <CardTile card={card} playable={playable} />
+            <Pressable
+              key={card.id}
+              accessibilityRole="button"
+              accessibilityLabel={formatMessage(locale, 'lalSatti.playCardLabel', {
+                card: label,
+              })}
+              accessibilityState={{ disabled: !playable }}
+              disabled={!playable}
+              onPress={() => play(card.id)}
+            >
+              <CardTile card={card} playable={playable} label={label} />
             </Pressable>
           );
         })}
@@ -189,12 +259,17 @@ export function LalSattiComputerScreen(): ReactElement {
       {result ? (
         <View style={styles.result}>
           <Text style={styles.resultTitle}>
-            {formatMessage(DEFAULT_LOCALE, 'lalSatti.winnerLine', {
-              name: result.winnerIds.map(playerName).join(', '),
+            {formatMessage(locale, 'lalSatti.winnerLine', {
+              name: result.winnerIds.map((id) => playerName(messages, id)).join(', '),
             })}
           </Text>
-          <Pressable style={styles.primaryButton} onPress={rematch}>
-            <Text style={styles.primaryButtonText}>{t['action.rematch']}</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={messages['action.rematch']}
+            style={styles.primaryButton}
+            onPress={rematch}
+          >
+            <Text style={styles.primaryButtonText}>{messages['action.rematch']}</Text>
           </Pressable>
         </View>
       ) : null}
@@ -232,6 +307,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: reactNativeTokens.space.sm,
+  },
+  localeRow: {
+    flexDirection: 'row',
+    gap: reactNativeTokens.space.sm,
+  },
+  localeButton: {
+    minHeight: 44,
+    minWidth: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: color['brand.accent'],
+    borderRadius: reactNativeTokens.radius.md,
+    backgroundColor: color['surface.primary'],
+    paddingHorizontal: reactNativeTokens.space.md,
+  },
+  localeButtonActive: {
+    borderColor: color['action.primary'],
+    backgroundColor: color['action.primary'],
+  },
+  localeButtonText: {
+    color: color['text.primary'],
+    fontWeight: '800',
+  },
+  localeButtonTextActive: {
+    color: color['text.onBrand'],
   },
   seat: {
     minWidth: 148,

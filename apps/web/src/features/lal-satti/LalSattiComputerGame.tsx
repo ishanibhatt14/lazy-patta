@@ -280,9 +280,7 @@ export function LalSattiComputerGame(): ReactElement {
                   name: view.winnerNames.map((name) => displayName(name, view.locale)).join(', '),
                 })}
               </h2>
-              <p className="mt-2">
-                {t.t(view.blockedResult ? 'lalSatti.blockedResult' : 'lalSatti.resultInstruction')}
-              </p>
+              <p className="mt-2">{t.t('lalSatti.resultInstruction')}</p>
               <Button
                 className="mt-4"
                 variant="secondary"
