@@ -148,7 +148,10 @@ describe.skipIf(!LIVE)('rooms RLS + RPCs (live Supabase)', () => {
       ]);
 
       // A sees only A's hand.
-      const aHands = await h.userA.client.from('game_private_hands').select('*').eq('game_id', gameId);
+      const aHands = await h.userA.client
+        .from('game_private_hands')
+        .select('*')
+        .eq('game_id', gameId);
       expect(aHands.data).toHaveLength(1);
       expect(aHands.data?.[0]?.user_id).toBe(h.userA.id);
 
