@@ -15,3 +15,4 @@ Decisions are cross-referenced from the
 | [0006](./0006-versioned-game-rule-packs.md)                     | Versioned game rule packs                                     |
 | [0007](./0007-design-tokens-as-cross-platform-contract.md)      | Design tokens as the cross-platform contract                  |
 | [0008](./0008-private-card-state-and-opaque-position-tokens.md) | Private card state & opaque position tokens                   |
+| [0009](./0009-postgres-rpc-authority-boundary.md)               | Postgres RPC as the authority boundary (refines 0003)         |

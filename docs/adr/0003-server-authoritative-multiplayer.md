@@ -1,6 +1,9 @@
 # ADR-0003 — Server-authoritative multiplayer
 
-**Status:** Accepted (2026-07-12) · Locks decision D-52.
+**Status:** Accepted (2026-07-12) · Locks decision D-52. · Mechanism refined by
+[ADR-0009](./0009-postgres-rpc-authority-boundary.md): the authoritative
+transaction runs in a `SECURITY DEFINER` Postgres RPC rather than an Edge
+Function. The authority *principle* below is unchanged.
 
 ## Context
 
