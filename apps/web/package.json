@@ -13,10 +13,12 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@lazy-patta/auth": "workspace:*",
     "@lazy-patta/design-tokens": "workspace:*",
     "@lazy-patta/game-contracts": "workspace:*",
     "@lazy-patta/game-engine": "workspace:*",
     "@lazy-patta/localization": "workspace:*",
+    "@supabase/supabase-js": "^2.110.2",
     "next": "^16.2.10",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
