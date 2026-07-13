@@ -52,9 +52,17 @@ pnpm exec supabase db push               # applies 0001 → 0006 in order
 
 Because the project is brand new, `db push` runs every migration from scratch —
 this is the definitive proof the migration set is forward-clean (local dev had
-0006 applied additively, so this is the real check). Verify no errors and that
-`games`, `game_private_hands`, `game_authority_state`, `game_action_log`, and the
-`start_game` / `commit_game_action` functions exist.
+0006 applied additively, so this is the real check).
+
+Then verify the result with the read-only check script — every row must read
+`PASS` (migrations applied, tables + RLS, authority tables server-only, RPCs
+`SECURITY DEFINER` and not client-executable):
+
+```bash
+psql "$SUPABASE_DB_URL" -f supabase/verify/hosted-schema-check.sql
+```
+
+Or paste `supabase/verify/hosted-schema-check.sql` into the Supabase **SQL editor**.
 
 ### 3. Configure hosted Auth (email OTP)
 
