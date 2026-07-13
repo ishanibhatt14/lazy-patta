@@ -141,7 +141,9 @@ export function SuitRail({
     <div
       className={[
         'ls-rail grid grid-cols-[2rem_minmax(0,1fr)] items-center gap-2 rounded-xl px-1.5 py-1',
-        highlighted ? 'bg-[color-mix(in_srgb,var(--lp-action-secondary)_25%,transparent)]' : 'bg-black/10',
+        highlighted
+          ? 'bg-[color-mix(in_srgb,var(--lp-action-secondary)_25%,transparent)]'
+          : 'bg-black/10',
       ].join(' ')}
       data-opening={opening ? 'true' : 'false'}
       data-hearts-open={heartsOpening ? 'true' : 'false'}
@@ -165,7 +167,11 @@ export function SuitRail({
           <div className="flex items-center">
             {nextLow ? (
               <span className="mr-1 shrink-0">
-                <LegalSlotIndicator suit={lane.suit} rank={nextLow} label={boundaryLabel(nextLow)} />
+                <LegalSlotIndicator
+                  suit={lane.suit}
+                  rank={nextLow}
+                  label={boundaryLabel(nextLow)}
+                />
               </span>
             ) : null}
 
