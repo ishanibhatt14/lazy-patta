@@ -24,10 +24,10 @@ opaque background matches the app chrome exactly.
 
 ## Platform copies
 
-- **Web** — mirrored into `apps/web/public/brand/` (Next serves only from `public/`).
+- **Web** — mirrored into `apps/web/public/images/` (Next serves only from `public/`),
+  referenced as `/images/lazy-patta-logo-transparent.png` etc.
 - **Expo (Phase 4)** — point `expo.icon` / `expo.ios.icon` at the opaque variant and
-  the splash icon at the transparent one. See `apps/web/public/brand/README.md` and
-  the Expo config when that app lands.
+  the splash icon at the transparent one. See the Expo config when that app lands.
 
 ## Store-icon follow-up (do NOT skip before submission)
 

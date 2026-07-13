@@ -24,8 +24,8 @@ The app is `apps/web` (Next.js 16, App Router) inside a pnpm + turbo monorepo.
 5. Deploy. Set **no** environment variables.
 
 Every branch push now gets its own **preview URL**; the production branch (default
-`main`) publishes to the production domain. The logo hero 404s until the brand
-PNGs are added under `apps/web/public/brand/` (see `assets/images/README.md`).
+`main`) publishes to the production domain. The logo hero and icons are served
+from `apps/web/public/images/` (see `assets/images/README.md`).
 
 ---
 

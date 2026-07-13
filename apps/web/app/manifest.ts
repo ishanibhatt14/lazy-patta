@@ -25,13 +25,13 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: colors['action.primary'],
     icons: [
       {
-        src: '/brand/lazy-patta-ios-icon-opaque-maroon-1024.png',
+        src: '/images/lazy-patta-ios-icon-opaque-maroon-1024.png',
         sizes: '1024x1024',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/brand/lazy-patta-ios-icon-opaque-maroon-1024.png',
+        src: '/images/lazy-patta-ios-icon-opaque-maroon-1024.png',
         sizes: '1024x1024',
         type: 'image/png',
         purpose: 'maskable',

@@ -15,8 +15,8 @@ export const metadata: Metadata = {
   // Favicon uses the transparent wordmark; the Apple touch icon must be opaque
   // (iOS applies its own mask), so it points at the maroon-backed variant.
   icons: {
-    icon: '/brand/lazy-patta-logo-transparent.png',
-    apple: '/brand/lazy-patta-ios-icon-opaque-maroon-1024.png',
+    icon: '/images/lazy-patta-logo-transparent.png',
+    apple: '/images/lazy-patta-ios-icon-opaque-maroon-1024.png',
   },
 };
 

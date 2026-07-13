@@ -11,8 +11,8 @@ export default function HomePage(): ReactElement {
       {/* The logo is the wordmark, so the visible "Lazy Patta" heading is folded
           into it; an sr-only h1 preserves the document outline for a11y/SEO. */}
       <Image
-        src="/brand/lazy-patta-logo-transparent.png"
-        alt={t['app.name']}
+        src="/images/lazy-patta-logo-transparent.png"
+        alt={t['brand.logoAlt']}
         width={320}
         height={320}
         priority
