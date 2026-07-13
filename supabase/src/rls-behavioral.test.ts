@@ -142,6 +142,63 @@ describe.skipIf(!LIVE)('RLS behavioural (live Supabase)', () => {
     });
   });
 
+  describe('lal_satti_score_sessions', () => {
+    it('a user can save score history that another user cannot read or extend', async () => {
+      const session = await h.userA.client
+        .from('lal_satti_score_sessions')
+        .insert({
+          owner_id: h.userA.id,
+          display_name: 'Ava',
+          player_count: 4,
+          locale: 'en',
+        })
+        .select('id')
+        .single();
+      expect(session.error).toBeNull();
+      expect(session.data?.id).toBeTruthy();
+
+      const round = await h.userA.client
+        .from('lal_satti_score_rounds')
+        .insert({
+          session_id: session.data?.id,
+          round_number: 1,
+          winner_names: ['Ava'],
+          leftovers: [{ playerId: 'bot-ba', playerName: 'Ba', cardCount: 3 }],
+        })
+        .select('id')
+        .single();
+      expect(round.error).toBeNull();
+      expect(round.data?.id).toBeTruthy();
+
+      const otherSessionRead = await h.userB.client
+        .from('lal_satti_score_sessions')
+        .select('id')
+        .eq('id', session.data?.id);
+      expect(otherSessionRead.error).toBeNull();
+      expect(otherSessionRead.data).toHaveLength(0);
+
+      const otherRoundRead = await h.userB.client
+        .from('lal_satti_score_rounds')
+        .select('id')
+        .eq('session_id', session.data?.id);
+      expect(otherRoundRead.error).toBeNull();
+      expect(otherRoundRead.data).toHaveLength(0);
+
+      const forgedRound = await h.userB.client.from('lal_satti_score_rounds').insert({
+        session_id: session.data?.id,
+        round_number: 2,
+        winner_names: ['Ben'],
+        leftovers: [],
+      });
+      expect(forgedRound.error).not.toBeNull();
+    });
+
+    it('does not expose saved scores to anonymous callers', async () => {
+      const read = await h.anon.from('lal_satti_score_sessions').select('id');
+      expect(read.error).not.toBeNull();
+    });
+  });
+
   describe('service-role isolation', () => {
     it('admin (service-role) operations are not available through the anon client', async () => {
       const { error } = await h.anon.auth.admin.listUsers();
