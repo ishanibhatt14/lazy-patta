@@ -16,6 +16,9 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 const URL_ENV = 'NEXT_PUBLIC_SUPABASE_URL';
 const ANON_KEY_ENV = 'NEXT_PUBLIC_SUPABASE_ANON_KEY';
+const VERCEL_SUPABASE_URL_ENV = 'NEXT_PUBLIC_SUPABASE_URL_SUPABASE_URL';
+const VERCEL_SUPABASE_PUBLISHABLE_KEY_ENV = 'NEXT_PUBLIC_SUPABASE_URL_SUPABASE_PUBLISHABLE_KEY';
+const VERCEL_SUPABASE_ANON_KEY_ENV = 'NEXT_PUBLIC_SUPABASE_URL_SUPABASE_ANON_KEY';
 
 function readEnv(name: string): string | undefined {
   const value = process.env[name];
@@ -24,9 +27,29 @@ function readEnv(name: string): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
+function readFirstEnv(names: readonly string[]): string | undefined {
+  for (const name of names) {
+    const value = readEnv(name);
+    if (value) return value;
+  }
+  return undefined;
+}
+
 /** Whether both public Supabase env vars are present. Safe on server and client. */
 export function isSupabaseConfigured(): boolean {
-  return readEnv(URL_ENV) !== undefined && readEnv(ANON_KEY_ENV) !== undefined;
+  return readPublicUrl() !== undefined && readPublicKey() !== undefined;
+}
+
+function readPublicUrl(): string | undefined {
+  return readFirstEnv([URL_ENV, VERCEL_SUPABASE_URL_ENV]);
+}
+
+function readPublicKey(): string | undefined {
+  return readFirstEnv([
+    ANON_KEY_ENV,
+    VERCEL_SUPABASE_PUBLISHABLE_KEY_ENV,
+    VERCEL_SUPABASE_ANON_KEY_ENV,
+  ]);
 }
 
 let cached: SupabaseClient | undefined;
@@ -39,8 +62,8 @@ let cached: SupabaseClient | undefined;
 export function getSupabaseBrowserClient(): SupabaseClient {
   if (cached) return cached;
 
-  const url = readEnv(URL_ENV);
-  const anonKey = readEnv(ANON_KEY_ENV);
+  const url = readPublicUrl();
+  const anonKey = readPublicKey();
   if (!url || !anonKey) {
     throw new Error(
       `Supabase is not configured: set ${URL_ENV} and ${ANON_KEY_ENV}. ` +
