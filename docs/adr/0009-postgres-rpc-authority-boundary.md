@@ -1,6 +1,11 @@
 # ADR-0009 — Postgres RPC as the authority boundary
 
-**Status:** Accepted (2026-07-12) · Refines ADR-0003 (server-authoritative multiplayer).
+**Status:** Accepted (2026-07-12) · Refines ADR-0003 (server-authoritative
+multiplayer). **Scope:** room **lifecycle** (create/join/ready/bot/leave). Live
+**gameplay** authority — which must run the TypeScript rule engine — is hosted in
+a Next.js Route Handler per [ADR-0010](./0010-nextjs-route-handler-game-authority.md);
+gameplay still commits through a thin persistence RPC of the shape described here
+(atomic transaction, version guard, idempotency) that carries **no game rules**.
 
 ## Context
 

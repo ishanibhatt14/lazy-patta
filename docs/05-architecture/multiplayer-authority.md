@@ -3,7 +3,16 @@
 **The server is authoritative.** Clients render state and request actions; they
 never decide shuffles, card identity, turn validity, or results. This document is
 the contract the [game-table UI](../03-ux-specification/game-table-contract.md) and
-[Edge Functions](./api-contracts.md) both bind to.
+the authority runtime both bind to.
+
+> **Runtime note (ADR-0010).** The "Edge Function" below is the original sketch.
+> Room **lifecycle** authority runs in `SECURITY DEFINER` Postgres RPCs (ADR-0009);
+> live **gameplay** authority runs in a **Next.js Route Handler** (Node) that
+> imports the TypeScript engine and commits through a thin persistence RPC. Read
+> "Edge Function" as "the server-side authority runtime". The action path, version
+> guard, idempotency, and privacy rules are unchanged. Because a Node route can't
+> hold a transaction across `await`s, the `SELECT … FOR UPDATE` + multi-table write
+> happens inside the persistence RPC (`commit_game_action`), not in the handler.
 
 ## Action path (a single accepted action)
 

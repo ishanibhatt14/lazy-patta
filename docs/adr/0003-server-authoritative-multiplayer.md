@@ -1,9 +1,11 @@
 # ADR-0003 — Server-authoritative multiplayer
 
 **Status:** Accepted (2026-07-12) · Locks decision D-52. · Mechanism refined by
-[ADR-0009](./0009-postgres-rpc-authority-boundary.md): the authoritative
-transaction runs in a `SECURITY DEFINER` Postgres RPC rather than an Edge
-Function. The authority *principle* below is unchanged.
+[ADR-0009](./0009-postgres-rpc-authority-boundary.md) (room lifecycle → `SECURITY
+DEFINER` Postgres RPCs) and [ADR-0010](./0010-nextjs-route-handler-game-authority.md)
+(live gameplay → a Next.js Route Handler running the TypeScript engine, committing
+through a thin persistence RPC). The authority *principle* below is unchanged; only
+the runtime host differs from the original Edge-Function sketch.
 
 ## Context
 
