@@ -7,6 +7,7 @@ import { useEffect, useReducer, useRef } from 'react';
 import { Button } from '../../../components/Button';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
 import { createTranslator } from '../../../lib/i18n';
+import { usePreferredLocale } from '../../../lib/locale/preferred-locale-context';
 
 import { LalSattiAccountPanel } from './LalSattiAccountPanel';
 import {
@@ -73,11 +74,12 @@ function prefersReducedMotion(): boolean {
 }
 
 export function LalSattiComputerGame(): ReactElement {
+  const { locale: preferredLocale, setLocale: setPreferredLocale } = usePreferredLocale();
   const controllerRef = useRef<LalSattiController | null>(null);
 
   if (controllerRef.current === null) {
     const rng = seededRng();
-    controllerRef.current = rng ? createLalSattiController(rng) : createLalSattiController();
+    controllerRef.current = createLalSattiController(rng ?? createCryptoRng(), preferredLocale);
   }
 
   const controller = controllerRef.current;
@@ -159,9 +161,11 @@ export function LalSattiComputerGame(): ReactElement {
                 <select
                   className="min-h-12 rounded-md border border-brand-accent bg-surface-primary px-3 py-2"
                   value={view.locale}
-                  onChange={(event) =>
-                    dispatch({ type: 'setLocale', locale: event.target.value as Locale })
-                  }
+                  onChange={(event) => {
+                    const next = event.target.value as Locale;
+                    setPreferredLocale(next);
+                    dispatch({ type: 'setLocale', locale: next });
+                  }}
                 >
                   {LOCALES.map((locale) => (
                     <option key={locale} value={locale}>
@@ -217,7 +221,10 @@ export function LalSattiComputerGame(): ReactElement {
       onPass={() => dispatch({ type: 'pass' })}
       onRematch={() => dispatch({ type: 'rematch' })}
       onToggleReducedMotion={() => dispatch({ type: 'toggleReducedMotion' })}
-      onLocaleChange={(next) => dispatch({ type: 'setLocale', locale: next })}
+      onLocaleChange={(next) => {
+        setPreferredLocale(next);
+        dispatch({ type: 'setLocale', locale: next });
+      }}
     />
   );
 }

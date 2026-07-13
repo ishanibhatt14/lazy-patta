@@ -30,7 +30,8 @@ export function LalSattiTopBar({
 }: LalSattiTopBarProps): ReactElement {
   const { t, format } = createTranslator(locale);
 
-  const roundNumber = view.phase === 'result' ? view.roundScores.length : view.roundScores.length + 1;
+  const roundNumber =
+    view.phase === 'result' ? view.roundScores.length : view.roundScores.length + 1;
 
   const turnText = view.isHumanTurn
     ? t('turn.yours')

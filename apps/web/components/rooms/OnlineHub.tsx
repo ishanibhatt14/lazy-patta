@@ -1,11 +1,11 @@
 'use client';
 
-import { DEFAULT_LOCALE } from '@lazy-patta/localization';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent, type ReactElement } from 'react';
 
 import { useAuth } from '../../lib/auth/auth-context';
 import { createTranslator } from '../../lib/i18n';
+import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import { createRoom, joinRoomByCode, type OnlineGameKey } from '../../lib/rooms/rooms-client';
 import { getSupabaseBrowserClient } from '../../lib/supabase/browser-client';
 import { Button } from '../Button';
@@ -17,14 +17,14 @@ import { LoginPanel } from '../auth/LoginPanel';
  * play is a deferred follow-up; this slice covers auth + create/join lifecycle.
  */
 
-const t = createTranslator(DEFAULT_LOCALE);
-
-function messageFor(error: unknown): string {
-  return error instanceof Error && error.message ? error.message : t.t('rooms.errorGeneric');
+function messageFor(error: unknown, fallback: string): string {
+  return error instanceof Error && error.message ? error.message : fallback;
 }
 
 export function OnlineHub(): ReactElement {
   const { state } = useAuth();
+  const { locale } = usePreferredLocale();
+  const t = createTranslator(locale);
   const router = useRouter();
   const [code, setCode] = useState('');
   const [gameKey, setGameKey] = useState<OnlineGameKey>('gadha_chor');
@@ -45,10 +45,10 @@ export function OnlineHub(): ReactElement {
     setBusy('create');
     setError(undefined);
     try {
-      const room = await createRoom(getSupabaseBrowserClient(), { displayName, gameKey });
+      const room = await createRoom(getSupabaseBrowserClient(), { displayName, gameKey, locale });
       router.push(`/play/online/${room.code}`);
     } catch (caught) {
-      setError(messageFor(caught));
+      setError(messageFor(caught, t.t('rooms.errorGeneric')));
       setBusy(undefined);
     }
   };
@@ -61,7 +61,7 @@ export function OnlineHub(): ReactElement {
       const room = await joinRoomByCode(getSupabaseBrowserClient(), code, displayName);
       router.push(`/play/online/${room.code}`);
     } catch (caught) {
-      setError(messageFor(caught));
+      setError(messageFor(caught, t.t('rooms.errorGeneric')));
       setBusy(undefined);
     }
   };

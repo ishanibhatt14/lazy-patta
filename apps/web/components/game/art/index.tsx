@@ -99,7 +99,14 @@ export function GadhaMascotPlaceholder({ size = 96, label }: MascotArtProps): Re
       data-art="mascot-placeholder"
     >
       <circle cx="48" cy="48" r="46" fill="var(--lp-scene-feltDeep)" />
-      <circle cx="48" cy="48" r="46" fill="none" stroke="var(--lp-action-secondary)" strokeWidth="2" />
+      <circle
+        cx="48"
+        cy="48"
+        r="46"
+        fill="none"
+        stroke="var(--lp-action-secondary)"
+        strokeWidth="2"
+      />
       {/* ears */}
       <path d="M34 30 Q30 14 38 20 L40 34 Z" fill="var(--lp-scene-rim)" />
       <path d="M62 30 Q66 14 58 20 L56 34 Z" fill="var(--lp-scene-rim)" />
@@ -127,7 +134,8 @@ export function BandhaniCardBackPlaceholder({ className = '' }: CardBackArtProps
       className={['relative block overflow-hidden rounded-md', className].join(' ')}
       style={{
         background: 'var(--lp-card-back)',
-        boxShadow: 'inset 0 0 0 0.09rem color-mix(in srgb, var(--lp-action-secondary), transparent 45%)',
+        boxShadow:
+          'inset 0 0 0 0.09rem color-mix(in srgb, var(--lp-action-secondary), transparent 45%)',
       }}
     >
       <span
@@ -142,7 +150,9 @@ export function BandhaniCardBackPlaceholder({ className = '' }: CardBackArtProps
       />
       <span
         className="absolute inset-[18%] rounded-sm"
-        style={{ border: '0.06rem solid color-mix(in srgb, var(--lp-action-secondary), transparent 30%)' }}
+        style={{
+          border: '0.06rem solid color-mix(in srgb, var(--lp-action-secondary), transparent 30%)',
+        }}
       />
     </span>
   );
@@ -151,7 +161,11 @@ export function BandhaniCardBackPlaceholder({ className = '' }: CardBackArtProps
 /** Placeholder courtyard backdrop — subtle arch silhouettes over the sky. */
 export function CourtyardBackdropPlaceholder(): ReactElement {
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0" data-art="backdrop-placeholder">
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0"
+      data-art="backdrop-placeholder"
+    >
       <svg
         className="absolute inset-x-0 bottom-0 h-2/5 w-full"
         viewBox="0 0 100 40"

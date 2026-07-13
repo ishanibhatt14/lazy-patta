@@ -63,7 +63,10 @@ export function PlayerPod({
       {!seat.isSelf && !seat.isFinished ? (
         <span className="ls-pod-backs flex h-6 items-end" aria-hidden>
           {Array.from({ length: backs }).map((_, index) => (
-            <BandhaniCardBackPlaceholder key={index} className="-ml-2.5 first:ml-0 h-6 w-4 shrink-0" />
+            <BandhaniCardBackPlaceholder
+              key={index}
+              className="-ml-2.5 first:ml-0 h-6 w-4 shrink-0"
+            />
           ))}
         </span>
       ) : null}

@@ -14,6 +14,7 @@ import { createCryptoRng, createSeededRng } from '../../lib/computer-game/rng';
 import type { ComputerGameIntent } from '../../lib/computer-game/types';
 import { selectViewState } from '../../lib/computer-game/view-model';
 import { createTranslator } from '../../lib/i18n';
+import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import { playCue } from '../../lib/sound';
 
 import { ComputerGameSetup } from './ComputerGameSetup';
@@ -41,6 +42,7 @@ function seededRngFactory(): (() => ReturnType<typeof createCryptoRng>) | null {
 }
 
 export function ComputerGameExperience(): ReactElement {
+  const { locale: preferredLocale, setLocale: setPreferredLocale } = usePreferredLocale();
   const rngFactoryRef = useRef<() => ReturnType<typeof createCryptoRng>>(
     seededRngFactory() ?? createCryptoRng,
   );
@@ -53,7 +55,7 @@ export function ComputerGameExperience(): ReactElement {
   if (controllerRef.current === null) {
     controllerRef.current = createComputerGameController(rngFactoryRef.current(), {
       playerCount: 4,
-      locale: 'en',
+      locale: preferredLocale,
       reducedMotion: prefersReducedMotion(),
       soundEnabled: true,
     });
@@ -124,7 +126,10 @@ export function ComputerGameExperience(): ReactElement {
         <ComputerGameSetup
           view={view}
           onPlayerCountChange={(playerCount) => dispatch({ type: 'setPlayerCount', playerCount })}
-          onLocaleChange={(next) => dispatch({ type: 'setLocale', locale: next })}
+          onLocaleChange={(next) => {
+            setPreferredLocale(next);
+            dispatch({ type: 'setLocale', locale: next });
+          }}
           onStart={() => dispatch({ type: 'start' })}
           onHowToPlay={() => setTutorialOpen(true)}
         />
@@ -163,7 +168,10 @@ export function ComputerGameExperience(): ReactElement {
         onRecover={() => dispatch({ type: 'recover' })}
         onToggleSound={() => dispatch({ type: 'toggleSound' })}
         onToggleReducedMotion={() => dispatch({ type: 'toggleReducedMotion' })}
-        onLocaleChange={(next) => dispatch({ type: 'setLocale', locale: next })}
+        onLocaleChange={(next) => {
+          setPreferredLocale(next);
+          dispatch({ type: 'setLocale', locale: next });
+        }}
         onHowToPlay={() => setTutorialOpen(true)}
       />
       {tutorial}

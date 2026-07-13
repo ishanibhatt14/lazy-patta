@@ -51,5 +51,8 @@ export function suitKey(suit: Card['suit']): MessageKey {
 /** Localized "Rank of Suit" accessible name for a single card. */
 export function cardLabel(card: Card, locale: Locale): string {
   const { t, format } = createTranslator(locale);
-  return format('card.accessibleFace', { rank: t(rankKey(card.rank)), suit: t(suitKey(card.suit)) });
+  return format('card.accessibleFace', {
+    rank: t(rankKey(card.rank)),
+    suit: t(suitKey(card.suit)),
+  });
 }

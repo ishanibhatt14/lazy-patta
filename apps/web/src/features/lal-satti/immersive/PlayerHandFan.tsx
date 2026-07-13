@@ -27,7 +27,10 @@ function fanTransform(index: number, count: number): CSSProperties {
   const step = Math.min(5, 44 / count);
   const angle = (index - mid) * step;
   const arc = Math.abs(index - mid) * 0.14;
-  return { transform: `rotate(${angle}deg) translateY(${arc}rem)`, transformOrigin: 'bottom center' };
+  return {
+    transform: `rotate(${angle}deg) translateY(${arc}rem)`,
+    transformOrigin: 'bottom center',
+  };
 }
 
 /**
@@ -52,7 +55,10 @@ export function PlayerHandFan({
 
   if (cards.length === 0) {
     return (
-      <div className="flex min-h-24 items-center justify-center" aria-label={t('lalSatti.yourCards')}>
+      <div
+        className="flex min-h-24 items-center justify-center"
+        aria-label={t('lalSatti.yourCards')}
+      >
         <span className="rounded-full bg-[color-mix(in_srgb,var(--lp-background-canvas)_85%,transparent)] px-4 py-2 text-sm font-semibold text-action-primary">
           {t('label.finished')}
         </span>

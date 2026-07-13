@@ -2,7 +2,10 @@ import type { Locale } from '@lazy-patta/localization';
 import type { ReactElement } from 'react';
 import { useEffect, useRef } from 'react';
 
-import type { ComputerGameViewEvent, ComputerGameViewState } from '../../../lib/computer-game/types';
+import type {
+  ComputerGameViewEvent,
+  ComputerGameViewState,
+} from '../../../lib/computer-game/types';
 import { createTranslator } from '../../../lib/i18n';
 import { LocaleSwitcher } from '../LocaleSwitcher';
 
@@ -94,12 +97,19 @@ export function GameSettingsSheet({
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-sm font-semibold text-action-primary">{t('settings.language')}</span>
+          <span className="text-sm font-semibold text-action-primary">
+            {t('settings.language')}
+          </span>
           <LocaleSwitcher locale={locale} onLocaleChange={onLocaleChange} />
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <button type="button" onClick={onToggleSound} className={TOGGLE_CLASS} aria-pressed={soundEnabled}>
+          <button
+            type="button"
+            onClick={onToggleSound}
+            className={TOGGLE_CLASS}
+            aria-pressed={soundEnabled}
+          >
             {soundEnabled ? t('settings.soundOn') : t('settings.soundOff')}
           </button>
           <button
@@ -124,7 +134,9 @@ export function GameSettingsSheet({
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-sm font-semibold text-action-primary">{t('computer.eventLog')}</span>
+          <span className="text-sm font-semibold text-action-primary">
+            {t('computer.eventLog')}
+          </span>
           <div className="grid gap-2" aria-live="polite">
             {view.events.length === 0 ? (
               <p className="rounded-md bg-background-canvas px-3 py-2 text-sm text-text-primary">
