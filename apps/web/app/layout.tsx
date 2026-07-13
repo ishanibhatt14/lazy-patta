@@ -1,15 +1,27 @@
+import { resolveColors } from '@lazy-patta/design-tokens';
 import { toCssVariables } from '@lazy-patta/design-tokens/css';
 import { DEFAULT_LOCALE, getMessages } from '@lazy-patta/localization';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import type { ReactElement, ReactNode } from 'react';
 
 import './globals.css';
 
 const messages = getMessages(DEFAULT_LOCALE);
+const colors = resolveColors();
 
 export const metadata: Metadata = {
   title: messages['app.name'],
   description: messages['welcome.tagline'],
+  // Favicon uses the transparent wordmark; the Apple touch icon must be opaque
+  // (iOS applies its own mask), so it points at the maroon-backed variant.
+  icons: {
+    icon: '/brand/lazy-patta-logo-transparent.png',
+    apple: '/brand/lazy-patta-ios-icon-opaque-maroon-1024.png',
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: colors['action.primary'],
 };
 
 export default function RootLayout({ children }: { children: ReactNode }): ReactElement {
