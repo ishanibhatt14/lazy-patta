@@ -241,5 +241,21 @@
   "rooms.gadhaChorIs": "{name} પાસે એકલું પત્તું રહ્યું — ગધા ચોર!",
   "rooms.spectating": "રમત જોવાઈ રહી છે…",
   "rooms.playerSafe": "સલામત",
-  "rooms.playerCards": "{count, plural, one {# પત્તું} other {# પત્તાં}}"
+  "rooms.playerCards": "{count, plural, one {# પત્તું} other {# પત્તાં}}",
+  "lobby.chooseGame": "એક રમત પસંદ કરો",
+  "lobby.moreGamesTitle": "વધુ રમતો ટૂંક સમયમાં",
+  "lobby.moreGamesBody": "તીન દો પાંચ, મેન્ડિકોટ અને જજમેન્ટ હવે પછી આવશે.",
+  "lobby.backToGames": "બધી રમતો",
+  "games.status.available": "ઉપલબ્ધ",
+  "games.status.comingSoon": "ટૂંક સમયમાં",
+  "games.gadhaChor.name": "ગધા ચોર",
+  "games.gadhaChor.description": "જોડી બનાવો, પત્તાં ખેંચો અને ગધા ચોર બનવાનું ટાળો.",
+  "games.lalSatti.name": "લાલ સત્તી",
+  "games.lalSatti.description": "ક્રમમાં પત્તાં રમો અને સૌથી પહેલા પૂરું કરો.",
+  "lalSattiTutorial.sevensTitle": "સત્તાથી શરૂઆત કરો",
+  "lalSattiTutorial.sevensBody": "દરેક સૂટ તેના સત્તાથી ખૂલે છે — તે સૂટની હરોળ શરૂ કરવા માટે પહેલા મુકાય છે.",
+  "lalSattiTutorial.sequenceTitle": "ક્રમ બનાવો",
+  "lalSattiTutorial.sequenceBody": "તમારા વારામાં, સત્તાથી ઉપર કે નીચે ક્રમ વધારે એવું પત્તું રમો — ન રમી શકો તો પાસ કરો.",
+  "lalSattiTutorial.winTitle": "હાથ ખાલી કરવાની હરીફાઈ",
+  "lalSattiTutorial.winBody": "જે સૌથી પહેલાં બધાં પત્તાં રમી દે તે રાઉન્ડ જીતે છે."
 }

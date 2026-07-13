@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 
-import { OnlineHub } from '../../../components/rooms/OnlineHub';
+import { OnlineHub } from '../../../../components/rooms/OnlineHub';
 
 export default function OnlinePlayPage(): ReactElement {
   return (

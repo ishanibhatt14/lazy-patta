@@ -45,7 +45,7 @@ export function OnlineHub(): ReactElement {
     setError(undefined);
     try {
       const room = await createRoom(getSupabaseBrowserClient(), { displayName });
-      router.push(`/play/online/${room.code}`);
+      router.push(`/play/gadha-chor/online/${room.code}`);
     } catch (caught) {
       setError(messageFor(caught));
       setBusy(undefined);
@@ -58,7 +58,7 @@ export function OnlineHub(): ReactElement {
     setError(undefined);
     try {
       const room = await joinRoomByCode(getSupabaseBrowserClient(), code, displayName);
-      router.push(`/play/online/${room.code}`);
+      router.push(`/play/gadha-chor/online/${room.code}`);
     } catch (caught) {
       setError(messageFor(caught));
       setBusy(undefined);

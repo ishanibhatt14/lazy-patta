@@ -144,7 +144,7 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
           onClick={() =>
             withBusy(async () => {
               await leaveRoom(getSupabaseBrowserClient(), room.id);
-              router.push('/play/online');
+              router.push('/play/gadha-chor/online');
             })
           }
         >
@@ -240,7 +240,7 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
             onClick={() =>
               withBusy(async () => {
                 await leaveRoom(getSupabaseBrowserClient(), room.id);
-                router.push('/play/online');
+                router.push('/play/gadha-chor/online');
               })
             }
           >

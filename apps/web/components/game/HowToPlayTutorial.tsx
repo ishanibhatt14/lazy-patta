@@ -7,29 +7,36 @@ import { useState } from 'react';
 import { createTranslator } from '../../lib/i18n';
 import { Button } from '../Button';
 
-interface HowToPlayTutorialProps {
-  readonly locale: Locale;
-  readonly onClose: () => void;
-}
-
-interface TutorialStep {
+export interface TutorialStep {
   readonly icon: string;
   readonly titleKey: MessageKey;
   readonly bodyKey: MessageKey;
 }
 
-const STEPS: readonly TutorialStep[] = [
+interface HowToPlayTutorialProps {
+  readonly locale: Locale;
+  readonly onClose: () => void;
+  /** Defaults to the Gadha Chor steps; pass a different set for other games. */
+  readonly steps?: readonly TutorialStep[];
+}
+
+/** Gadha Chor's default tutorial content (the original, only game for a while). */
+export const GADHA_CHOR_TUTORIAL_STEPS: readonly TutorialStep[] = [
   { icon: '🃏', titleKey: 'tutorial.pairsTitle', bodyKey: 'tutorial.pairsBody' },
   { icon: '👆', titleKey: 'tutorial.drawTitle', bodyKey: 'tutorial.drawBody' },
   { icon: '✨', titleKey: 'tutorial.autoPairTitle', bodyKey: 'tutorial.autoPairBody' },
   { icon: '🪔', titleKey: 'tutorial.gadhaChorTitle', bodyKey: 'tutorial.gadhaChorBody' },
 ];
 
-export function HowToPlayTutorial({ locale, onClose }: HowToPlayTutorialProps): ReactElement {
+export function HowToPlayTutorial({
+  locale,
+  onClose,
+  steps = GADHA_CHOR_TUTORIAL_STEPS,
+}: HowToPlayTutorialProps): ReactElement {
   const { t, format } = createTranslator(locale);
   const [index, setIndex] = useState(0);
-  const step = STEPS[index]!;
-  const isLast = index === STEPS.length - 1;
+  const step = steps[index]!;
+  const isLast = index === steps.length - 1;
 
   return (
     <div
@@ -41,7 +48,7 @@ export function HowToPlayTutorial({ locale, onClose }: HowToPlayTutorialProps): 
       <div className="flex w-full max-w-md flex-col gap-5 rounded-lg bg-surface-primary p-6 shadow-md">
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm font-bold uppercase tracking-widest text-brand-accent">
-            {format('tutorial.progress', { step: index + 1, total: STEPS.length })}
+            {format('tutorial.progress', { step: index + 1, total: steps.length })}
           </p>
           <button
             type="button"
@@ -61,7 +68,7 @@ export function HowToPlayTutorial({ locale, onClose }: HowToPlayTutorialProps): 
         </div>
 
         <div className="flex items-center justify-center gap-2" aria-hidden>
-          {STEPS.map((entry, dotIndex) => (
+          {steps.map((entry, dotIndex) => (
             <span
               key={entry.titleKey}
               className={[

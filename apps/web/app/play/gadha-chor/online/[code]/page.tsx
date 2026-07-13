@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 
-import { RoomLobby } from '../../../../components/rooms/RoomLobby';
+import { RoomLobby } from '../../../../../components/rooms/RoomLobby';
 
 export default async function RoomLobbyPage({
   params,
