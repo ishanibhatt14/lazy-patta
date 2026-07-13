@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 
 import { CLASSIC_GULAM_CHOR } from '../../../../../lib/computer-game/rule-pack';
-import { advanceBots, botId, initialState, persistStart } from '../../../../../lib/online-game/authority';
+import {
+  advanceBots,
+  botId,
+  initialState,
+  persistStart,
+} from '../../../../../lib/online-game/authority';
 import { getRequestUserId } from '../../../../../lib/online-game/route-context';
 import {
   getSupabaseAdminClient,

@@ -57,9 +57,7 @@ function withBotFlags(state: GameState): GameState {
 }
 
 function humanHands(state: GameState): { user_id: string; hand: readonly unknown[] }[] {
-  return state.players
-    .filter((p) => !isBotId(p.id))
-    .map((p) => ({ user_id: p.id, hand: p.hand }));
+  return state.players.filter((p) => !isBotId(p.id)).map((p) => ({ user_id: p.id, hand: p.hand }));
 }
 
 function statusFor(state: GameState): 'active' | 'complete' {
@@ -190,7 +188,15 @@ export async function advanceBots(
     const expected = current.stateVersion;
     const { state: next, events } = engine.reduce(current, action);
     const nextState = withBotFlags(next);
-    await commitStep(admin, gameId, actor, `bot:v${nextState.stateVersion}`, expected, nextState, events);
+    await commitStep(
+      admin,
+      gameId,
+      actor,
+      `bot:v${nextState.stateVersion}`,
+      expected,
+      nextState,
+      events,
+    );
     current = nextState;
   }
   return current;

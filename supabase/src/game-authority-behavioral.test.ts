@@ -233,9 +233,9 @@ describe.skipIf(!LIVE)('game authority RPCs + privacy (live Supabase)', () => {
         p_result: null,
       });
       expect(stale.error).not.toBeNull();
-      expect(stale.error?.code === 'PT409' || /version conflict/.test(stale.error?.message ?? '')).toBe(
-        true,
-      );
+      expect(
+        stale.error?.code === 'PT409' || /version conflict/.test(stale.error?.message ?? ''),
+      ).toBe(true);
     });
 
     it('flips the room to complete when the game finishes', async () => {
