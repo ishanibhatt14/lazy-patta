@@ -32,6 +32,7 @@ export interface AuthContextValue {
   readonly configured: boolean;
   requestPasscode(contact: string): Promise<void>;
   verifyPasscode(contact: string, passcode: string): Promise<void>;
+  signInAsGuest(displayName: string): Promise<void>;
   signOut(): Promise<void>;
 }
 
@@ -71,6 +72,7 @@ export function AuthContextProvider({ children }: { children: ReactNode }): Reac
       configured,
       requestPasscode: (contact) => requireProvider().requestPasscode(contact),
       verifyPasscode: (contact, passcode) => requireProvider().verifyPasscode(contact, passcode),
+      signInAsGuest: (displayName) => requireProvider().signInAsGuest(displayName),
       signOut: () => requireProvider().signOut(),
     }),
     [state, configured, requireProvider],

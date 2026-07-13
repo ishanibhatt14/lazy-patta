@@ -22,11 +22,14 @@ function messageFor(error: unknown): string {
 }
 
 export function LoginPanel(): ReactElement {
-  const { state, configured, requestPasscode, verifyPasscode, signOut } = useAuth();
+  const { state, configured, requestPasscode, verifyPasscode, signInAsGuest, signOut } = useAuth();
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
   const [passcode, setPasscode] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [guestName, setGuestName] = useState('');
+  const [busy, setBusy] = useState<'email' | 'verify' | 'guest' | 'sign-out' | undefined>(
+    undefined,
+  );
   const [error, setError] = useState<string | undefined>(undefined);
 
   if (!configured) {
@@ -50,9 +53,9 @@ export function LoginPanel(): ReactElement {
         <Button
           variant="ghost"
           size="sm"
-          disabled={busy}
+          disabled={busy !== undefined}
           onClick={async () => {
-            setBusy(true);
+            setBusy('sign-out');
             setError(undefined);
             try {
               await signOut();
@@ -62,7 +65,7 @@ export function LoginPanel(): ReactElement {
             } catch (caught) {
               setError(messageFor(caught));
             } finally {
-              setBusy(false);
+              setBusy(undefined);
             }
           }}
         >
@@ -75,7 +78,7 @@ export function LoginPanel(): ReactElement {
 
   const onRequest = async (event: FormEvent): Promise<void> => {
     event.preventDefault();
-    setBusy(true);
+    setBusy('email');
     setError(undefined);
     try {
       await requestPasscode(email.trim());
@@ -83,13 +86,13 @@ export function LoginPanel(): ReactElement {
     } catch (caught) {
       setError(messageFor(caught));
     } finally {
-      setBusy(false);
+      setBusy(undefined);
     }
   };
 
   const onVerify = async (event: FormEvent): Promise<void> => {
     event.preventDefault();
-    setBusy(true);
+    setBusy('verify');
     setError(undefined);
     try {
       await verifyPasscode(email.trim(), passcode.trim());
@@ -97,7 +100,20 @@ export function LoginPanel(): ReactElement {
     } catch (caught) {
       setError(messageFor(caught));
     } finally {
-      setBusy(false);
+      setBusy(undefined);
+    }
+  };
+
+  const onGuest = async (event: FormEvent): Promise<void> => {
+    event.preventDefault();
+    setBusy('guest');
+    setError(undefined);
+    try {
+      await signInAsGuest(guestName.trim());
+    } catch (caught) {
+      setError(messageFor(caught));
+    } finally {
+      setBusy(undefined);
     }
   };
 
@@ -107,6 +123,27 @@ export function LoginPanel(): ReactElement {
         <h2 className="text-lg font-semibold text-text-primary">{t.t('auth.signInTitle')}</h2>
         <p className="text-sm text-text-primary">{t.t('auth.signInDescription')}</p>
       </div>
+
+      <form className="flex flex-col gap-3" onSubmit={onGuest}>
+        <label className="flex flex-col gap-1 text-sm text-text-primary">
+          {t.t('auth.guestNameLabel')}
+          <input
+            type="text"
+            autoComplete="nickname"
+            maxLength={32}
+            value={guestName}
+            onChange={(e) => setGuestName(e.target.value)}
+            placeholder={t.t('auth.guestNamePlaceholder')}
+            className="rounded-md border border-action-primary/30 bg-background-canvas px-3 py-2 text-text-primary"
+          />
+        </label>
+        <Button type="submit" disabled={busy !== undefined}>
+          {busy === 'guest' ? t.t('auth.continuingAsGuest') : t.t('auth.continueAsGuest')}
+        </Button>
+        <p className="text-xs text-text-primary">{t.t('auth.guestDescription')}</p>
+      </form>
+
+      <div className="h-px bg-action-primary/20" />
 
       {step === 'email' ? (
         <form className="flex flex-col gap-3" onSubmit={onRequest}>
@@ -123,8 +160,12 @@ export function LoginPanel(): ReactElement {
               className="rounded-md border border-action-primary/30 bg-background-canvas px-3 py-2 text-text-primary"
             />
           </label>
-          <Button type="submit" disabled={busy || email.trim().length === 0}>
-            {busy ? t.t('auth.sending') : t.t('auth.sendCode')}
+          <Button
+            type="submit"
+            variant="secondary"
+            disabled={busy !== undefined || email.trim().length === 0}
+          >
+            {busy === 'email' ? t.t('auth.sending') : t.t('auth.sendCode')}
           </Button>
         </form>
       ) : (
@@ -145,14 +186,18 @@ export function LoginPanel(): ReactElement {
               className="rounded-md border border-action-primary/30 bg-background-canvas px-3 py-2 text-center text-lg tracking-[0.4em] text-text-primary"
             />
           </label>
-          <Button type="submit" disabled={busy || passcode.trim().length === 0}>
-            {busy ? t.t('auth.verifying') : t.t('auth.verify')}
+          <Button
+            type="submit"
+            variant="secondary"
+            disabled={busy !== undefined || passcode.trim().length === 0}
+          >
+            {busy === 'verify' ? t.t('auth.verifying') : t.t('auth.verify')}
           </Button>
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            disabled={busy}
+            disabled={busy !== undefined}
             onClick={() => {
               setStep('email');
               setPasscode('');

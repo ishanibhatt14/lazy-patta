@@ -26,6 +26,11 @@ function readString(meta: Record<string, unknown>, key: string): string | undefi
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
+function normalizeDisplayName(value: string): string | undefined {
+  const normalized = value.trim().replace(/\s+/g, ' ');
+  return normalized.length > 0 ? normalized : undefined;
+}
+
 function toAuthUser(user: SupabaseUser): AuthUser {
   const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
   const displayName =
@@ -113,6 +118,18 @@ export function createSupabaseAuthProvider(
         email: contact,
         token: passcode,
         type: 'email',
+      });
+      if (error) {
+        throw new Error(error.message);
+      }
+    },
+
+    signInAsGuest: async (displayName) => {
+      const normalizedDisplayName = normalizeDisplayName(displayName);
+      const { error } = await client.auth.signInAnonymously({
+        options: normalizedDisplayName
+          ? { data: { display_name: normalizedDisplayName } }
+          : undefined,
       });
       if (error) {
         throw new Error(error.message);
