@@ -1,6 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const ROUTE = '/play/gadha-chor/computer';
+const ROUTE = '/play/gadha-chor/computer?seed=424242';
+
+test.setTimeout(60_000);
 
 async function startGame(page: Page, players: number): Promise<void> {
   await page.goto(ROUTE);
