@@ -8,6 +8,7 @@ import { Button } from '../Button';
 export interface GameCardProps {
   readonly locale: Locale;
   readonly name: string;
+  readonly alias?: string;
   readonly description: string;
   /** `available` shows live buttons; `comingSoon` disables Play Online. */
   readonly status: 'available' | 'comingSoon';
@@ -30,6 +31,7 @@ const DISABLED_CLASSES =
 export function GameCard({
   locale,
   name,
+  alias,
   description,
   status,
   computerHref,
@@ -65,6 +67,9 @@ export function GameCard({
       </div>
 
       <p className="text-sm text-text-primary">{description}</p>
+      {alias ? (
+        <p className="text-xs font-semibold uppercase tracking-wide text-brand-accent">{alias}</p>
+      ) : null}
 
       <div className="flex flex-wrap gap-2">
         <Link href={computerHref} className={PRIMARY_LINK_CLASSES}>

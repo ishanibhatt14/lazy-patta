@@ -3,20 +3,18 @@ import type { ReactElement } from 'react';
 
 import { GADHA_CHOR_TUTORIAL_STEPS } from '../../../components/game/HowToPlayTutorial';
 import { GameOverview } from '../../../components/home/GameOverview';
+import { GAME_DISCOVERY, gameAlternates } from '../../../lib/game-discovery';
+import { createTranslator } from '../../../lib/i18n';
+
+const game = GAME_DISCOVERY['gadha-chor'];
+const t = createTranslator('en');
 
 export const metadata: Metadata = {
-  title: 'Gadha Chor | Lazy Patta',
+  title: t.t(game.metaTitleKey),
+  description: t.t(game.metaDescriptionKey),
+  alternates: gameAlternates(game.slug),
 };
 
 export default function GadhaChorOverviewPage(): ReactElement {
-  return (
-    <GameOverview
-      nameKey="games.gadhaChor.name"
-      descriptionKey="games.gadhaChor.description"
-      status="available"
-      computerHref="/play/gadha-chor/computer"
-      onlineHref="/play/online?game=gadha_chor"
-      tutorialSteps={GADHA_CHOR_TUTORIAL_STEPS}
-    />
-  );
+  return <GameOverview game={game} status="available" tutorialSteps={GADHA_CHOR_TUTORIAL_STEPS} />;
 }
