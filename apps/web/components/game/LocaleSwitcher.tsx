@@ -33,9 +33,11 @@ export function LocaleSwitcher({ locale, onLocaleChange }: LocaleSwitcherProps):
                 : 'text-action-primary hover:bg-surface-primary',
             ].join(' ')}
           >
-            <span className="block leading-5">{LOCALE_DISPLAY[code].native}</span>
+            <span className="block leading-5" lang={code}>
+              {LOCALE_DISPLAY[code].native}
+            </span>
             {LOCALE_DISPLAY[code].english !== LOCALE_DISPLAY[code].native ? (
-              <span className="block text-xs font-semibold opacity-80">
+              <span className="block text-xs font-semibold opacity-80" lang="en">
                 {LOCALE_DISPLAY[code].english}
               </span>
             ) : null}

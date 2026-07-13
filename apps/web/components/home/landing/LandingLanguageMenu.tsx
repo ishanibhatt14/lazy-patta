@@ -23,7 +23,7 @@ export function LandingLanguageMenu(): ReactElement {
         onClick={() => setOpen((current) => !current)}
       >
         <span aria-hidden>◎</span>
-        <span>{LOCALE_DISPLAY[locale].native}</span>
+        <span lang={locale}>{LOCALE_DISPLAY[locale].native}</span>
       </button>
 
       {open ? (
@@ -63,9 +63,13 @@ export function LandingLanguageMenu(): ReactElement {
                   }}
                 >
                   <span className="flex flex-col">
-                    <span className="font-bold">{label.native}</span>
+                    <span className="font-bold" lang={code}>
+                      {label.native}
+                    </span>
                     {label.english !== label.native ? (
-                      <span className="text-xs opacity-80">{label.english}</span>
+                      <span className="text-xs opacity-80" lang="en">
+                        {label.english}
+                      </span>
                     ) : null}
                   </span>
                   {selected ? <span aria-hidden>✓</span> : null}

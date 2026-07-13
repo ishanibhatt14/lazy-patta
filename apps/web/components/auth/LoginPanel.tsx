@@ -7,6 +7,8 @@ import { useAuth } from '../../lib/auth/auth-context';
 import { createTranslator } from '../../lib/i18n';
 import { Button } from '../Button';
 
+import { SessionLoadingState } from './SessionLoadingState';
+
 /**
  * Email one-time-passcode sign-in, modelled as the two-step request/verify flow
  * the {@link AuthProvider} contract expects. No passwords are ever collected and
@@ -41,7 +43,7 @@ export function LoginPanel(): ReactElement {
   }
 
   if (state.status === 'loading') {
-    return <p className="text-sm text-text-primary">{t.t('auth.loading')}</p>;
+    return <SessionLoadingState />;
   }
 
   if (state.status === 'signed-in') {
