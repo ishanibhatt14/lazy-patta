@@ -44,6 +44,8 @@ describe('GameLobby landing page', () => {
       'href',
       '/play/online?game=lal_satti',
     );
+    expect(screen.getByText(/Also known as Gulaam Chor/i)).toBeVisible();
+    expect(screen.getByText(/Also known as Badam Saat/i)).toBeVisible();
   });
 
   it('opens both tutorial dialogs from rich game cards', async () => {

@@ -47,6 +47,7 @@ export function GameLobby(): ReactElement {
           <RichGameCard
             locale={locale}
             title={t('games.gadhaChor.name')}
+            alias={t('games.gadhaChor.aliasShort')}
             description={t('landing.game.gadhaChor.description')}
             status={t('games.status.available')}
             difficulty={t('landing.game.gadhaChor.difficulty')}
@@ -61,6 +62,7 @@ export function GameLobby(): ReactElement {
           <RichGameCard
             locale={locale}
             title={t('games.lalSatti.name')}
+            alias={t('games.lalSatti.aliasShort')}
             description={t('landing.game.lalSatti.description')}
             status={t('games.status.available')}
             difficulty={t('landing.game.lalSatti.difficulty')}

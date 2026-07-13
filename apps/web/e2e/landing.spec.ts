@@ -73,4 +73,18 @@ test.describe('rich landing page', () => {
     await page.goto('/');
     await expect(page.getByText(/Reduced motion family card table/i)).toBeAttached();
   });
+
+  test('renders localized game discovery pages', async ({ page }) => {
+    await page.goto('/hi/games/gadha-chor');
+    await expect(
+      page.getByRole('heading', { name: 'गधा चोर ऑनलाइन खेलें', level: 1 }),
+    ).toBeVisible();
+    await expect(page.getByText(/गुलाम चोर/i).first()).toBeVisible();
+
+    await page.goto('/gu/games/lal-satti');
+    await expect(
+      page.getByRole('heading', { name: 'લાલ સત્તી ઓનલાઈન રમો', level: 1 }),
+    ).toBeVisible();
+    await expect(page.getByText(/બાદામ સાત/i).first()).toBeVisible();
+  });
 });

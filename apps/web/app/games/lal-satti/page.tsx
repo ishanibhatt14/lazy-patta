@@ -3,20 +3,18 @@ import type { ReactElement } from 'react';
 
 import { LAL_SATTI_TUTORIAL_STEPS } from '../../../components/game/lal-satti-tutorial-steps';
 import { GameOverview } from '../../../components/home/GameOverview';
+import { GAME_DISCOVERY, gameAlternates } from '../../../lib/game-discovery';
+import { createTranslator } from '../../../lib/i18n';
+
+const game = GAME_DISCOVERY['lal-satti'];
+const t = createTranslator('en');
 
 export const metadata: Metadata = {
-  title: 'Lal Satti | Lazy Patta',
+  title: t.t(game.metaTitleKey),
+  description: t.t(game.metaDescriptionKey),
+  alternates: gameAlternates(game.slug),
 };
 
 export default function LalSattiOverviewPage(): ReactElement {
-  return (
-    <GameOverview
-      nameKey="games.lalSatti.name"
-      descriptionKey="games.lalSatti.description"
-      status="available"
-      computerHref="/play/lal-satti/computer"
-      onlineHref="/play/online?game=lal_satti"
-      tutorialSteps={LAL_SATTI_TUTORIAL_STEPS}
-    />
-  );
+  return <GameOverview game={game} status="available" tutorialSteps={LAL_SATTI_TUTORIAL_STEPS} />;
 }

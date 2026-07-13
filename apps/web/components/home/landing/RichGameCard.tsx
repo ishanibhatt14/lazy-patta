@@ -10,6 +10,7 @@ import { Button } from '../../Button';
 interface RichGameCardProps {
   readonly locale: Locale;
   readonly title: string;
+  readonly alias: string;
   readonly description: string;
   readonly status: string;
   readonly difficulty: string;
@@ -72,6 +73,7 @@ export function LalSattiArtwork(): ReactElement {
 export function RichGameCard({
   locale,
   title,
+  alias,
   description,
   status,
   difficulty,
@@ -93,6 +95,9 @@ export function RichGameCard({
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-2xl font-black text-action-primary">{title}</h3>
+            <p className="mt-1 text-xs font-black uppercase tracking-wide text-brand-accent">
+              {alias}
+            </p>
             <p className="mt-2 text-sm leading-6 text-text-primary">{description}</p>
           </div>
           <span className="rounded-full bg-brand-accent/15 px-3 py-1 text-xs font-black uppercase tracking-wide text-brand-accent">
