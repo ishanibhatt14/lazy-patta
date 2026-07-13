@@ -40,6 +40,10 @@ function seatLabel(occupant: string, displayName: string | null): string {
   return t.t('rooms.seatEmpty');
 }
 
+function gameLabel(gameKey: string | undefined): string {
+  return gameKey === 'lal_satti' ? t.t('rooms.gameLalSatti') : t.t('rooms.gameGadhaChor');
+}
+
 export function RoomLobby({ code }: { code: string }): ReactElement {
   const { state, configured } = useAuth();
   const router = useRouter();
@@ -128,6 +132,9 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
         <header className="flex flex-col items-center gap-1">
           <span className="text-sm text-text-primary">{t.t('rooms.roomCodeLabel')}</span>
           <span className="text-3xl font-bold tracking-[0.3em] text-action-primary">{code}</span>
+          <span className="text-xs font-semibold text-brand-accent">
+            {gameLabel(room.game_key)}
+          </span>
         </header>
 
         <GameBoard
@@ -144,7 +151,7 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
           onClick={() =>
             withBusy(async () => {
               await leaveRoom(getSupabaseBrowserClient(), room.id);
-              router.push('/play/gadha-chor/online');
+              router.push('/play/online');
             })
           }
         >
@@ -161,6 +168,7 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
       <header className="flex flex-col items-center gap-1">
         <span className="text-sm text-text-primary">{t.t('rooms.roomCodeLabel')}</span>
         <span className="text-3xl font-bold tracking-[0.3em] text-action-primary">{code}</span>
+        <span className="text-xs font-semibold text-brand-accent">{gameLabel(room?.game_key)}</span>
         <span className="text-xs text-text-primary">{t.t('rooms.shareHint')}</span>
       </header>
 
@@ -240,7 +248,7 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
             onClick={() =>
               withBusy(async () => {
                 await leaveRoom(getSupabaseBrowserClient(), room.id);
-                router.push('/play/gadha-chor/online');
+                router.push('/play/online');
               })
             }
           >

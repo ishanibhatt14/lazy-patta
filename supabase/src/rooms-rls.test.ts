@@ -15,6 +15,7 @@ import { describe, expect, it } from 'vitest';
 const migrationsDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'migrations');
 const schema = readFileSync(join(migrationsDir, '0004_rooms.sql'), 'utf8');
 const rpcs = readFileSync(join(migrationsDir, '0005_room_rpcs.sql'), 'utf8');
+const onlineGameKeys = readFileSync(join(migrationsDir, '0008_online_game_keys.sql'), 'utf8');
 
 const ROOM_TABLES = [
   'public.rooms',
@@ -82,5 +83,26 @@ describe('room RPCs (structural)', () => {
     expect(rpcs).toMatch(
       new RegExp(`grant execute on function public\\.${fn}\\b[\\s\\S]*?to authenticated`, 'i'),
     );
+  });
+});
+
+describe('online room game keys (structural)', () => {
+  it('adds explicit game_key columns to rooms and games', () => {
+    const lower = onlineGameKeys.toLowerCase();
+    expect(lower).toContain('alter table public.rooms');
+    expect(lower).toContain('add column if not exists game_key');
+    expect(lower).toContain("check (game_key in ('gadha_chor', 'lal_satti'))");
+    expect(lower).toContain('alter table public.games');
+  });
+
+  it('extends create_room and carries the room game_key into start_game', () => {
+    const lower = onlineGameKeys.toLowerCase();
+    expect(lower).toContain('p_game_key text');
+    expect(lower).toContain("if p_game_key not in ('gadha_chor', 'lal_satti')");
+    expect(lower).toContain(
+      'insert into public.rooms (code, host_id, max_seats, locale, game_key)',
+    );
+    expect(lower).toContain('insert into public.games (room_id, game_key, status');
+    expect(lower).toContain('v_room.game_key');
   });
 });

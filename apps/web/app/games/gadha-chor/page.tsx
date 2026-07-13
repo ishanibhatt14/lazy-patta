@@ -15,7 +15,7 @@ export default function GadhaChorOverviewPage(): ReactElement {
       descriptionKey="games.gadhaChor.description"
       status="available"
       computerHref="/play/gadha-chor/computer"
-      onlineHref="/play/gadha-chor/online"
+      onlineHref="/play/online"
       tutorialSteps={GADHA_CHOR_TUTORIAL_STEPS}
     />
   );

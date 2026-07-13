@@ -51,6 +51,7 @@ export function GameLobby(): ReactElement {
             description={t('games.lalSatti.description')}
             status="available"
             computerHref="/play/lal-satti/computer"
+            onlineHref="/play/online"
             overviewHref="/games/lal-satti"
             onHowToPlay={() => setActiveTutorial('lal-satti')}
           />
@@ -60,7 +61,7 @@ export function GameLobby(): ReactElement {
             description={t('games.gadhaChor.description')}
             status="available"
             computerHref="/play/gadha-chor/computer"
-            onlineHref="/play/gadha-chor/online"
+            onlineHref="/play/online"
             overviewHref="/games/gadha-chor"
             onHowToPlay={() => setActiveTutorial('gadha-chor')}
           />

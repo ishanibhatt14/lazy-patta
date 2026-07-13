@@ -6,7 +6,7 @@ import { useState, type FormEvent, type ReactElement } from 'react';
 
 import { useAuth } from '../../lib/auth/auth-context';
 import { createTranslator } from '../../lib/i18n';
-import { createRoom, joinRoomByCode } from '../../lib/rooms/rooms-client';
+import { createRoom, joinRoomByCode, type OnlineGameKey } from '../../lib/rooms/rooms-client';
 import { getSupabaseBrowserClient } from '../../lib/supabase/browser-client';
 import { Button } from '../Button';
 import { LoginPanel } from '../auth/LoginPanel';
@@ -27,6 +27,7 @@ export function OnlineHub(): ReactElement {
   const { state } = useAuth();
   const router = useRouter();
   const [code, setCode] = useState('');
+  const [gameKey, setGameKey] = useState<OnlineGameKey>('gadha_chor');
   const [busy, setBusy] = useState<'create' | 'join' | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -44,8 +45,8 @@ export function OnlineHub(): ReactElement {
     setBusy('create');
     setError(undefined);
     try {
-      const room = await createRoom(getSupabaseBrowserClient(), { displayName });
-      router.push(`/play/gadha-chor/online/${room.code}`);
+      const room = await createRoom(getSupabaseBrowserClient(), { displayName, gameKey });
+      router.push(`/play/online/${room.code}`);
     } catch (caught) {
       setError(messageFor(caught));
       setBusy(undefined);
@@ -58,7 +59,7 @@ export function OnlineHub(): ReactElement {
     setError(undefined);
     try {
       const room = await joinRoomByCode(getSupabaseBrowserClient(), code, displayName);
-      router.push(`/play/gadha-chor/online/${room.code}`);
+      router.push(`/play/online/${room.code}`);
     } catch (caught) {
       setError(messageFor(caught));
       setBusy(undefined);
@@ -70,6 +71,25 @@ export function OnlineHub(): ReactElement {
       <div className="flex flex-col gap-3 rounded-lg bg-surface-primary p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-text-primary">{t.t('rooms.createTitle')}</h2>
         <p className="text-sm text-text-primary">{t.t('rooms.createDescription')}</p>
+        <div className="grid grid-cols-2 gap-2" aria-label={t.t('rooms.gameLabel')}>
+          {(['gadha_chor', 'lal_satti'] as const).map((candidate) => (
+            <button
+              key={candidate}
+              type="button"
+              disabled={busy !== undefined}
+              aria-pressed={gameKey === candidate}
+              onClick={() => setGameKey(candidate)}
+              className={[
+                'rounded-md border px-3 py-2 text-sm font-semibold transition',
+                gameKey === candidate
+                  ? 'border-action-primary bg-action-primary text-text-onBrand'
+                  : 'border-action-primary/30 bg-background-canvas text-text-primary',
+              ].join(' ')}
+            >
+              {candidate === 'lal_satti' ? t.t('rooms.gameLalSatti') : t.t('rooms.gameGadhaChor')}
+            </button>
+          ))}
+        </div>
         <Button disabled={busy !== undefined} onClick={onCreate}>
           {busy === 'create' ? t.t('rooms.creating') : t.t('action.createRoom')}
         </Button>
