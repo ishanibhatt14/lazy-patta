@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@lazy-patta/design-tokens": "workspace:*",
+    "@lazy-patta/game-contracts": "workspace:*",
+    "@lazy-patta/lal-satti-engine": "workspace:*",
     "@lazy-patta/localization": "workspace:*",
     "@expo/metro-runtime": "~57.0.3",
     "expo": "~57.0.4",

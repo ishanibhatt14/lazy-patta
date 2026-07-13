@@ -32,6 +32,12 @@ importers:
       '@lazy-patta/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      '@lazy-patta/game-contracts':
+        specifier: workspace:*
+        version: link:../../packages/game-contracts
+      '@lazy-patta/lal-satti-engine':
+        specifier: workspace:*
+        version: link:../../packages/lal-satti-engine
       '@lazy-patta/localization':
         specifier: workspace:*
         version: link:../../packages/localization
@@ -99,6 +105,9 @@ importers:
       '@lazy-patta/game-engine':
         specifier: workspace:*
         version: link:../../packages/game-engine
+      '@lazy-patta/lal-satti-engine':
+        specifier: workspace:*
+        version: link:../../packages/lal-satti-engine
       '@lazy-patta/localization':
         specifier: workspace:*
         version: link:../../packages/localization
