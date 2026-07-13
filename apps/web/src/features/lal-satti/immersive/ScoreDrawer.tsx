@@ -19,10 +19,34 @@ function displayName(name: string, locale: Locale): string {
   return name;
 }
 
+function cardShortLabel(
+  card: NonNullable<LalSattiViewState['roundScores'][number]['leftovers'][number]['cards']>[number],
+): string {
+  const rank =
+    card.rank === 'jack'
+      ? 'J'
+      : card.rank === 'queen'
+        ? 'Q'
+        : card.rank === 'king'
+          ? 'K'
+          : card.rank === 'ace'
+            ? 'A'
+            : card.rank;
+  const suit =
+    card.suit === 'hearts'
+      ? '♥'
+      : card.suit === 'diamonds'
+        ? '♦'
+        : card.suit === 'clubs'
+          ? '♣'
+          : '♠';
+  return `${rank}${suit}`;
+}
+
 /**
  * The session scoreboard on demand — a bottom sheet on mobile, a right-anchored
  * panel on wider screens. Holds the current match leader, running totals, and
- * the per-round history with leftover cards. Replaces the permanent scoreboard
+ * the per-round history with leftover penalty points. Replaces the permanent scoreboard
  * sidebar. Escape and the scrim both close it.
  */
 export function ScoreDrawer({
@@ -108,7 +132,7 @@ export function ScoreDrawer({
                       <td className="py-2 pr-3 font-semibold">
                         {displayName(score.playerName, locale)}
                       </td>
-                      <td className="py-2 pr-3">{score.totalLeftoverCards}</td>
+                      <td className="py-2 pr-3">{score.totalPenaltyPoints}</td>
                       <td className="py-2">{score.roundsNotWon}</td>
                     </tr>
                   ))}
@@ -133,7 +157,13 @@ export function ScoreDrawer({
                         {format('lalSatti.leftoverLine', {
                           name: displayName(leftover.playerName, locale),
                           count: leftover.cardCount,
+                          points: leftover.cardPoints,
                         })}
+                        {leftover.cards && leftover.cards.length > 0 ? (
+                          <span className="block text-xs text-text-primary">
+                            {leftover.cards.map(cardShortLabel).join(' ')}
+                          </span>
+                        ) : null}
                       </li>
                     ))}
                   </ul>

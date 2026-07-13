@@ -184,6 +184,7 @@ export function LalSattiComputerGame(): ReactElement {
                 <li>{t.t('lalSatti.quickRuleSevens')}</li>
                 <li>{t.t('lalSatti.quickRuleBuild')}</li>
                 <li>{t.t('lalSatti.quickRulePass')}</li>
+                <li>{t.t('lalSatti.quickRuleScoring')}</li>
               </ul>
             </section>
 

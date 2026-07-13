@@ -6,7 +6,7 @@ import {
   selectLalSattiViewState,
   type LalSattiController,
 } from './controller';
-import type { LalSattiControllerState } from './types';
+import type { LalSattiControllerState, LalSattiRoundScore } from './types';
 
 function startedController(seed = 2) {
   const controller = createLalSattiController(seededRng(seed));
@@ -112,7 +112,7 @@ describe('Lal Satti web controller', () => {
     expect(selectLalSattiViewState(started).seats[0]?.name).toBe('Isha Bhatt');
   });
 
-  it('records leftover cards and running totals when a round finishes', () => {
+  it('records leftover card points and sorted running totals when a round finishes', () => {
     const { controller, state } = startedController(5);
     const result = finishRound(controller, state);
     const view = selectLalSattiViewState(result);
@@ -122,8 +122,37 @@ describe('Lal Satti web controller', () => {
     expect(view.roundScores[0]?.winnerNames).toHaveLength(1);
     expect(view.roundScores[0]?.leftovers.length).toBeGreaterThan(0);
     expect(view.roundScores[0]?.leftovers.every((leftover) => leftover.cardCount > 0)).toBe(true);
-    expect(view.runningScores.reduce((total, score) => total + score.totalLeftoverCards, 0)).toBe(
-      view.roundScores[0]?.leftovers.reduce((total, leftover) => total + leftover.cardCount, 0),
+    expect(view.roundScores[0]?.leftovers.every((leftover) => leftover.cardPoints > 0)).toBe(true);
+    expect(view.runningScores.reduce((total, score) => total + score.totalPenaltyPoints, 0)).toBe(
+      view.roundScores[0]?.leftovers.reduce((total, leftover) => total + leftover.cardPoints, 0),
+    );
+    expect(view.runningScores.map((score) => score.totalPenaltyPoints)).toEqual(
+      [...view.runningScores].map((score) => score.totalPenaltyPoints).sort((a, b) => a - b),
+    );
+  });
+
+  it('keeps legacy hydrated card-count scores out of rank-value totals', () => {
+    const controller = createLalSattiController(seededRng(2));
+    const legacyRoundScores = [
+      {
+        id: 'legacy-round-1',
+        roundNumber: 1,
+        winnerNames: ['Isha'],
+        leftovers: [{ playerId: 'bot-ba', playerName: 'Ba', cardCount: 3 }],
+      },
+    ] as unknown as readonly LalSattiRoundScore[];
+
+    const state = controller.dispatch(controller.initialState, {
+      type: 'hydrateSession',
+      humanName: 'Isha',
+      roundScores: legacyRoundScores,
+    });
+    const view = selectLalSattiViewState(state);
+
+    expect(view.roundScores[0]?.scoreRule).toBe('card-count-v1');
+    expect(view.roundScores[0]?.leftovers[0]?.cardPoints).toBe(0);
+    expect(view.runningScores.reduce((total, score) => total + score.totalPenaltyPoints, 0)).toBe(
+      0,
     );
   });
 });

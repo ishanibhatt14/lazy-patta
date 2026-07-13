@@ -30,7 +30,7 @@
 with
   -- ── ground-truth expectations ────────────────────────────────────────────
   expected_migrations(version) as (
-    values ('0001'), ('0002'), ('0003'), ('0004'), ('0005'), ('0006'), ('0007')
+    values ('0001'), ('0002'), ('0003'), ('0004'), ('0005'), ('0006'), ('0007'), ('0008'), ('0009')
   ),
   expected_tables(t) as (
     values ('profiles'), ('user_preferences'), ('account_deletion_requests'),
@@ -73,7 +73,7 @@ with
   ),
 
   checks as (
-    -- 1. Exactly the expected migrations (0001–0007) are applied (none missing).
+    -- 1. Exactly the expected migrations (0001-0009) are applied (none missing).
     select
       '1_migrations_exact' as check_name,
       'present=' || coalesce((select string_agg(version, ',' order by version)

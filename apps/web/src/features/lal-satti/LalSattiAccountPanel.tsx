@@ -251,6 +251,9 @@ export function LalSattiAccountPanel({
                       <p className="mt-1 text-xs leading-5 text-text-primary">
                         {savedSessionDate(session, locale)} -{' '}
                         {t.format('lobby.playerCount', { count: session.playerCount })}
+                        {session.scoreRule === 'card-count-v1'
+                          ? ` - ${t.t('lalSatti.legacyScoreRule')}`
+                          : ''}
                       </p>
                       {latestSavedRound ? (
                         <p className="mt-1 text-xs leading-5 text-text-primary">

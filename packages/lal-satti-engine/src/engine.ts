@@ -9,6 +9,7 @@ import {
   LAL_SATTI_CLASSIC,
   playableCards,
 } from './rules';
+import { lalSattiHandPoints } from './scoring';
 import type {
   LalSattiAction,
   LalSattiEvent,
@@ -46,6 +47,12 @@ function assertUniquePlayers(players: readonly PlayerId[]): void {
 
 function remainingCards(state: LalSattiState): Readonly<Record<PlayerId, number>> {
   return Object.fromEntries(state.players.map((player) => [player.id, player.hand.length]));
+}
+
+function remainingPoints(state: LalSattiState): Readonly<Record<PlayerId, number>> {
+  return Object.fromEntries(
+    state.players.map((player) => [player.id, lalSattiHandPoints(player.hand)]),
+  );
 }
 
 function findCardHolder(players: readonly LalSattiPlayerState[], cardIdToFind: string): number {
@@ -174,6 +181,7 @@ export class LalSattiEngine {
       winnerIds: state.winnerIds,
       reason: state.completionReason,
       remainingCards: remainingCards(state),
+      remainingPoints: remainingPoints(state),
     };
   }
 

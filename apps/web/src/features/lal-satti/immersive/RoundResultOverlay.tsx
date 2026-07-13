@@ -21,6 +21,30 @@ function displayName(name: string, locale: Locale): string {
   return name;
 }
 
+function cardShortLabel(
+  card: NonNullable<LalSattiViewState['roundScores'][number]['leftovers'][number]['cards']>[number],
+): string {
+  const rank =
+    card.rank === 'jack'
+      ? 'J'
+      : card.rank === 'queen'
+        ? 'Q'
+        : card.rank === 'king'
+          ? 'K'
+          : card.rank === 'ace'
+            ? 'A'
+            : card.rank;
+  const suit =
+    card.suit === 'hearts'
+      ? '♥'
+      : card.suit === 'diamonds'
+        ? '♦'
+        : card.suit === 'clubs'
+          ? '♣'
+          : '♠';
+  return `${rank}${suit}`;
+}
+
 /**
  * The staged end-of-round reveal: the table dims, the winner's avatar is
  * celebrated, opponents' remaining cards are counted, standings update, and the
@@ -100,7 +124,13 @@ export function RoundResultOverlay({
                   {format('lalSatti.leftoverLine', {
                     name: displayName(leftover.playerName, locale),
                     count: leftover.cardCount,
+                    points: leftover.cardPoints,
                   })}
+                  {leftover.cards && leftover.cards.length > 0 ? (
+                    <span className="block text-xs text-text-primary">
+                      {leftover.cards.map(cardShortLabel).join(' ')}
+                    </span>
+                  ) : null}
                 </li>
               ))}
             </ul>

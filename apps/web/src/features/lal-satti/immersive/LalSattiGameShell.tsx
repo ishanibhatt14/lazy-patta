@@ -38,13 +38,10 @@ function displayName(name: string, locale: Locale): string {
   return name;
 }
 
-/** Lowest total leftover cards leads the session; ties keep the first seat. */
+/** Lowest total penalty points leads the session; controller already tie-breaks standings. */
 function computeLeader(view: LalSattiViewState, locale: Locale): string | null {
   if (view.roundScores.length === 0) return null;
-  const sorted = [...view.runningScores].sort(
-    (a, b) => a.totalLeftoverCards - b.totalLeftoverCards,
-  );
-  const top = sorted[0];
+  const top = view.runningScores[0];
   return top ? displayName(top.playerName, locale) : null;
 }
 

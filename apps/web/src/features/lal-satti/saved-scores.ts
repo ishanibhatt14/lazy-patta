@@ -1,7 +1,11 @@
 import type { Locale } from '@lazy-patta/localization';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-import type { LalSattiRoundScore } from './types';
+import {
+  LAL_SATTI_CURRENT_SCORE_RULE,
+  type LalSattiRoundScore,
+  type LalSattiSavedScoreRule,
+} from './types';
 
 export interface SaveLalSattiScoreSessionInput {
   readonly humanName: string;
@@ -16,6 +20,7 @@ export interface SavedLalSattiScoreSession {
   readonly playerCount: number;
   readonly locale: Locale;
   readonly createdAt: string;
+  readonly scoreRule: LalSattiSavedScoreRule;
   readonly rounds: readonly LalSattiRoundScore[];
 }
 
@@ -25,6 +30,7 @@ interface SavedSessionRow {
   readonly player_count: number;
   readonly locale: Locale;
   readonly created_at: string;
+  readonly score_rule?: LalSattiSavedScoreRule | null;
 }
 
 interface SavedRoundRow {
@@ -36,7 +42,12 @@ interface SavedRoundRow {
     readonly playerId: string;
     readonly playerName: string;
     readonly cardCount: number;
+    readonly cardPoints?: number;
   }[];
+}
+
+function scoreRuleFromRow(row: Pick<SavedSessionRow, 'score_rule'>): LalSattiSavedScoreRule {
+  return row.score_rule === 'rank-value-v2' ? 'rank-value-v2' : 'card-count-v1';
 }
 
 function displayNameForSave(name: string): string {
@@ -44,12 +55,20 @@ function displayNameForSave(name: string): string {
   return normalized.length > 0 ? normalized : 'Player';
 }
 
-function savedRoundFromRow(row: SavedRoundRow): LalSattiRoundScore {
+function savedRoundFromRow(
+  row: SavedRoundRow,
+  scoreRule: LalSattiSavedScoreRule,
+): LalSattiRoundScore {
   return {
     id: row.id,
     roundNumber: row.round_number,
+    scoreRule,
+    winnerIds: [],
     winnerNames: row.winner_names,
-    leftovers: row.leftovers,
+    leftovers: row.leftovers.map((leftover) => ({
+      ...leftover,
+      cardPoints: scoreRule === 'rank-value-v2' ? (leftover.cardPoints ?? 0) : 0,
+    })),
   };
 }
 
@@ -76,6 +95,7 @@ export async function saveLalSattiScoreSession(
       display_name: displayName,
       player_count: input.playerCount,
       locale: input.locale,
+      score_rule: LAL_SATTI_CURRENT_SCORE_RULE,
     })
     .select('id')
     .single();
@@ -93,6 +113,7 @@ export async function saveLalSattiScoreSession(
           playerId: leftover.playerId,
           playerName: leftover.playerName,
           cardCount: leftover.cardCount,
+          cardPoints: leftover.cardPoints,
         })),
       })),
     );
@@ -107,7 +128,7 @@ export async function listLalSattiScoreSessions(
 ): Promise<readonly SavedLalSattiScoreSession[]> {
   const sessions = await client
     .from('lal_satti_score_sessions')
-    .select('id, display_name, player_count, locale, created_at')
+    .select('id, display_name, player_count, locale, created_at, score_rule')
     .order('created_at', { ascending: false })
     .limit(5);
   if (sessions.error) throw new Error(sessions.error.message);
@@ -130,12 +151,18 @@ export async function listLalSattiScoreSessions(
     roundsBySession.set(row.session_id, list);
   }
 
-  return rows.map((row) => ({
-    id: row.id,
-    displayName: row.display_name,
-    playerCount: row.player_count,
-    locale: row.locale,
-    createdAt: row.created_at,
-    rounds: (roundsBySession.get(row.id) ?? []).map(savedRoundFromRow),
-  }));
+  return rows.map((row) => {
+    const scoreRule = scoreRuleFromRow(row);
+    return {
+      id: row.id,
+      displayName: row.display_name,
+      playerCount: row.player_count,
+      locale: row.locale,
+      createdAt: row.created_at,
+      scoreRule,
+      rounds: (roundsBySession.get(row.id) ?? []).map((round) =>
+        savedRoundFromRow(round, scoreRule),
+      ),
+    };
+  });
 }
