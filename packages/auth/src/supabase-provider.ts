@@ -53,7 +53,21 @@ function toSessionState(session: SupabaseSession | null): SessionState {
   return { status: 'signed-in', session: mapped };
 }
 
-export function createSupabaseAuthProvider(client: SupabaseClient): AuthProvider {
+export interface SupabaseAuthProviderOptions {
+  readonly getEmailRedirectTo?: () => string | undefined;
+}
+
+function readRedirectTo(options?: SupabaseAuthProviderOptions): string | undefined {
+  const value = options?.getEmailRedirectTo?.();
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+export function createSupabaseAuthProvider(
+  client: SupabaseClient,
+  options?: SupabaseAuthProviderOptions,
+): AuthProvider {
   let current: SessionState = { status: 'loading' };
   const listeners = new Set<(state: SessionState) => void>();
 
@@ -81,9 +95,13 @@ export function createSupabaseAuthProvider(client: SupabaseClient): AuthProvider
     },
 
     requestPasscode: async (contact) => {
+      const emailRedirectTo = readRedirectTo(options);
       const { error } = await client.auth.signInWithOtp({
         email: contact,
-        options: { shouldCreateUser: true },
+        options: {
+          shouldCreateUser: true,
+          ...(emailRedirectTo ? { emailRedirectTo } : {}),
+        },
       });
       if (error) {
         throw new Error(error.message);

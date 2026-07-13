@@ -8,6 +8,7 @@ import { useEffect, useReducer, useRef, useState } from 'react';
 
 import { Button } from '../../../components/Button';
 import { PlayingCard } from '../../../components/PlayingCard';
+import { getBrowserAuthRedirectUrl } from '../../../lib/auth/redirect-url';
 import { createTranslator } from '../../../lib/i18n';
 import { getBrowserSupabaseClient } from '../../../lib/supabase';
 
@@ -523,7 +524,9 @@ function LalSattiAccountPanel({
       return;
     }
 
-    setAuthProvider(() => createSupabaseAuthProvider(client));
+    setAuthProvider(() =>
+      createSupabaseAuthProvider(client, { getEmailRedirectTo: getBrowserAuthRedirectUrl }),
+    );
   }, []);
 
   useEffect(() => {

@@ -45,6 +45,21 @@ describe('createSupabaseAuthProvider', () => {
     });
   });
 
+  it('includes an explicit email redirect URL when configured', async () => {
+    const { client, calls } = fakeClient();
+    const provider = createSupabaseAuthProvider(client, {
+      getEmailRedirectTo: () => ' https://lazy-patta-web.vercel.app/play/online ',
+    });
+    await provider.requestPasscode('nani@example.test');
+    expect(calls.signInWithOtp).toHaveBeenCalledWith({
+      email: 'nani@example.test',
+      options: {
+        shouldCreateUser: true,
+        emailRedirectTo: 'https://lazy-patta-web.vercel.app/play/online',
+      },
+    });
+  });
+
   it('verifies a passcode via verifyOtp with type email', async () => {
     const { client, calls } = fakeClient();
     const provider = createSupabaseAuthProvider(client);

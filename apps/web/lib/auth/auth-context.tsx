@@ -15,6 +15,8 @@ import {
 
 import { getSupabaseBrowserClient, isSupabaseConfigured } from '../supabase/browser-client';
 
+import { getBrowserAuthRedirectUrl } from './redirect-url';
+
 /**
  * React binding over the provider-agnostic {@link AuthProvider}.
  *
@@ -46,7 +48,9 @@ export function AuthContextProvider({ children }: { children: ReactNode }): Reac
 
   useEffect(() => {
     if (!configured) return;
-    const provider = createSupabaseAuthProvider(getSupabaseBrowserClient());
+    const provider = createSupabaseAuthProvider(getSupabaseBrowserClient(), {
+      getEmailRedirectTo: getBrowserAuthRedirectUrl,
+    });
     providerRef.current = provider;
     const unsubscribe = provider.onStateChange(setState);
     return () => {
