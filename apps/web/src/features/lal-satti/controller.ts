@@ -2,7 +2,9 @@ import { type Card, type Rng } from '@lazy-patta/game-contracts';
 import {
   chooseLalSattiBotAction,
   createEmptyTableau,
+  lalSattiHandPoints,
   LalSattiEngine,
+  sortCards,
   toTableauLanes,
 } from '@lazy-patta/lal-satti-engine';
 import type { Locale, MessageKey, MessageValues } from '@lazy-patta/localization';
@@ -10,6 +12,7 @@ import type { Locale, MessageKey, MessageValues } from '@lazy-patta/localization
 import { createCryptoRng } from '../../../lib/computer-game/rng';
 
 import { buildLalSattiRoster, LAL_SATTI_HUMAN_ID, rosterName } from './players';
+import { LAL_SATTI_CURRENT_SCORE_RULE } from './types';
 import type {
   LalSattiControllerState,
   LalSattiIntent,
@@ -133,14 +136,21 @@ function roundScoreFor(
   return {
     id: `lal-satti-round-${state.roundScores.length + 1}`,
     roundNumber: state.roundScores.length + 1,
+    scoreRule: LAL_SATTI_CURRENT_SCORE_RULE,
+    winnerIds: completedGame.winnerIds,
     winnerNames: completedGame.winnerIds.map((id) => playerDisplayName(state, id)),
     leftovers: completedGame.players
       .filter((player) => !winnerIds.has(player.id))
-      .map((player) => ({
-        playerId: player.id,
-        playerName: playerDisplayName(state, player.id),
-        cardCount: player.hand.length,
-      })),
+      .map((player) => {
+        const cards = sortCards(player.hand);
+        return {
+          playerId: player.id,
+          playerName: playerDisplayName(state, player.id),
+          cardCount: cards.length,
+          cardPoints: lalSattiHandPoints(cards),
+          cards,
+        };
+      }),
   };
 }
 
@@ -209,7 +219,9 @@ function dispatchWithRng(
       return {
         ...state,
         humanName: intent.humanName?.slice(0, 32) ?? state.humanName,
-        roundScores: intent.roundScores ?? state.roundScores,
+        roundScores: intent.roundScores
+          ? normalizeHydratedRoundScores(intent.roundScores)
+          : state.roundScores,
         hasHydratedSession: true,
       };
     case 'toggleReducedMotion':
@@ -252,6 +264,23 @@ function dispatchWithRng(
   }
 }
 
+function normalizeHydratedRoundScores(
+  rounds: readonly LalSattiRoundScore[],
+): readonly LalSattiRoundScore[] {
+  return rounds.map((round) => {
+    const scoreRule = round.scoreRule ?? 'card-count-v1';
+    return {
+      ...round,
+      scoreRule,
+      winnerIds: round.winnerIds ?? [],
+      leftovers: round.leftovers.map((leftover) => ({
+        ...leftover,
+        cardPoints: scoreRule === 'rank-value-v2' ? (leftover.cardPoints ?? 0) : 0,
+      })),
+    };
+  });
+}
+
 function seatsFor(state: LalSattiControllerState): readonly LalSattiSeatView[] {
   const roster = buildLalSattiRoster(state.playerCount);
   const current = currentPlayerId(state);
@@ -282,17 +311,26 @@ function winnerNames(state: LalSattiControllerState): readonly string[] {
 }
 
 function runningScoresFor(state: LalSattiControllerState): readonly LalSattiRunningScore[] {
-  return buildLalSattiRoster(state.playerCount).map((entry) => {
-    const leftovers = state.roundScores.flatMap((round) =>
-      round.leftovers.filter((leftover) => leftover.playerId === entry.id),
-    );
-    return {
-      playerId: entry.id,
-      playerName: playerDisplayName(state, entry.id),
-      totalLeftoverCards: leftovers.reduce((total, leftover) => total + leftover.cardCount, 0),
-      roundsNotWon: leftovers.length,
-    };
-  });
+  return buildLalSattiRoster(state.playerCount)
+    .map((entry, seatOrder) => {
+      const leftovers = state.roundScores.flatMap((round) =>
+        round.leftovers.filter((leftover) => leftover.playerId === entry.id),
+      );
+      return {
+        playerId: entry.id,
+        playerName: playerDisplayName(state, entry.id),
+        totalPenaltyPoints: leftovers.reduce((total, leftover) => total + leftover.cardPoints, 0),
+        roundsNotWon: leftovers.length,
+        seatOrder,
+      };
+    })
+    .sort(
+      (a, b) =>
+        a.totalPenaltyPoints - b.totalPenaltyPoints ||
+        a.roundsNotWon - b.roundsNotWon ||
+        a.seatOrder - b.seatOrder,
+    )
+    .map(({ seatOrder: _seatOrder, ...score }) => score);
 }
 
 export function selectLalSattiViewState(state: LalSattiControllerState): LalSattiViewState {

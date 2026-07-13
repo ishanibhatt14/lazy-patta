@@ -10,7 +10,7 @@ export const LAL_SATTI_CLASSIC: LalSattiRulePack = {
   opening: 'classic-seven-of-hearts',
   passRule: 'blocked-only',
   blockedCycle: 'invariant-error',
-  scoring: 'win-only',
+  scoring: 'rank-value',
 };
 
 export const LAL_SATTI_ALL_SEVENS_OPEN: LalSattiRulePack = {
@@ -20,7 +20,7 @@ export const LAL_SATTI_ALL_SEVENS_OPEN: LalSattiRulePack = {
   opening: 'all-sevens-open',
   passRule: 'blocked-only',
   blockedCycle: 'invariant-error',
-  scoring: 'win-only',
+  scoring: 'rank-value',
 };
 
 export function createEmptyTableau(): LalSattiTableau {

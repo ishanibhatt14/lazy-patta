@@ -151,6 +151,7 @@ describe.skipIf(!LIVE)('RLS behavioural (live Supabase)', () => {
           display_name: 'Ava',
           player_count: 4,
           locale: 'en',
+          score_rule: 'rank-value-v2',
         })
         .select('id')
         .single();
@@ -163,7 +164,7 @@ describe.skipIf(!LIVE)('RLS behavioural (live Supabase)', () => {
           session_id: session.data?.id,
           round_number: 1,
           winner_names: ['Ava'],
-          leftovers: [{ playerId: 'bot-ba', playerName: 'Ba', cardCount: 3 }],
+          leftovers: [{ playerId: 'bot-ba', playerName: 'Ba', cardCount: 3, cardPoints: 18 }],
         })
         .select('id')
         .single();

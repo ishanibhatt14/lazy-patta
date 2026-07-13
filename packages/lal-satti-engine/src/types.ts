@@ -4,6 +4,7 @@ export type LalSattiPhase = 'in_progress' | 'completed';
 export type LalSattiPlayerStatus = 'active' | 'finished';
 export type LalSattiCompletionReason = 'hand_empty';
 export type LalSattiOpeningRule = 'classic-seven-of-hearts' | 'all-sevens-open';
+export type LalSattiScoringRule = 'card-count' | 'rank-value';
 
 export interface LalSattiRulePack {
   readonly id: string;
@@ -12,7 +13,7 @@ export interface LalSattiRulePack {
   readonly opening: LalSattiOpeningRule;
   readonly passRule: 'blocked-only';
   readonly blockedCycle: 'invariant-error';
-  readonly scoring: 'win-only';
+  readonly scoring: LalSattiScoringRule;
 }
 
 export interface LalSattiPlayerState {
@@ -65,6 +66,7 @@ export interface LalSattiResult {
   readonly winnerIds: readonly PlayerId[];
   readonly reason: LalSattiCompletionReason;
   readonly remainingCards: Readonly<Record<PlayerId, number>>;
+  readonly remainingPoints: Readonly<Record<PlayerId, number>>;
 }
 
 export interface LalSattiBlockedCycleDiagnostic {

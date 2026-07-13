@@ -469,6 +469,7 @@ function LalSattiOnlineBoard({
                   {t.format('rooms.lalSattiLeftover', {
                     name: nameFor(playerId),
                     count: Number(count),
+                    points: Number(result.remainingPoints[playerId] ?? 0),
                   })}
                 </li>
               ))}

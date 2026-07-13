@@ -7,6 +7,9 @@ import type {
 import type { Locale, MessageKey, MessageValues } from '@lazy-patta/localization';
 
 export type LalSattiComputerPhase = 'setup' | 'playing' | 'result';
+export type LalSattiSavedScoreRule = 'card-count-v1' | 'rank-value-v2';
+
+export const LAL_SATTI_CURRENT_SCORE_RULE: LalSattiSavedScoreRule = 'rank-value-v2';
 
 export interface LalSattiSeatView {
   readonly id: string;
@@ -28,11 +31,15 @@ export interface LalSattiLeftoverScore {
   readonly playerId: string;
   readonly playerName: string;
   readonly cardCount: number;
+  readonly cardPoints: number;
+  readonly cards?: readonly Card[];
 }
 
 export interface LalSattiRoundScore {
   readonly id: string;
   readonly roundNumber: number;
+  readonly scoreRule: LalSattiSavedScoreRule;
+  readonly winnerIds: readonly string[];
   readonly winnerNames: readonly string[];
   readonly leftovers: readonly LalSattiLeftoverScore[];
 }
@@ -40,7 +47,7 @@ export interface LalSattiRoundScore {
 export interface LalSattiRunningScore {
   readonly playerId: string;
   readonly playerName: string;
-  readonly totalLeftoverCards: number;
+  readonly totalPenaltyPoints: number;
   readonly roundsNotWon: number;
 }
 

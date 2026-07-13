@@ -2,7 +2,9 @@ import { reactNativeTokens } from '@lazy-patta/design-tokens';
 import type { Card, Rank, Rng, Suit } from '@lazy-patta/game-contracts';
 import {
   chooseLalSattiBotAction,
+  lalSattiHandPoints,
   LalSattiEngine,
+  sortCards,
   toTableauLanes,
 } from '@lazy-patta/lal-satti-engine';
 import {
@@ -32,11 +34,20 @@ interface MobileLeftoverScore {
   readonly playerId: string;
   readonly playerName: string;
   readonly cardCount: number;
+  readonly cardPoints: number;
+}
+
+interface MobileRunningScore {
+  readonly playerId: string;
+  readonly playerName: string;
+  readonly totalPenaltyPoints: number;
+  readonly roundsNotWon: number;
 }
 
 interface MobileRoundScore {
   readonly id: string;
   readonly roundNumber: number;
+  readonly winnerIds: readonly string[];
   readonly winnerNames: readonly string[];
   readonly leftovers: readonly MobileLeftoverScore[];
 }
@@ -129,14 +140,19 @@ function roundScoreFor(
   return {
     id: `mobile-lal-satti-round-${roundNumber}`,
     roundNumber,
+    winnerIds: game.winnerIds,
     winnerNames: game.winnerIds.map((id) => playerName(messages, id, humanName)),
     leftovers: game.players
       .filter((player) => !winnerIds.has(player.id))
-      .map((player) => ({
-        playerId: player.id,
-        playerName: playerName(messages, player.id, humanName),
-        cardCount: player.hand.length,
-      })),
+      .map((player) => {
+        const cards = sortCards(player.hand);
+        return {
+          playerId: player.id,
+          playerName: playerName(messages, player.id, humanName),
+          cardCount: cards.length,
+          cardPoints: lalSattiHandPoints(cards),
+        };
+      }),
   };
 }
 
@@ -144,17 +160,26 @@ function runningScoresFor(
   scores: readonly MobileRoundScore[],
   messages: Record<MessageKey, string>,
   humanName: string,
-): readonly MobileLeftoverScore[] {
-  return PLAYER_IDS.map((playerId) => {
+): readonly MobileRunningScore[] {
+  return PLAYER_IDS.map((playerId, seatOrder) => {
     const leftovers = scores.flatMap((round) =>
       round.leftovers.filter((leftover) => leftover.playerId === playerId),
     );
     return {
       playerId,
       playerName: leftovers[0]?.playerName ?? playerName(messages, playerId, humanName),
-      cardCount: leftovers.reduce((total, leftover) => total + leftover.cardCount, 0),
+      totalPenaltyPoints: leftovers.reduce((total, leftover) => total + leftover.cardPoints, 0),
+      roundsNotWon: leftovers.length,
+      seatOrder,
     };
-  });
+  })
+    .sort(
+      (a, b) =>
+        a.totalPenaltyPoints - b.totalPenaltyPoints ||
+        a.roundsNotWon - b.roundsNotWon ||
+        a.seatOrder - b.seatOrder,
+    )
+    .map(({ seatOrder: _seatOrder, ...score }) => score);
 }
 
 export function LalSattiComputerScreen(): ReactElement {
@@ -408,6 +433,7 @@ export function LalSattiComputerScreen(): ReactElement {
                   {formatMessage(locale, 'lalSatti.leftoverLine', {
                     name: leftover.playerName,
                     count: leftover.cardCount,
+                    points: leftover.cardPoints,
                   })}
                 </Text>
               ))}
@@ -435,7 +461,7 @@ export function LalSattiComputerScreen(): ReactElement {
               <View key={score.playerId} style={styles.scoreRow}>
                 <Text style={styles.scoreName}>{score.playerName}</Text>
                 <Text style={styles.scoreValue}>
-                  {messages['lalSatti.scoreboardTotalLeft']}: {score.cardCount}
+                  {messages['lalSatti.scoreboardTotalLeft']}: {score.totalPenaltyPoints}
                 </Text>
               </View>
             ))}

@@ -194,6 +194,7 @@ describe('LalSattiEngine', () => {
       winnerIds: ['you'],
       reason: 'hand_empty',
       remainingCards: { you: 0, 'bot-a': 1 },
+      remainingPoints: { you: 0, 'bot-a': 6 },
     });
   });
 

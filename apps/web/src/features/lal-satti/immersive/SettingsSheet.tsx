@@ -138,6 +138,7 @@ export function SettingsSheet({
             <li>{t('lalSatti.quickRuleSevens')}</li>
             <li>{t('lalSatti.quickRuleBuild')}</li>
             <li>{t('lalSatti.quickRulePass')}</li>
+            <li>{t('lalSatti.quickRuleScoring')}</li>
           </ul>
         </div>
       </div>
