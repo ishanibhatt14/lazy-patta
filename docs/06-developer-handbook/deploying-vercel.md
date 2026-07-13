@@ -63,8 +63,15 @@ dashboard under **Authentication**:
 
 - **URL Configuration → Site URL:** your production Vercel URL
   (e.g. `https://lazy-patta.vercel.app`).
-- **Additional Redirect URLs:** add your Vercel preview wildcard
-  (e.g. `https://*-<your-team>.vercel.app`) so previews can complete sign-in.
+- **Additional Redirect URLs:** add your Vercel preview wildcard so preview
+  deploys can complete sign-in:
+
+  ```text
+  https://*-<team-or-account-slug>.vercel.app/**
+  ```
+
+  Replace `<team-or-account-slug>` with your Vercel team (or personal account)
+  slug. The trailing `/**` matches any path under each preview host.
 - **Email provider:** enabled; the app uses **one-time codes** (no password).
 - ⚠️ The built-in Supabase email sender is **heavily rate-limited** (a few
   messages/hour) — fine for a demo, but configure **custom SMTP** before real use.
