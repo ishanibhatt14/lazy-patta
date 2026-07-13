@@ -23,6 +23,16 @@ export const semanticColorTokens = {
   'card.back': 'maroon',
   'card.suitRed': 'errorRed',
   'card.suitBlack': 'ink',
+  // Immersive scene roles (Gadha Chor courtyard). The scene is a first-class
+  // surface: an evening sky, a peacock-green felt inside a wooden rim, with
+  // kumkum/indigo festive accents. A theme can remap these like any other role.
+  'scene.skyTop': 'duskTop',
+  'scene.skyBottom': 'duskBottom',
+  'scene.rim': 'wood',
+  'scene.rimEdge': 'woodDark',
+  'scene.feltDeep': 'peacockDeep',
+  'accent.indigo': 'indigo',
+  'accent.kumkum': 'kumkum',
 } as const satisfies Record<string, ColorPrimitive>;
 
 export type SemanticColorToken = keyof typeof semanticColorTokens;

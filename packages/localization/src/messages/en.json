@@ -273,5 +273,15 @@
   "lalSattiTutorial.sequenceTitle": "Build the sequence",
   "lalSattiTutorial.sequenceBody": "On your turn, play a card that extends a suit up or down from its seven — or pass if you can't.",
   "lalSattiTutorial.winTitle": "Race to empty your hand",
-  "lalSattiTutorial.winBody": "First to play every card wins the round."
+  "lalSattiTutorial.winBody": "First to play every card wins the round.",
+  "action.settings": "Settings",
+  "action.close": "Close",
+  "action.shareResult": "Share result",
+  "settings.largeCards": "Large cards",
+  "computer.todaysGadhaChor": "Today's Gadha Chor",
+  "computer.revealSafeTitle": "Safe this round",
+  "computer.revealSafeCount": "{count, plural, one {# player stayed safe} other {# players stayed safe}}",
+  "computer.revealNoSafe": "Everyone kept it close!",
+  "computer.shareResultText": "We played Gadha Chor on Lazy Patta — {name} was today's Gadha Chor!",
+  "computer.shareCopied": "Copied to clipboard"
 }

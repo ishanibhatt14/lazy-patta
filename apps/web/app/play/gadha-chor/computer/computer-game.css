@@ -1,3 +1,9 @@
+/* ------------------------------------------------------------------ *
+ * Preserved primitives (referenced by unit tests + reduced-motion).  *
+ * DrawAnimationLayer still emits .computer-pair-animation /           *
+ * .computer-pair-reduced and the bandhani dots; keep them stable.     *
+ * ------------------------------------------------------------------ */
+
 .computer-table-pattern {
   position: absolute;
   inset: 0;
@@ -13,10 +19,6 @@
 .computer-hidden-card--selectable {
   transform: translateY(-0.35rem);
   filter: drop-shadow(0 0 0.75rem var(--lp-brand-accent));
-}
-
-.computer-center-action {
-  border: 0.12rem solid color-mix(in srgb, var(--lp-action-secondary), transparent 32%);
 }
 
 .computer-pair-animation,
@@ -108,4 +110,309 @@
     opacity: 0;
     transform: scale(1.8);
   }
+}
+
+/* ------------------------------------------------------------------ *
+ * Immersive courtyard scene. One continuous game table — an evening  *
+ * sky, a peacock-green felt inside a wooden rim, sparing bandhani.    *
+ * Motion durations follow the redesign spec and collapse to 0 under  *
+ * reduced motion. All decorative layers are pointer/aria inert.       *
+ * ------------------------------------------------------------------ */
+
+.gc-shell {
+  --gc-lift: 100ms;
+  --gc-draw-travel: 280ms;
+  --gc-pair-remove: 420ms;
+  --gc-turn-transfer: 220ms;
+  --gc-reaction: 1500ms;
+  --gc-flip: 600ms;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+  color: var(--lp-text-onBrand);
+  background:
+    radial-gradient(120% 90% at 50% -10%, color-mix(in srgb, var(--lp-accent-indigo), transparent 55%) 0, transparent 60%),
+    linear-gradient(180deg, var(--lp-scene-skyTop) 0%, var(--lp-scene-skyBottom) 78%, var(--lp-scene-rimEdge) 100%);
+}
+
+/* Faint hanging-lantern glow near the top of the courtyard. */
+.gc-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(9rem 6rem at 18% 8%, color-mix(in srgb, var(--lp-action-secondary), transparent 72%) 0, transparent 70%),
+    radial-gradient(9rem 6rem at 82% 8%, color-mix(in srgb, var(--lp-accent-kumkum), transparent 76%) 0, transparent 70%);
+}
+
+.gc-scene {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0.5rem;
+  border-radius: 1.75rem;
+  padding: clamp(0.5rem, 2vw, 1.25rem);
+  /* Wooden / woven rim around the felt. */
+  background:
+    linear-gradient(135deg, var(--lp-scene-rim) 0%, var(--lp-scene-rimEdge) 100%);
+  box-shadow:
+    0 1.25rem 2.5rem rgba(0, 0, 0, 0.4),
+    inset 0 0 0 0.15rem color-mix(in srgb, var(--lp-action-secondary), transparent 60%);
+}
+
+@media (min-width: 1024px) {
+  .gc-scene {
+    aspect-ratio: 16 / 10;
+    max-height: calc(100dvh - 5rem);
+    margin: 0.75rem auto;
+    width: min(100%, 78rem);
+  }
+}
+
+.gc-felt {
+  position: absolute;
+  inset: clamp(0.5rem, 2vw, 1.25rem);
+  border-radius: 1.35rem;
+  background:
+    radial-gradient(120% 120% at 50% 42%, var(--lp-game-table) 0%, var(--lp-scene-feltDeep) 100%);
+  box-shadow: inset 0 0 3.5rem rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+/* Subtle original bandhani-inspired tie-dye dot lattice on the felt. */
+.gc-felt-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  pointer-events: none;
+  background:
+    radial-gradient(circle, var(--lp-action-secondary) 0 0.09rem, transparent 0.1rem) 0 0 / 2.1rem 2.1rem,
+    radial-gradient(circle, var(--lp-background-canvas) 0 0.06rem, transparent 0.07rem) 1.05rem 1.05rem / 2.1rem 2.1rem,
+    radial-gradient(circle, var(--lp-accent-kumkum) 0 0.05rem, transparent 0.06rem) 1.05rem 0 / 2.1rem 2.1rem;
+}
+
+/* A woven kinari border just inside the felt. */
+.gc-felt-border {
+  position: absolute;
+  inset: 0.55rem;
+  border-radius: 1rem;
+  border: 0.12rem dashed color-mix(in srgb, var(--lp-action-secondary), transparent 55%);
+  pointer-events: none;
+}
+
+.gc-regions {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100%;
+  gap: clamp(0.25rem, 1.2vh, 0.75rem);
+  padding: clamp(0.5rem, 2vw, 1.1rem);
+}
+
+/* ---- Player pods -------------------------------------------------- */
+
+.gc-pod-ring {
+  position: absolute;
+  inset: -0.3rem;
+  border-radius: 999rem;
+  border: 0.16rem solid transparent;
+  transition: border-color var(--gc-turn-transfer) ease, box-shadow var(--gc-turn-transfer) ease;
+}
+
+.gc-pod-ring[data-active='true'] {
+  border-color: var(--lp-action-secondary);
+  box-shadow:
+    0 0 0 0.12rem color-mix(in srgb, var(--lp-action-secondary), transparent 30%),
+    0 0 1.1rem color-mix(in srgb, var(--lp-action-secondary), transparent 40%);
+  animation: gc-ring-pulse 1600ms ease-in-out infinite;
+}
+
+@keyframes gc-ring-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0.12rem color-mix(in srgb, var(--lp-action-secondary), transparent 30%),
+      0 0 0.9rem color-mix(in srgb, var(--lp-action-secondary), transparent 55%);
+  }
+  50% {
+    box-shadow:
+      0 0 0 0.16rem color-mix(in srgb, var(--lp-action-secondary), transparent 20%),
+      0 0 1.5rem color-mix(in srgb, var(--lp-action-secondary), transparent 25%);
+  }
+}
+
+.gc-pod-backs > span {
+  box-shadow: 0 0.1rem 0.2rem rgba(0, 0, 0, 0.35);
+}
+
+/* ---- Card fans ---------------------------------------------------- */
+
+.gc-hand-card {
+  transition:
+    transform var(--gc-lift) ease-out,
+    filter var(--gc-lift) ease-out;
+  transform-origin: bottom center;
+}
+
+.gc-hand-card:hover,
+.gc-hand-card:focus-visible,
+.gc-hand-card[data-lifted='true'] {
+  transform: translateY(-0.9rem) scale(1.04);
+  filter: drop-shadow(0 0.5rem 0.6rem rgba(0, 0, 0, 0.4));
+  z-index: 5;
+}
+
+.gc-hand-card[data-drawn='true'] {
+  animation: gc-draw-in var(--gc-draw-travel) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes gc-draw-in {
+  0% {
+    opacity: 0;
+    transform: translate(-1.5rem, -2.4rem) rotate(-8deg) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0) scale(1);
+  }
+}
+
+.gc-fan-card {
+  transition:
+    transform var(--gc-lift) ease-out,
+    filter var(--gc-lift) ease-out;
+}
+
+.gc-fan-card[data-selectable='true']:hover,
+.gc-fan-card[data-selectable='true']:focus-visible {
+  transform: translateY(-0.8rem);
+  filter: drop-shadow(0 0 0.7rem var(--lp-action-secondary));
+}
+
+.gc-fan-card[data-selected='true'] {
+  transform: translateY(-1.2rem) scale(1.05);
+  filter: drop-shadow(0 0 0.9rem var(--lp-action-secondary));
+}
+
+/* ---- Central discard pile ---------------------------------------- */
+
+.gc-discard {
+  position: relative;
+  width: 3rem;
+  height: 4rem;
+}
+
+.gc-discard-card {
+  position: absolute;
+  inset: 0;
+  border-radius: 0.4rem;
+  border: 0.06rem solid color-mix(in srgb, var(--lp-action-secondary), transparent 40%);
+  background: var(--lp-card-back);
+  box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.4);
+}
+
+.gc-discard[data-just-added='true'] .gc-discard-card:last-child {
+  animation: gc-pair-drop var(--gc-pair-remove) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes gc-pair-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-2.6rem) rotate(-10deg) scale(0.8);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(-4deg) scale(1);
+  }
+}
+
+/* ---- Reaction bubbles -------------------------------------------- */
+
+.gc-reaction {
+  animation: gc-reaction-pop var(--gc-reaction) ease-out both;
+}
+
+@keyframes gc-reaction-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(0.4rem) scale(0.7);
+  }
+  12% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-0.2rem) scale(0.98);
+  }
+}
+
+/* ---- Gadha reveal ------------------------------------------------- */
+
+.gc-reveal-backdrop {
+  animation: gc-fade-in 300ms ease-out both;
+}
+
+.gc-reveal-card {
+  perspective: 900px;
+}
+
+.gc-reveal-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  animation: gc-flip var(--gc-flip) cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 220ms;
+}
+
+@keyframes gc-flip {
+  0% {
+    transform: rotateY(180deg);
+  }
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+
+@keyframes gc-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Reduced motion: hold every state at its resting frame. Correctness  *
+ * never depends on animation, so this is purely cosmetic.             *
+ * ------------------------------------------------------------------ */
+
+[data-reduced-motion='true'] .gc-pod-ring[data-active='true'],
+[data-reduced-motion='true'] .gc-hand-card,
+[data-reduced-motion='true'] .gc-hand-card[data-drawn='true'],
+[data-reduced-motion='true'] .gc-fan-card,
+[data-reduced-motion='true'] .gc-discard[data-just-added='true'] .gc-discard-card:last-child,
+[data-reduced-motion='true'] .gc-reaction,
+[data-reduced-motion='true'] .gc-reveal-inner,
+[data-reduced-motion='true'] .gc-reveal-backdrop {
+  animation: none;
+  transition: none;
+}
+
+[data-reduced-motion='true'] .gc-hand-card[data-drawn='true'],
+[data-reduced-motion='true'] .gc-reveal-inner {
+  opacity: 1;
+  transform: none;
 }

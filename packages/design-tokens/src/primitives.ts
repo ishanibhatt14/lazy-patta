@@ -13,6 +13,14 @@ export const primitives = {
     feltGreen: '#1F6B4F',
     ink: '#1F1B16',
     errorRed: '#C62828',
+    // Immersive courtyard scene palette (Gadha Chor table). Additive, role-free.
+    kumkum: '#C0392B',
+    indigo: '#28356B',
+    peacockDeep: '#0A3D3A',
+    wood: '#6B4A2E',
+    woodDark: '#432B18',
+    duskTop: '#2E2340',
+    duskBottom: '#7A4A38',
   },
   space: {
     xs: 4,

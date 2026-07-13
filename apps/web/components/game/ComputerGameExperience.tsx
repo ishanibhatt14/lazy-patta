@@ -10,7 +10,7 @@ import {
 } from '../../lib/computer-game/controller';
 import { botDelay, pacingFor } from '../../lib/computer-game/pacing';
 import { HUMAN_ID } from '../../lib/computer-game/players';
-import { createCryptoRng } from '../../lib/computer-game/rng';
+import { createCryptoRng, createSeededRng } from '../../lib/computer-game/rng';
 import type { ComputerGameIntent } from '../../lib/computer-game/types';
 import { selectViewState } from '../../lib/computer-game/view-model';
 import { createTranslator } from '../../lib/i18n';
@@ -18,9 +18,8 @@ import { playCue } from '../../lib/sound';
 
 import { ComputerGameSetup } from './ComputerGameSetup';
 import { GameErrorBoundary } from './GameErrorBoundary';
-import { GameStatusPanel } from './GameStatusPanel';
-import { GameTable } from './GameTable';
 import { HowToPlayTutorial } from './HowToPlayTutorial';
+import { ImmersiveGameShell } from './immersive/ImmersiveGameShell';
 
 function prefersReducedMotion(): boolean {
   return (
@@ -30,15 +29,29 @@ function prefersReducedMotion(): boolean {
   );
 }
 
+/** A `?seed=` query param makes the deal reproducible for visual-regression
+ * tests; production play always uses crypto randomness. */
+function seededRngFactory(): (() => ReturnType<typeof createCryptoRng>) | null {
+  if (typeof window === 'undefined') return null;
+  const raw = new URLSearchParams(window.location.search).get('seed');
+  if (raw === null) return null;
+  const seed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(seed)) return null;
+  return () => createSeededRng(seed);
+}
+
 export function ComputerGameExperience(): ReactElement {
+  const rngFactoryRef = useRef<() => ReturnType<typeof createCryptoRng>>(
+    seededRngFactory() ?? createCryptoRng,
+  );
   const controllerRef = useRef<ComputerGameController | null>(null);
-  const pacingRngRef = useRef(createCryptoRng());
+  const pacingRngRef = useRef(rngFactoryRef.current());
   const startedRef = useRef(false);
   const lastDrawSeqRef = useRef<string | null>(null);
   const [tutorialOpen, setTutorialOpen] = useState(false);
 
   if (controllerRef.current === null) {
-    controllerRef.current = createComputerGameController(createCryptoRng(), {
+    controllerRef.current = createComputerGameController(rngFactoryRef.current(), {
       playerCount: 4,
       locale: 'en',
       reducedMotion: prefersReducedMotion(),
@@ -142,27 +155,18 @@ export function ComputerGameExperience(): ReactElement {
         </main>
       )}
     >
-      <main
-        className="flex min-h-screen flex-col gap-4 px-3 py-4 lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:px-6"
-        data-reduced-motion={reducedMotion ? 'true' : 'false'}
-      >
-        <GameTable
-          view={view}
-          locale={locale}
-          onChooseCard={(positionToken) => dispatch({ type: 'chooseHiddenCard', positionToken })}
-          onRematch={() => dispatch({ type: 'rematch' })}
-          onRecover={() => dispatch({ type: 'recover' })}
-        />
-        <GameStatusPanel
-          view={view}
-          locale={locale}
-          onToggleSound={() => dispatch({ type: 'toggleSound' })}
-          onToggleReducedMotion={() => dispatch({ type: 'toggleReducedMotion' })}
-          onLocaleChange={(next) => dispatch({ type: 'setLocale', locale: next })}
-          onHowToPlay={() => setTutorialOpen(true)}
-        />
-        {tutorial}
-      </main>
+      <ImmersiveGameShell
+        view={view}
+        locale={locale}
+        onChooseCard={(positionToken) => dispatch({ type: 'chooseHiddenCard', positionToken })}
+        onRematch={() => dispatch({ type: 'rematch' })}
+        onRecover={() => dispatch({ type: 'recover' })}
+        onToggleSound={() => dispatch({ type: 'toggleSound' })}
+        onToggleReducedMotion={() => dispatch({ type: 'toggleReducedMotion' })}
+        onLocaleChange={(next) => dispatch({ type: 'setLocale', locale: next })}
+        onHowToPlay={() => setTutorialOpen(true)}
+      />
+      {tutorial}
     </GameErrorBoundary>
   );
 }

@@ -273,5 +273,15 @@
   "lalSattiTutorial.sequenceTitle": "क्रम बनाएं",
   "lalSattiTutorial.sequenceBody": "अपनी बारी पर, सत्ते से ऊपर या नीचे क्रम बढ़ाने वाला पत्ता खेलें — न खेल सकें तो पास करें।",
   "lalSattiTutorial.winTitle": "हाथ खाली करने की दौड़",
-  "lalSattiTutorial.winBody": "जो सबसे पहले सभी पत्ते खेल दे, वह राउंड जीतता है।"
+  "lalSattiTutorial.winBody": "जो सबसे पहले सभी पत्ते खेल दे, वह राउंड जीतता है।",
+  "action.settings": "सेटिंग्स",
+  "action.close": "बंद करें",
+  "action.shareResult": "परिणाम साझा करें",
+  "settings.largeCards": "बड़े पत्ते",
+  "computer.todaysGadhaChor": "आज का गधा चोर",
+  "computer.revealSafeTitle": "इस राउंड में सुरक्षित",
+  "computer.revealSafeCount": "{count, plural, one {# खिलाड़ी सुरक्षित रहा} other {# खिलाड़ी सुरक्षित रहे}}",
+  "computer.revealNoSafe": "सबने खेल को रोचक बनाए रखा!",
+  "computer.shareResultText": "हमने लेज़ी पट्टा पर गधा चोर खेला — {name} आज का गधा चोर था!",
+  "computer.shareCopied": "क्लिपबोर्ड पर कॉपी हुआ"
 }

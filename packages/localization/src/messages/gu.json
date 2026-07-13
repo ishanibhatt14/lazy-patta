@@ -273,5 +273,15 @@
   "lalSattiTutorial.sequenceTitle": "ક્રમ બનાવો",
   "lalSattiTutorial.sequenceBody": "તમારા વારામાં, સત્તાથી ઉપર કે નીચે ક્રમ વધારે એવું પત્તું રમો — ન રમી શકો તો પાસ કરો.",
   "lalSattiTutorial.winTitle": "હાથ ખાલી કરવાની હરીફાઈ",
-  "lalSattiTutorial.winBody": "જે સૌથી પહેલાં બધાં પત્તાં રમી દે તે રાઉન્ડ જીતે છે."
+  "lalSattiTutorial.winBody": "જે સૌથી પહેલાં બધાં પત્તાં રમી દે તે રાઉન્ડ જીતે છે.",
+  "action.settings": "સેટિંગ્સ",
+  "action.close": "બંધ કરો",
+  "action.shareResult": "પરિણામ શેર કરો",
+  "settings.largeCards": "મોટા પત્તાં",
+  "computer.todaysGadhaChor": "આજનો ગધા ચોર",
+  "computer.revealSafeTitle": "આ રાઉન્ડમાં સલામત",
+  "computer.revealSafeCount": "{count, plural, one {# ખેલાડી સલામત રહ્યા} other {# ખેલાડીઓ સલામત રહ્યા}}",
+  "computer.revealNoSafe": "બધાએ રમત રસપ્રદ રાખી!",
+  "computer.shareResultText": "અમે લેઝી પટ્ટા પર ગધા ચોર રમ્યા — {name} આજના ગધા ચોર હતા!",
+  "computer.shareCopied": "ક્લિપબોર્ડ પર કૉપિ થયું"
 }
