@@ -7,7 +7,7 @@
     "lint": "eslint src --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:rls": "SUPABASE_RLS_LIVE=1 vitest run rls-behavioral"
+    "test:rls": "SUPABASE_RLS_LIVE=1 vitest run behavioral"
   },
   "devDependencies": {
     "@lazy-patta/eslint-config": "workspace:*",
