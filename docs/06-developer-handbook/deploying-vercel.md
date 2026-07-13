@@ -47,16 +47,15 @@ The Supabase CLI is already a dev dependency. From the repo root:
 ```bash
 pnpm supabase login                      # once
 pnpm exec supabase link --project-ref <ref>
-pnpm exec supabase db push               # applies 0001 → 0006 in order
+pnpm exec supabase db push               # applies 0001 → 0007 in order
 ```
 
 Because the project is brand new, `db push` runs every migration from scratch —
-this is the definitive proof the migration set is forward-clean (local dev had
-0006 applied additively, so this is the real check).
+the definitive proof the migration set is forward-clean.
 
 Then run the read-only **schema / security-boundary** check script. The first row
 (`0_overall`) rolls up the rest; every row must read `PASS` (exact migration set
-0001–0006, tables + RLS, authority tables server-only with no client DML and no
+0001–0007, tables + RLS, authority tables server-only with no client DML and no
 policies, the exact lifecycle policy set, and the RPCs `SECURITY DEFINER` with a
 pinned `search_path` and service-role-only `EXECUTE`):
 

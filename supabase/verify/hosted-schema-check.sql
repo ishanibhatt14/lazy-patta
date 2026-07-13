@@ -30,14 +30,15 @@
 with
   -- ── ground-truth expectations ────────────────────────────────────────────
   expected_migrations(version) as (
-    values ('0001'), ('0002'), ('0003'), ('0004'), ('0005'), ('0006')
+    values ('0001'), ('0002'), ('0003'), ('0004'), ('0005'), ('0006'), ('0007')
   ),
   expected_tables(t) as (
     values ('profiles'), ('user_preferences'), ('account_deletion_requests'),
            ('rooms'), ('room_seats'), ('games'), ('game_private_hands'),
-           ('game_events'), ('game_authority_state'), ('game_action_log')
+           ('game_events'), ('game_authority_state'), ('game_action_log'),
+           ('lal_satti_score_sessions'), ('lal_satti_score_rounds')
   ),
-  -- The full lifecycle policy set: (table, policy, command). Roles are asserted
+  -- The full application policy set: (table, policy, command). Roles are asserted
   -- separately (check 8) to be exactly {public}.
   expected_policies(tablename, policyname, cmd) as (
     values
@@ -54,7 +55,15 @@ with
       ('room_seats',                'room_seats_select_member',                    'SELECT'),
       ('games',                     'games_select_member',                         'SELECT'),
       ('game_private_hands',        'game_private_hands_select_own',               'SELECT'),
-      ('game_events',               'game_events_select_member',                   'SELECT')
+      ('game_events',               'game_events_select_member',                   'SELECT'),
+      ('lal_satti_score_sessions',  'lal_satti_score_sessions_select_own',         'SELECT'),
+      ('lal_satti_score_sessions',  'lal_satti_score_sessions_insert_own',         'INSERT'),
+      ('lal_satti_score_sessions',  'lal_satti_score_sessions_update_own',         'UPDATE'),
+      ('lal_satti_score_sessions',  'lal_satti_score_sessions_delete_own',         'DELETE'),
+      ('lal_satti_score_rounds',    'lal_satti_score_rounds_select_own_session',   'SELECT'),
+      ('lal_satti_score_rounds',    'lal_satti_score_rounds_insert_own_session',   'INSERT'),
+      ('lal_satti_score_rounds',    'lal_satti_score_rounds_update_own_session',   'UPDATE'),
+      ('lal_satti_score_rounds',    'lal_satti_score_rounds_delete_own_session',   'DELETE')
   ),
   -- Exact identity signatures of the two persistence RPCs.
   expected_functions(proname, args) as (
@@ -64,7 +73,7 @@ with
   ),
 
   checks as (
-    -- 1. Exactly the six expected migrations are applied (no missing versions).
+    -- 1. Exactly the expected migrations (0001–0007) are applied (none missing).
     select
       '1_migrations_exact' as check_name,
       'present=' || coalesce((select string_agg(version, ',' order by version)
