@@ -6,10 +6,10 @@ whenever a file here changes.
 
 ## Files
 
-| File | Size | Mode | Background | Use |
-| --- | --- | --- | --- | --- |
-| `lazy-patta-logo-transparent.png` | 1024×1024 | RGBA (transparent) | none | In-app headers, welcome screen, website, marketing, splash artwork |
-| `lazy-patta-ios-icon-opaque-maroon-1024.png` | 1024×1024 | RGB (no alpha) | maroon `#7A1F2B` | iOS/Android launcher icon, PWA/Apple touch icon |
+| File                                         | Size      | Mode               | Background       | Use                                                                |
+| -------------------------------------------- | --------- | ------------------ | ---------------- | ------------------------------------------------------------------ |
+| `lazy-patta-logo-transparent.png`            | 1024×1024 | RGBA (transparent) | none             | In-app headers, welcome screen, website, marketing, splash artwork |
+| `lazy-patta-ios-icon-opaque-maroon-1024.png` | 1024×1024 | RGB (no alpha)     | maroon `#7A1F2B` | iOS/Android launcher icon, PWA/Apple touch icon                    |
 
 `#7A1F2B` is the design-system `primitives.maroon` (= `action.primary`), so the
 opaque background matches the app chrome exactly.

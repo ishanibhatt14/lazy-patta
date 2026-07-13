@@ -56,7 +56,7 @@ describe('supabase RLS foundation', () => {
 });
 
 describe('lal_satti_score_sessions RLS', () => {
-  const sql = sqlFor('0006_lal_satti_score_sessions.sql').toLowerCase();
+  const sql = sqlFor('0007_lal_satti_score_sessions.sql').toLowerCase();
 
   it('enables RLS on score sessions and score rounds', () => {
     expect(sql).toContain('alter table public.lal_satti_score_sessions enable row level security');

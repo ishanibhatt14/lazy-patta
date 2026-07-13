@@ -4,7 +4,7 @@
 [ADR-0009](./0009-postgres-rpc-authority-boundary.md) (room lifecycle → `SECURITY
 DEFINER` Postgres RPCs) and [ADR-0010](./0010-nextjs-route-handler-game-authority.md)
 (live gameplay → a Next.js Route Handler running the TypeScript engine, committing
-through a thin persistence RPC). The authority *principle* below is unchanged; only
+through a thin persistence RPC). The authority _principle_ below is unchanged; only
 the runtime host differs from the original Edge-Function sketch.
 
 ## Context

@@ -2,7 +2,7 @@
 
 How Lazy Patta's web app reaches a public URL. There are two tiers; pick per goal.
 
-- **Tier A — UI-only preview (no backend).** Deploy with *no* Supabase env vars.
+- **Tier A — UI-only preview (no backend).** Deploy with _no_ Supabase env vars.
   Home screen, computer play, tutorial, and gallery work; online play shows a
   friendly "not configured" notice by design. Nothing below the "Tier A" line is
   needed.
@@ -80,6 +80,7 @@ dashboard under **Authentication**:
 
   Replace `<team-or-account-slug>` with your Vercel team (or personal account)
   slug. The trailing `/**` matches any path under each preview host.
+
 - **Email provider:** enabled; the app uses **one-time codes** (no password).
 - ⚠️ The built-in Supabase email sender is **heavily rate-limited** (a few
   messages/hour) — fine for a demo, but configure **custom SMTP** before real use.
@@ -92,12 +93,12 @@ Same as Tier A steps 1–4 (Root Directory `apps/web`, Next.js, Node 22.x).
 
 Apply to **Production** and **Preview** (and Development if you use `vercel dev`):
 
-| Name | Value | Notes |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | `https://<ref>.supabase.co` | Browser-safe |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon key | Browser-safe; RLS-scoped |
-| `SUPABASE_URL` | `https://<ref>.supabase.co` | Server-only |
-| `SUPABASE_SERVICE_ROLE_KEY` | service_role key | **Server-only. Mark sensitive. NEVER prefix `NEXT_PUBLIC_`, never log.** |
+| Name                            | Value                       | Notes                                                                    |
+| ------------------------------- | --------------------------- | ------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_SUPABASE_URL`      | `https://<ref>.supabase.co` | Browser-safe                                                             |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon key                    | Browser-safe; RLS-scoped                                                 |
+| `SUPABASE_URL`                  | `https://<ref>.supabase.co` | Server-only                                                              |
+| `SUPABASE_SERVICE_ROLE_KEY`     | service_role key            | **Server-only. Mark sensitive. NEVER prefix `NEXT_PUBLIC_`, never log.** |
 
 The authority route handlers (`/api/rooms/[roomId]/start`,
 `/api/games/[gameId]/action`) read `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` at
@@ -120,7 +121,7 @@ Push the branch or promote to production, then on the live URL:
 
 ## Operational notes
 
-- **Preview isolation:** all preview deploys point at the *one* hosted Supabase
+- **Preview isolation:** all preview deploys point at the _one_ hosted Supabase
   project unless you adopt Supabase branching / per-branch projects. Acceptable
   for now; revisit before inviting outside testers.
 - **Rollback:** Vercel supports instant rollback to a previous deployment. Database

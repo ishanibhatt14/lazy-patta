@@ -47,7 +47,7 @@ shape.
   would span the function runtime. Edge Functions remain appropriate for work
   that is genuinely off-transaction (e.g. sending an email, calling a third
   party), not for the atomic mutate-and-bump.
-- **Client writes guarded only by RLS.** Rejected: RLS can gate *rows* but cannot
+- **Client writes guarded only by RLS.** Rejected: RLS can gate _rows_ but cannot
   express multi-row invariants (capacity, single host seat, monotonic version)
   atomically; those belong in a transactional function.
 - **A dedicated stateful game server.** Rejected for MVP for the same reasons as

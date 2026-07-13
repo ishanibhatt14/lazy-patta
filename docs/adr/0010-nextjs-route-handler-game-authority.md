@@ -7,7 +7,7 @@ multiplayer) and scopes ADR-0009 (Postgres RPC authority boundary).
 
 ADR-0003 requires the **server** to be authoritative for every hidden-state
 mutation, and sketched the runtime as a Supabase **Edge Function** that runs the
-pure engine inside a locked transaction. ADR-0009 then moved the *room lifecycle*
+pure engine inside a locked transaction. ADR-0009 then moved the _room lifecycle_
 authority (create/join/ready/bot/leave) into **`SECURITY DEFINER` Postgres RPCs**,
 because those operations are pure SQL invariants (capacity, single host, seat
 allocation) with no game rules.
@@ -33,10 +33,10 @@ handler:
   (`init` / `reduce` / `botMove`) with a **crypto RNG**, and computes the new
   public snapshot + per-player hands + events;
 - **persists atomically** by calling a thin `SECURITY DEFINER` persistence RPC
-  (`start_game`, `commit_game_action`) with the *already-computed* result. That
+  (`start_game`, `commit_game_action`) with the _already-computed_ result. That
   RPC contains **no game rules**: it locks the `games` row, enforces the
   `expectedVersion` optimistic-concurrency guard and `(game_id, actor_id,
-  client_action_id)` idempotency, and writes `games` + `game_authority_state` +
+client_action_id)` idempotency, and writes `games` + `game_authority_state` +
   `game_private_hands` + `game_events` in one transaction.
 
 The service-role key is used **only** server-side inside these handlers; it is
