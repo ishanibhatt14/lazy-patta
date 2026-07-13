@@ -13,6 +13,8 @@ import { buildLalSattiRoster, LAL_SATTI_HUMAN_ID, rosterName } from './players';
 import type {
   LalSattiControllerState,
   LalSattiIntent,
+  LalSattiRoundScore,
+  LalSattiRunningScore,
   LalSattiSeatView,
   LalSattiViewEvent,
   LalSattiViewState,
@@ -35,13 +37,32 @@ function setupState(locale: Locale, playerCount = 4): LalSattiControllerState {
   return {
     phase: 'setup',
     playerCount,
+    humanName: '',
     locale,
     reducedMotion: false,
     game: null,
     events: [],
+    roundScores: [],
     lastEngineEvents: [],
+    hasHydratedSession: false,
     seq: 0,
   };
+}
+
+function normalizeHumanName(name: string): string {
+  return name.trim().replace(/\s+/g, ' ').slice(0, 24);
+}
+
+function canStart(state: LalSattiControllerState): boolean {
+  return normalizeHumanName(state.humanName).length > 0;
+}
+
+function playerDisplayName(state: LalSattiControllerState, playerId: string): string {
+  if (playerId === LAL_SATTI_HUMAN_ID) {
+    return normalizeHumanName(state.humanName) || LAL_SATTI_HUMAN_ID;
+  }
+
+  return rosterName(buildLalSattiRoster(state.playerCount), playerId);
 }
 
 function currentPlayerId(state: LalSattiControllerState): string | null {
@@ -91,14 +112,35 @@ function reduceEngineAction(
     seq += 1;
     viewEvents = appendEvent({ ...state, seq, events: viewEvents }, 'lalSatti.eventResult');
   }
+  const completedRound = nextGame.phase === 'completed' ? roundScoreFor(state, nextGame) : null;
 
   return {
     ...state,
     phase: nextGame.phase === 'completed' ? 'result' : 'playing',
     game: nextGame,
     lastEngineEvents: engineEvents,
+    roundScores: completedRound ? [...state.roundScores, completedRound] : state.roundScores,
     seq,
     events: viewEvents,
+  };
+}
+
+function roundScoreFor(
+  state: LalSattiControllerState,
+  completedGame: NonNullable<LalSattiControllerState['game']>,
+): LalSattiRoundScore {
+  const winnerIds = new Set(completedGame.winnerIds);
+  return {
+    id: `lal-satti-round-${state.roundScores.length + 1}`,
+    roundNumber: state.roundScores.length + 1,
+    winnerNames: completedGame.winnerIds.map((id) => playerDisplayName(state, id)),
+    leftovers: completedGame.players
+      .filter((player) => !winnerIds.has(player.id))
+      .map((player) => ({
+        playerId: player.id,
+        playerName: playerDisplayName(state, player.id),
+        cardCount: player.hand.length,
+      })),
   };
 }
 
@@ -115,12 +157,11 @@ function eventValues(
   state: LalSattiControllerState,
   action: ReturnType<LalSattiEngine['legalActions']>[number],
 ): MessageValues {
-  const roster = buildLalSattiRoster(state.playerCount);
   if (action.type === 'PASS') {
-    return { name: rosterName(roster, action.actor) };
+    return { name: playerDisplayName(state, action.actor) };
   }
 
-  const actor = rosterName(roster, action.actor);
+  const actor = playerDisplayName(state, action.actor);
   const card = state.game?.players
     .find((player) => player.id === action.actor)
     ?.hand.find((candidate) => candidate.id === action.cardId);
@@ -158,13 +199,24 @@ function dispatchWithRng(
     case 'setPlayerCount':
       if (state.phase !== 'setup') return state;
       return { ...state, playerCount: clampPlayerCount(intent.playerCount) };
+    case 'setHumanName':
+      if (state.phase !== 'setup') return state;
+      return { ...state, humanName: intent.humanName.slice(0, 32) };
     case 'setLocale':
       return { ...state, locale: intent.locale };
+    case 'hydrateSession':
+      if (state.hasHydratedSession) return state;
+      return {
+        ...state,
+        humanName: intent.humanName?.slice(0, 32) ?? state.humanName,
+        roundScores: intent.roundScores ?? state.roundScores,
+        hasHydratedSession: true,
+      };
     case 'toggleReducedMotion':
       return { ...state, reducedMotion: !state.reducedMotion };
     case 'start':
-      if (state.phase !== 'setup') return state;
-      return startGame(state, rng);
+      if (state.phase !== 'setup' || !canStart(state)) return state;
+      return startGame({ ...state, humanName: normalizeHumanName(state.humanName) }, rng);
     case 'playCard': {
       if (!state.game || currentPlayerId(state) !== LAL_SATTI_HUMAN_ID) return state;
       const action = engine
@@ -187,7 +239,16 @@ function dispatchWithRng(
     }
     case 'rematch':
       if (state.phase !== 'result') return state;
-      return startGame(setupState(state.locale, state.playerCount), rng);
+      return startGame(
+        {
+          ...setupState(state.locale, state.playerCount),
+          humanName: state.humanName,
+          reducedMotion: state.reducedMotion,
+          roundScores: state.roundScores,
+          hasHydratedSession: state.hasHydratedSession,
+        },
+        rng,
+      );
   }
 }
 
@@ -199,8 +260,11 @@ function seatsFor(state: LalSattiControllerState): readonly LalSattiSeatView[] {
     const player = state.game?.players.find((candidate) => candidate.id === entry.id);
     return {
       id: entry.id,
-      name: entry.name,
-      avatarInitial: entry.avatarInitial,
+      name: playerDisplayName(state, entry.id),
+      avatarInitial:
+        entry.id === LAL_SATTI_HUMAN_ID
+          ? (normalizeHumanName(state.humanName)[0]?.toUpperCase() ?? 'Y')
+          : entry.avatarInitial,
       isSelf: entry.id === LAL_SATTI_HUMAN_ID,
       isActive: current === entry.id,
       isFinished: player?.status === 'finished',
@@ -214,12 +278,21 @@ function humanHand(state: LalSattiControllerState): readonly Card[] {
 }
 
 function winnerNames(state: LalSattiControllerState): readonly string[] {
-  const roster = buildLalSattiRoster(state.playerCount);
-  return (
-    state.game?.winnerIds.map((id) =>
-      id === LAL_SATTI_HUMAN_ID ? LAL_SATTI_HUMAN_ID : rosterName(roster, id),
-    ) ?? []
-  );
+  return state.game?.winnerIds.map((id) => playerDisplayName(state, id)) ?? [];
+}
+
+function runningScoresFor(state: LalSattiControllerState): readonly LalSattiRunningScore[] {
+  return buildLalSattiRoster(state.playerCount).map((entry) => {
+    const leftovers = state.roundScores.flatMap((round) =>
+      round.leftovers.filter((leftover) => leftover.playerId === entry.id),
+    );
+    return {
+      playerId: entry.id,
+      playerName: playerDisplayName(state, entry.id),
+      totalLeftoverCards: leftovers.reduce((total, leftover) => total + leftover.cardCount, 0),
+      roundsNotWon: leftovers.length,
+    };
+  });
 }
 
 export function selectLalSattiViewState(state: LalSattiControllerState): LalSattiViewState {
@@ -230,14 +303,16 @@ export function selectLalSattiViewState(state: LalSattiControllerState): LalSatt
   const current = currentPlayerId(state);
   const currentPlayerName =
     current === LAL_SATTI_HUMAN_ID
-      ? LAL_SATTI_HUMAN_ID
+      ? playerDisplayName(state, LAL_SATTI_HUMAN_ID)
       : current
-        ? rosterName(buildLalSattiRoster(state.playerCount), current)
+        ? playerDisplayName(state, current)
         : '';
 
   return {
     phase: state.phase,
     playerCount: state.playerCount,
+    humanName: state.humanName,
+    canStart: canStart(state),
     locale: state.locale,
     reducedMotion: state.reducedMotion,
     seats: seatsFor(state),
@@ -245,6 +320,7 @@ export function selectLalSattiViewState(state: LalSattiControllerState): LalSatt
     ownHand: humanHand(state),
     playableCardIds,
     currentPlayerName,
+    isHumanTurn: current === LAL_SATTI_HUMAN_ID,
     canPass: actions.some((action) => action.type === 'PASS'),
     instructionKey:
       state.phase === 'setup'
@@ -268,6 +344,8 @@ export function selectLalSattiViewState(state: LalSattiControllerState): LalSatt
     statusValues: current ? { name: currentPlayerName } : undefined,
     events: state.events,
     winnerNames: winnerNames(state),
+    roundScores: state.roundScores,
+    runningScores: runningScoresFor(state),
   };
 }
 

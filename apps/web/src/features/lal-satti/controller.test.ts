@@ -6,12 +6,15 @@ import {
   selectLalSattiViewState,
   type LalSattiController,
 } from './controller';
-import { LAL_SATTI_HUMAN_ID } from './players';
 import type { LalSattiControllerState } from './types';
 
 function startedController(seed = 2) {
   const controller = createLalSattiController(seededRng(seed));
-  const state = controller.dispatch(controller.initialState, { type: 'start' });
+  const named = controller.dispatch(controller.initialState, {
+    type: 'setHumanName',
+    humanName: 'Isha',
+  });
+  const state = controller.dispatch(named, { type: 'start' });
   return { controller, state };
 }
 
@@ -22,16 +25,33 @@ function advanceToHumanTurn(
   let current = state;
   for (let step = 0; step < 80; step += 1) {
     const view = selectLalSattiViewState(current);
-    if (
-      view.phase === 'playing' &&
-      view.currentPlayerName === LAL_SATTI_HUMAN_ID &&
-      view.playableCardIds.length > 0
-    ) {
+    if (view.phase === 'playing' && view.isHumanTurn && view.playableCardIds.length > 0) {
       return current;
     }
     current = controller.dispatch(current, { type: 'botStep' });
   }
   throw new Error('HUMAN_TURN_NOT_REACHED');
+}
+
+function finishRound(
+  controller: LalSattiController,
+  state: LalSattiControllerState,
+): LalSattiControllerState {
+  let current = state;
+  for (let step = 0; step < 300; step += 1) {
+    const view = selectLalSattiViewState(current);
+    if (view.phase === 'result') return current;
+
+    if (view.isHumanTurn) {
+      current =
+        view.playableCardIds.length > 0
+          ? controller.dispatch(current, { type: 'playCard', cardId: view.playableCardIds[0]! })
+          : controller.dispatch(current, { type: 'pass' });
+    } else {
+      current = controller.dispatch(current, { type: 'botStep' });
+    }
+  }
+  throw new Error('ROUND_NOT_FINISHED');
 }
 
 describe('Lal Satti web controller', () => {
@@ -75,5 +95,35 @@ describe('Lal Satti web controller', () => {
 
     expect(afterBot.game?.stateVersion).toBe(1);
     expect(afterBot.events[0]?.messageKey).toBe('lalSatti.eventCardPlayed');
+  });
+
+  it('requires a table name before starting', () => {
+    const controller = createLalSattiController(seededRng(2));
+    const unnamed = controller.dispatch(controller.initialState, { type: 'start' });
+    const named = controller.dispatch(controller.initialState, {
+      type: 'setHumanName',
+      humanName: '  Isha   Bhatt  ',
+    });
+    const started = controller.dispatch(named, { type: 'start' });
+
+    expect(selectLalSattiViewState(unnamed).phase).toBe('setup');
+    expect(selectLalSattiViewState(named).canStart).toBe(true);
+    expect(selectLalSattiViewState(started).phase).toBe('playing');
+    expect(selectLalSattiViewState(started).seats[0]?.name).toBe('Isha Bhatt');
+  });
+
+  it('records leftover cards and running totals when a round finishes', () => {
+    const { controller, state } = startedController(5);
+    const result = finishRound(controller, state);
+    const view = selectLalSattiViewState(result);
+
+    expect(view.phase).toBe('result');
+    expect(view.roundScores).toHaveLength(1);
+    expect(view.roundScores[0]?.winnerNames).toHaveLength(1);
+    expect(view.roundScores[0]?.leftovers.length).toBeGreaterThan(0);
+    expect(view.roundScores[0]?.leftovers.every((leftover) => leftover.cardCount > 0)).toBe(true);
+    expect(view.runningScores.reduce((total, score) => total + score.totalLeftoverCards, 0)).toBe(
+      view.roundScores[0]?.leftovers.reduce((total, leftover) => total + leftover.cardCount, 0),
+    );
   });
 });
