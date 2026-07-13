@@ -10,6 +10,7 @@ import { Button } from '../../../components/Button';
 import { PlayingCard } from '../../../components/PlayingCard';
 import { getBrowserAuthRedirectUrl } from '../../../lib/auth/redirect-url';
 import { createTranslator } from '../../../lib/i18n';
+import { usePreferredLocale } from '../../../lib/locale/preferred-locale-context';
 import { getBrowserSupabaseClient } from '../../../lib/supabase';
 
 import {
@@ -97,10 +98,11 @@ function prefersReducedMotion(): boolean {
 }
 
 export function LalSattiComputerGame(): ReactElement {
+  const { locale: preferredLocale, setLocale: setPreferredLocale } = usePreferredLocale();
   const controllerRef = useRef<LalSattiController | null>(null);
 
   if (controllerRef.current === null) {
-    controllerRef.current = createLalSattiController();
+    controllerRef.current = createLalSattiController(undefined, preferredLocale);
   }
 
   const controller = controllerRef.current;
@@ -183,9 +185,11 @@ export function LalSattiComputerGame(): ReactElement {
                 <select
                   className="min-h-12 rounded-md border border-brand-accent bg-surface-primary px-3 py-2"
                   value={view.locale}
-                  onChange={(event) =>
-                    dispatch({ type: 'setLocale', locale: event.target.value as Locale })
-                  }
+                  onChange={(event) => {
+                    const next = event.target.value as Locale;
+                    setPreferredLocale(next);
+                    dispatch({ type: 'setLocale', locale: next });
+                  }}
                 >
                   {LOCALES.map((locale) => (
                     <option key={locale} value={locale}>

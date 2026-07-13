@@ -1,10 +1,10 @@
 'use client';
 
-import { DEFAULT_LOCALE } from '@lazy-patta/localization';
 import Link from 'next/link';
 import { useState, type ReactElement } from 'react';
 
 import { createTranslator } from '../../lib/i18n';
+import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import type { TutorialStep } from '../game/HowToPlayTutorial';
 import { HowToPlayTutorial } from '../game/HowToPlayTutorial';
 
@@ -32,7 +32,7 @@ export function GameOverview({
   onlineHref,
   tutorialSteps,
 }: GameOverviewProps): ReactElement {
-  const locale = DEFAULT_LOCALE;
+  const { locale } = usePreferredLocale();
   const { t } = createTranslator(locale);
   const [tutorialOpen, setTutorialOpen] = useState(false);
 

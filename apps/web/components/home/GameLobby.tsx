@@ -1,81 +1,83 @@
 'use client';
 
-import { DEFAULT_LOCALE, type Locale } from '@lazy-patta/localization';
-import Image from 'next/image';
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 
 import { createTranslator } from '../../lib/i18n';
+import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import { GADHA_CHOR_TUTORIAL_STEPS, HowToPlayTutorial } from '../game/HowToPlayTutorial';
-import { LocaleSwitcher } from '../game/LocaleSwitcher';
 import { LAL_SATTI_TUTORIAL_STEPS } from '../game/lal-satti-tutorial-steps';
 
-import { GameCard } from './GameCard';
+import { AnimatedHero } from './landing/AnimatedHero';
+import { ComingGamesRail } from './landing/ComingGamesRail';
+import { FamilyConnectionSection } from './landing/FamilyConnectionSection';
+import { LandingFooter } from './landing/LandingFooter';
+import { LandingShell } from './landing/LandingShell';
+import { PlayModeSection } from './landing/PlayModeSection';
+import { GadhaChorArtwork, LalSattiArtwork, RichGameCard } from './landing/RichGameCard';
+import { TrustStrip } from './landing/TrustStrip';
 
 type ActiveTutorial = 'gadha-chor' | 'lal-satti' | null;
 
-/**
- * Lazy Patta's landing lobby (recommended-home-page redesign): logo + tagline,
- * a language switcher (lobby copy only — each game keeps its own in-game
- * switcher for now), the two game cards, and a small "more games" teaser. This
- * is the front door for the whole collection, not just Gadha Chor.
- */
 export function GameLobby(): ReactElement {
-  const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE);
+  const { locale } = usePreferredLocale();
   const [activeTutorial, setActiveTutorial] = useState<ActiveTutorial>(null);
   const { t } = createTranslator(locale);
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col items-center gap-10 px-6 py-12">
-      <header className="flex flex-col items-center gap-4 text-center">
-        <Image
-          src="/images/lazy-patta-logo-transparent.png"
-          alt={t('brand.logoAlt')}
-          width={280}
-          height={280}
-          priority
-          className="h-auto w-48 sm:w-60"
-        />
-        <h1 className="sr-only">{t('app.name')}</h1>
-        <p className="text-lg text-text-primary">{t('welcome.tagline')}</p>
-        <LocaleSwitcher locale={locale} onLocaleChange={setLocale} />
-      </header>
+    <LandingShell>
+      <AnimatedHero locale={locale} />
+      <TrustStrip locale={locale} />
 
-      <section className="flex w-full flex-col gap-4">
-        <h2 className="text-center text-sm font-semibold uppercase tracking-wide text-text-primary/70">
-          {t('lobby.chooseGame')}
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <GameCard
+      <section className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8" id="games">
+        <div className="mb-6 flex flex-col gap-2">
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-brand-accent">
+            {t('landing.games.eyebrow')}
+          </p>
+          <h2 className="text-3xl font-black text-action-primary md:text-5xl">
+            {t('landing.games.title')}
+          </h2>
+          <p className="max-w-2xl text-base leading-7 text-text-primary">
+            {t('landing.games.body')}
+          </p>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <RichGameCard
             locale={locale}
-            name={t('games.lalSatti.name')}
-            description={t('games.lalSatti.description')}
-            status="available"
-            computerHref="/play/lal-satti/computer"
-            onlineHref="/play/online"
-            overviewHref="/games/lal-satti"
-            onHowToPlay={() => setActiveTutorial('lal-satti')}
-          />
-          <GameCard
-            locale={locale}
-            name={t('games.gadhaChor.name')}
-            description={t('games.gadhaChor.description')}
-            status="available"
+            title={t('games.gadhaChor.name')}
+            description={t('landing.game.gadhaChor.description')}
+            status={t('games.status.available')}
+            difficulty={t('landing.game.gadhaChor.difficulty')}
+            duration={t('landing.game.gadhaChor.duration')}
+            players={t('landing.game.gadhaChor.players')}
             computerHref="/play/gadha-chor/computer"
             onlineHref="/play/online"
             overviewHref="/games/gadha-chor"
             onHowToPlay={() => setActiveTutorial('gadha-chor')}
+            artwork={<GadhaChorArtwork />}
+          />
+          <RichGameCard
+            locale={locale}
+            title={t('games.lalSatti.name')}
+            description={t('landing.game.lalSatti.description')}
+            status={t('games.status.available')}
+            difficulty={t('landing.game.lalSatti.difficulty')}
+            duration={t('landing.game.lalSatti.duration')}
+            players={t('landing.game.lalSatti.players')}
+            computerHref="/play/lal-satti/computer"
+            onlineHref="/play/online"
+            overviewHref="/games/lal-satti"
+            onHowToPlay={() => setActiveTutorial('lal-satti')}
+            artwork={<LalSattiArtwork />}
           />
         </div>
       </section>
 
-      <section className="flex w-full flex-col items-center gap-1 rounded-md bg-surface-primary px-4 py-3 text-center text-sm text-text-primary shadow-sm">
-        <span className="font-semibold">{t('lobby.moreGamesTitle')}</span>
-        <span>{t('lobby.moreGamesBody')}</span>
-      </section>
-
-      <p className="rounded-md bg-surface-primary px-4 py-2 text-sm text-text-primary shadow-sm">
-        {t('welcome.noBetting')}
-      </p>
+      <PlayModeSection locale={locale} />
+      <FamilyConnectionSection locale={locale} />
+      <ComingGamesRail locale={locale} />
+      <LandingFooter locale={locale} />
 
       {activeTutorial === 'gadha-chor' ? (
         <HowToPlayTutorial
@@ -91,6 +93,6 @@ export function GameLobby(): ReactElement {
           onClose={() => setActiveTutorial(null)}
         />
       ) : null}
-    </main>
+    </LandingShell>
   );
 }

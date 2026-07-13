@@ -1,0 +1,247 @@
+.landing-shell {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 12% 8%,
+      color-mix(in srgb, var(--lp-action-secondary), transparent 78%),
+      transparent 28rem
+    ),
+    radial-gradient(
+      circle at 88% 18%,
+      color-mix(in srgb, var(--lp-brand-accent), transparent 82%),
+      transparent 26rem
+    ),
+    linear-gradient(
+      180deg,
+      var(--lp-background-canvas),
+      color-mix(in srgb, var(--lp-background-canvas), var(--lp-action-secondary) 10%)
+    );
+}
+
+.landing-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  background:
+    radial-gradient(circle, var(--lp-accent-kumkum) 0 0.08rem, transparent 0.09rem) 0 0 / 2.2rem
+      2.2rem,
+    radial-gradient(circle, var(--lp-brand-accent) 0 0.055rem, transparent 0.065rem) 1.1rem 1.1rem /
+      2.2rem 2.2rem;
+}
+
+.landing-scene {
+  animation: lp-scene-in 360ms ease-out both;
+}
+
+.landing-diya {
+  animation: lp-diya-flicker 2400ms ease-in-out infinite;
+}
+
+.landing-card {
+  animation: lp-card-deal 920ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.landing-card-pair-left {
+  animation: lp-pair-left 1180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.landing-card-pair-right {
+  animation: lp-pair-right 1180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.landing-card-seven {
+  animation: lp-seven-land 1120ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.landing-mascot {
+  transform-origin: bottom center;
+  animation:
+    lp-mascot-peek 1180ms cubic-bezier(0.22, 1, 0.36, 1) both,
+    lp-mascot-blink 5200ms ease-in-out 1600ms infinite;
+}
+
+.landing-hero-copy {
+  animation: lp-copy-settle 620ms ease-out 360ms both;
+}
+
+.rich-game-card {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.rich-game-card:hover,
+.rich-game-card:focus-within {
+  transform: translateY(-0.25rem);
+  box-shadow: 0 1.25rem 2.5rem color-mix(in srgb, var(--lp-text-primary), transparent 84%);
+}
+
+.rich-game-card .art-lift {
+  transition:
+    transform 180ms ease,
+    opacity 180ms ease;
+}
+
+.rich-game-card:hover .art-lift,
+.rich-game-card:focus-within .art-lift {
+  transform: translateY(-0.4rem) rotate(-2deg);
+}
+
+.rich-game-card:hover .art-slide-left,
+.rich-game-card:focus-within .art-slide-left {
+  transform: translateX(-0.35rem);
+}
+
+.rich-game-card:hover .art-slide-right,
+.rich-game-card:focus-within .art-slide-right {
+  transform: translateX(0.35rem);
+}
+
+@keyframes lp-scene-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lp-card-deal {
+  0% {
+    opacity: 0;
+    transform: translateY(-2rem) rotate(-12deg) scale(0.9);
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(var(--lp-card-rotate, 0deg)) scale(1);
+  }
+}
+
+@keyframes lp-pair-left {
+  0% {
+    opacity: 0;
+    transform: translate(-2rem, -1rem) rotate(-18deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(-8deg);
+  }
+  78% {
+    opacity: 1;
+    transform: translate(1.15rem, 0.3rem) rotate(-3deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(1.15rem, 0.3rem) scale(0.8);
+  }
+}
+
+@keyframes lp-pair-right {
+  0% {
+    opacity: 0;
+    transform: translate(2rem, -1rem) rotate(18deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(8deg);
+  }
+  78% {
+    opacity: 1;
+    transform: translate(-1.15rem, 0.3rem) rotate(3deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-1.15rem, 0.3rem) scale(0.8);
+  }
+}
+
+@keyframes lp-seven-land {
+  0% {
+    opacity: 0;
+    transform: translateY(-2.6rem) scale(0.9) rotate(10deg);
+  }
+  62% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(-3deg);
+  }
+}
+
+@keyframes lp-mascot-peek {
+  0%,
+  64% {
+    opacity: 0;
+    transform: translateY(2rem) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes lp-mascot-blink {
+  0%,
+  94%,
+  100% {
+    filter: brightness(1);
+  }
+  96% {
+    filter: brightness(0.72);
+  }
+}
+
+@keyframes lp-diya-flicker {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes lp-copy-settle {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-scene,
+  .landing-diya,
+  .landing-card,
+  .landing-card-pair-left,
+  .landing-card-pair-right,
+  .landing-card-seven,
+  .landing-mascot,
+  .landing-hero-copy,
+  .rich-game-card,
+  .rich-game-card .art-lift {
+    animation: none;
+    transition: none;
+    transform: none;
+  }
+
+  .landing-card-pair-left,
+  .landing-card-pair-right {
+    opacity: 0.35;
+  }
+}

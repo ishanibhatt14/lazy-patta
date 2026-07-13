@@ -1,11 +1,11 @@
 'use client';
 
-import { DEFAULT_LOCALE } from '@lazy-patta/localization';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
 
 import { useAuth } from '../../lib/auth/auth-context';
 import { createTranslator } from '../../lib/i18n';
+import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import { startGame } from '../../lib/online-game/games-client';
 import {
   addBotSeat,
@@ -27,25 +27,30 @@ import { GameBoard } from './GameBoard';
  * is polled on an interval — live realtime updates are a deferred follow-up.
  */
 
-const t = createTranslator(DEFAULT_LOCALE);
 const POLL_MS = 3000;
 
-function messageFor(error: unknown): string {
-  return error instanceof Error && error.message ? error.message : t.t('rooms.errorGeneric');
+function messageFor(error: unknown, fallback: string): string {
+  return error instanceof Error && error.message ? error.message : fallback;
 }
 
-function seatLabel(occupant: string, displayName: string | null): string {
+function seatLabel(
+  occupant: string,
+  displayName: string | null,
+  t: ReturnType<typeof createTranslator>,
+): string {
   if (occupant === 'bot') return displayName ?? t.t('rooms.seatBot');
   if (occupant === 'human') return displayName ?? t.t('rooms.seatPlayer');
   return t.t('rooms.seatEmpty');
 }
 
-function gameLabel(gameKey: string | undefined): string {
+function gameLabel(gameKey: string | undefined, t: ReturnType<typeof createTranslator>): string {
   return gameKey === 'lal_satti' ? t.t('rooms.gameLalSatti') : t.t('rooms.gameGadhaChor');
 }
 
 export function RoomLobby({ code }: { code: string }): ReactElement {
   const { state, configured } = useAuth();
+  const { locale } = usePreferredLocale();
+  const t = useMemo(() => createTranslator(locale), [locale]);
   const router = useRouter();
   const [data, setData] = useState<RoomWithSeats | null>(null);
   const [error, setError] = useState<string | undefined>(undefined);
@@ -60,9 +65,9 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
       const next = await fetchRoomByCode(getSupabaseBrowserClient(), code);
       setData(next);
     } catch (caught) {
-      setError(messageFor(caught));
+      setError(messageFor(caught, t.t('rooms.errorGeneric')));
     }
-  }, [code]);
+  }, [code, t]);
 
   // Ensure a seat once signed in (idempotent), then poll for seat changes.
   useEffect(() => {
@@ -76,7 +81,7 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
           await refresh();
         }
       } catch (caught) {
-        if (!cancelled) setError(messageFor(caught));
+        if (!cancelled) setError(messageFor(caught, t.t('rooms.errorGeneric')));
       }
     })();
     return () => {
@@ -118,7 +123,7 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
       await fn();
       await refresh();
     } catch (caught) {
-      setError(messageFor(caught));
+      setError(messageFor(caught, t.t('rooms.errorGeneric')));
     } finally {
       setBusy(false);
     }
@@ -133,7 +138,7 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
           <span className="text-sm text-text-primary">{t.t('rooms.roomCodeLabel')}</span>
           <span className="text-3xl font-bold tracking-[0.3em] text-action-primary">{code}</span>
           <span className="text-xs font-semibold text-brand-accent">
-            {gameLabel(room.game_key)}
+            {gameLabel(room.game_key, t)}
           </span>
         </header>
 
@@ -168,7 +173,9 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
       <header className="flex flex-col items-center gap-1">
         <span className="text-sm text-text-primary">{t.t('rooms.roomCodeLabel')}</span>
         <span className="text-3xl font-bold tracking-[0.3em] text-action-primary">{code}</span>
-        <span className="text-xs font-semibold text-brand-accent">{gameLabel(room?.game_key)}</span>
+        <span className="text-xs font-semibold text-brand-accent">
+          {gameLabel(room?.game_key, t)}
+        </span>
         <span className="text-xs text-text-primary">{t.t('rooms.shareHint')}</span>
       </header>
 
@@ -186,7 +193,7 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
                   aria-hidden
                 />
                 <span className="text-sm font-medium text-text-primary">
-                  {seatLabel(seat.occupant, seat.display_name)}
+                  {seatLabel(seat.occupant, seat.display_name, t)}
                   {isYou ? ` (${t.t('rooms.you')})` : ''}
                   {room && seat.user_id === room.host_id ? ` · ${t.t('rooms.host')}` : ''}
                 </span>
