@@ -1,5 +1,8 @@
 import type { Card, GameResult, PublicSnapshot } from '@lazy-patta/game-contracts';
+import type { LalSattiResult } from '@lazy-patta/lal-satti-engine';
 import type { SupabaseClient } from '@supabase/supabase-js';
+
+import type { LalSattiClientAction, LalSattiPublicSnapshot } from './lal-satti-authority';
 
 /**
  * Client wrappers for live gameplay. Reads (public snapshot, own hand) go
@@ -11,16 +14,23 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface GameRow {
   readonly id: string;
+  readonly game_key: 'gadha_chor' | 'lal_satti';
   readonly status: 'active' | 'complete' | 'abandoned';
   readonly state_version: number;
-  readonly public_snapshot: PublicSnapshot;
-  readonly result: GameResult | null;
+  readonly public_snapshot: PublicSnapshot | LalSattiPublicSnapshot;
+  readonly result: GameResult | LalSattiResult | null;
   readonly created_at?: string;
 }
 
 export interface DrawInput {
   readonly clientActionId: string;
   readonly positionToken: string;
+  readonly expectedVersion: number;
+}
+
+export interface LalSattiActionInput {
+  readonly clientActionId: string;
+  readonly action: LalSattiClientAction;
   readonly expectedVersion: number;
 }
 
@@ -59,6 +69,16 @@ export async function drawCard(
   client: SupabaseClient,
   gameId: string,
   input: DrawInput,
+): Promise<{ stateVersion: number }> {
+  const json = await authedPost(client, `/api/games/${gameId}/action`, input);
+  return { stateVersion: Number(json.stateVersion) };
+}
+
+/** Submit a Lal Satti play/pass through the authority route. */
+export async function submitLalSattiAction(
+  client: SupabaseClient,
+  gameId: string,
+  input: LalSattiActionInput,
 ): Promise<{ stateVersion: number }> {
   const json = await authedPost(client, `/api/games/${gameId}/action`, input);
   return { stateVersion: Number(json.stateVersion) };

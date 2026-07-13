@@ -7,6 +7,12 @@ import {
   initialState,
   persistStart,
 } from '../../../../../lib/online-game/authority';
+import {
+  advanceLalSattiBots,
+  initialLalSattiState,
+  LAL_SATTI_CLASSIC,
+  persistLalSattiStart,
+} from '../../../../../lib/online-game/lal-satti-authority';
 import { getRequestUserId } from '../../../../../lib/online-game/route-context';
 import {
   getSupabaseAdminClient,
@@ -14,10 +20,9 @@ import {
 } from '../../../../../lib/supabase/admin-client';
 
 /**
- * Host-only: deal and start the room's Gadha Chor game (ADR-0010). Authority
- * runs the pure engine server-side and commits through the persistence RPCs;
- * the client learns only the new `gameId` + `stateVersion` and then reads its
- * own hand via RLS. The service-role key never leaves this Node handler.
+ * Host-only: deal and start the room's selected game. Authority runs the pure
+ * engine server-side and commits through the persistence RPCs; clients learn
+ * only the new game id/version and read their own hand via RLS.
  */
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -61,10 +66,16 @@ export async function POST(request: Request, ctx: Context): Promise<Response> {
   if (seatErr) return NextResponse.json({ error: 'seat lookup failed' }, { status: 500 });
 
   const seats = seatRows ?? [];
-  if (seats.length < CLASSIC_GULAM_CHOR.minPlayers) {
+  const gameKey = room.game_key === 'lal_satti' ? 'lal_satti' : 'gadha_chor';
+  const minPlayers =
+    gameKey === 'lal_satti' ? LAL_SATTI_CLASSIC.minPlayers : CLASSIC_GULAM_CHOR.minPlayers;
+  const maxPlayers =
+    gameKey === 'lal_satti' ? LAL_SATTI_CLASSIC.maxPlayers : CLASSIC_GULAM_CHOR.maxPlayers;
+
+  if (seats.length < minPlayers) {
     return NextResponse.json({ error: 'need at least two players' }, { status: 409 });
   }
-  if (seats.length > CLASSIC_GULAM_CHOR.maxPlayers) {
+  if (seats.length > maxPlayers) {
     return NextResponse.json({ error: 'too many players' }, { status: 409 });
   }
   if (!seats.every((seat) => seat.is_ready)) {
@@ -76,6 +87,13 @@ export async function POST(request: Request, ctx: Context): Promise<Response> {
   );
 
   try {
+    if (gameKey === 'lal_satti') {
+      const opening = initialLalSattiState(playerIds);
+      const gameId = await persistLalSattiStart(admin, roomId, opening);
+      const finalState = await advanceLalSattiBots(admin, gameId, opening);
+      return NextResponse.json({ ok: true, gameId, stateVersion: finalState.stateVersion });
+    }
+
     const opening = initialState(playerIds);
     const gameId = await persistStart(admin, roomId, opening);
     const finalState = await advanceBots(admin, gameId, opening);
