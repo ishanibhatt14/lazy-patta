@@ -90,7 +90,9 @@ export function SettingsSheet({
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-sm font-semibold text-action-primary">{t('settings.language')}</span>
+          <span className="text-sm font-semibold text-action-primary">
+            {t('settings.language')}
+          </span>
           <LocaleSwitcher locale={locale} onLocaleChange={onLocaleChange} />
         </div>
 

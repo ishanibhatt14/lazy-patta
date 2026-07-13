@@ -50,7 +50,9 @@ function computeLeader(view: LalSattiViewState, locale: Locale): string | null {
 
 /** A stable signature of what sits in the lanes, to detect card placements. */
 function lanesSignature(view: LalSattiViewState): string {
-  return view.lanes.map((lane) => `${lane.suit}:${lane.cards.map((c) => c.id).join(',')}`).join('|');
+  return view.lanes
+    .map((lane) => `${lane.suit}:${lane.cards.map((c) => c.id).join(',')}`)
+    .join('|');
 }
 
 /**
