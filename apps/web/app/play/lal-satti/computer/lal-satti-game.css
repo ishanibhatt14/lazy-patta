@@ -1,0 +1,379 @@
+/* ------------------------------------------------------------------ *
+ * Lal Satti immersive table. One continuous game surface — an indigo   *
+ * evening sky, a peacock-teal woven mat inside a warm wooden rim, with  *
+ * a restrained original Patola/Bandhani lattice and sparing             *
+ * kumkum/haldi accents. Suit rails sit directly on the mat; the 7 of    *
+ * each suit is the visual anchor. Motion durations follow the redesign  *
+ * spec and collapse to a resting frame under reduced motion — game      *
+ * correctness never depends on animation.                               *
+ * ------------------------------------------------------------------ */
+
+.ls-shell {
+  --ls-lift: 100ms;
+  --ls-place: 240ms;
+  --ls-suit-open: 400ms;
+  --ls-seven-open: 600ms;
+  --ls-turn-transfer: 220ms;
+  --ls-reaction: 1500ms;
+  --ls-result: 700ms;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+  color: var(--lp-text-onBrand);
+  background:
+    radial-gradient(120% 90% at 50% -10%, color-mix(in srgb, var(--lp-accent-indigo), transparent 45%) 0, transparent 62%),
+    linear-gradient(180deg, var(--lp-scene-skyTop) 0%, var(--lp-scene-skyBottom) 76%, var(--lp-scene-rimEdge) 100%);
+}
+
+/* Faint paired-lantern glow near the top of the terrace. */
+.ls-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(9rem 6rem at 16% 7%, color-mix(in srgb, var(--lp-action-secondary), transparent 74%) 0, transparent 70%),
+    radial-gradient(9rem 6rem at 84% 7%, color-mix(in srgb, var(--lp-accent-kumkum), transparent 78%) 0, transparent 70%);
+}
+
+.ls-scene {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0.5rem;
+  border-radius: 1.75rem;
+  padding: clamp(0.5rem, 2vw, 1.25rem);
+  /* Warm wooden / woven rim around the mat. */
+  background: linear-gradient(135deg, var(--lp-scene-rim) 0%, var(--lp-scene-rimEdge) 100%);
+  box-shadow:
+    0 1.25rem 2.5rem rgba(0, 0, 0, 0.42),
+    inset 0 0 0 0.15rem color-mix(in srgb, var(--lp-action-secondary), transparent 60%);
+}
+
+@media (min-width: 1024px) {
+  .ls-scene {
+    max-height: calc(100dvh - 4.5rem);
+    margin: 0.75rem auto;
+    width: min(100%, 80rem);
+  }
+}
+
+.ls-felt {
+  position: absolute;
+  inset: clamp(0.5rem, 2vw, 1.25rem);
+  border-radius: 1.35rem;
+  background: radial-gradient(120% 120% at 50% 40%, var(--lp-game-table) 0%, var(--lp-scene-feltDeep) 100%);
+  box-shadow: inset 0 0 3.5rem rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+/* Subtle original Patola-inspired diamond + bandhani dot lattice on the mat. */
+.ls-felt-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.13;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(45deg, color-mix(in srgb, var(--lp-action-secondary), transparent 55%) 0 0.05rem, transparent 0.05rem 1.5rem),
+    repeating-linear-gradient(-45deg, color-mix(in srgb, var(--lp-accent-kumkum), transparent 60%) 0 0.05rem, transparent 0.05rem 1.5rem),
+    radial-gradient(circle, var(--lp-background-canvas) 0 0.06rem, transparent 0.07rem) 0.75rem 0.75rem / 1.5rem 1.5rem;
+}
+
+/* A woven kinari border just inside the mat. */
+.ls-felt-border {
+  position: absolute;
+  inset: 0.55rem;
+  border-radius: 1rem;
+  border: 0.12rem dashed color-mix(in srgb, var(--lp-action-secondary), transparent 55%);
+  pointer-events: none;
+}
+
+.ls-regions {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100%;
+  gap: clamp(0.25rem, 1.2vh, 0.75rem);
+  padding: clamp(0.5rem, 2vw, 1.1rem);
+}
+
+/* ---- Player pods -------------------------------------------------- */
+
+.ls-pod-ring {
+  position: absolute;
+  inset: -0.3rem;
+  border-radius: 999rem;
+  border: 0.16rem solid transparent;
+  transition:
+    border-color var(--ls-turn-transfer) ease,
+    box-shadow var(--ls-turn-transfer) ease;
+}
+
+.ls-pod-ring[data-active='true'] {
+  border-color: var(--lp-action-secondary);
+  box-shadow:
+    0 0 0 0.12rem color-mix(in srgb, var(--lp-action-secondary), transparent 30%),
+    0 0 1.1rem color-mix(in srgb, var(--lp-action-secondary), transparent 40%);
+  animation: ls-ring-pulse 1600ms ease-in-out infinite;
+}
+
+@keyframes ls-ring-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0.12rem color-mix(in srgb, var(--lp-action-secondary), transparent 30%),
+      0 0 0.9rem color-mix(in srgb, var(--lp-action-secondary), transparent 55%);
+  }
+  50% {
+    box-shadow:
+      0 0 0 0.16rem color-mix(in srgb, var(--lp-action-secondary), transparent 20%),
+      0 0 1.5rem color-mix(in srgb, var(--lp-action-secondary), transparent 25%);
+  }
+}
+
+.ls-pod-backs > span {
+  box-shadow: 0 0.1rem 0.2rem rgba(0, 0, 0, 0.35);
+}
+
+/* ---- Suit rails --------------------------------------------------- */
+
+.ls-rail {
+  transition: background-color var(--ls-turn-transfer) ease;
+}
+
+/* The seven anchor sits centered; lower ranks extend left, higher right. */
+.ls-rail-seven {
+  position: relative;
+}
+
+.ls-rail-seven[data-open='false'] {
+  opacity: 0.6;
+}
+
+/* Freshly placed cards travel into the rail along a short curved path. */
+.ls-rail-card[data-just-placed='true'] {
+  animation: ls-place-in var(--ls-place) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes ls-place-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-1.6rem) rotate(-6deg) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0) scale(1);
+  }
+}
+
+/* A subtle destination marker for the next legal rank at either boundary. */
+.ls-slot {
+  border: 0.11rem dashed color-mix(in srgb, var(--lp-action-secondary), transparent 30%);
+  background: color-mix(in srgb, var(--lp-action-secondary), transparent 86%);
+  animation: ls-slot-pulse 1800ms ease-in-out infinite;
+}
+
+.ls-slot[data-anchor='true'] {
+  border-color: color-mix(in srgb, var(--lp-accent-kumkum), transparent 25%);
+  background: color-mix(in srgb, var(--lp-accent-kumkum), transparent 84%);
+}
+
+@keyframes ls-slot-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* The suit opening flourish, and the signature 7 of hearts opening. */
+.ls-rail[data-opening='true'] .ls-rail-seven {
+  animation: ls-suit-open var(--ls-suit-open) ease-out both;
+}
+
+.ls-rail[data-hearts-open='true'] .ls-rail-seven {
+  animation: ls-seven-open var(--ls-seven-open) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes ls-suit-open {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ls-seven-open {
+  0% {
+    opacity: 0;
+    transform: translateY(-0.6rem) scale(0.8);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(0) scale(1.12);
+    filter: drop-shadow(0 0 0.85rem color-mix(in srgb, var(--lp-card-suitRed), transparent 30%));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0.4rem color-mix(in srgb, var(--lp-card-suitRed), transparent 55%));
+  }
+}
+
+/* ---- Player hand fan ---------------------------------------------- */
+
+.ls-hand-card {
+  transition:
+    transform var(--ls-lift) ease-out,
+    filter var(--ls-lift) ease-out;
+  transform-origin: bottom center;
+}
+
+.ls-hand-card[data-playable='true'] {
+  transform: translateY(-0.5rem);
+  filter: drop-shadow(0 0 0.4rem color-mix(in srgb, var(--lp-action-secondary), transparent 45%));
+}
+
+.ls-hand-card[data-playable='true']:hover,
+.ls-hand-card[data-playable='true']:focus-visible,
+.ls-hand-card[data-focused='true'] {
+  transform: translateY(-1rem) scale(1.05);
+  filter: drop-shadow(0 0.5rem 0.6rem rgba(0, 0, 0, 0.4))
+    drop-shadow(0 0 0.55rem var(--lp-action-secondary));
+  z-index: 5;
+}
+
+.ls-hand-card[data-invalid='true'] {
+  animation: ls-invalid-shake 320ms ease-in-out both;
+}
+
+@keyframes ls-invalid-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-0.35rem);
+  }
+  40% {
+    transform: translateX(0.35rem);
+  }
+  60% {
+    transform: translateX(-0.22rem);
+  }
+  80% {
+    transform: translateX(0.22rem);
+  }
+}
+
+/* High-contrast card option: a strong ink ring around the actual cards. */
+.ls-shell[data-high-contrast='true'] .ls-rail-card [role='img'],
+.ls-shell[data-high-contrast='true'] .ls-hand-card [role='img'] {
+  box-shadow: 0 0 0 0.14rem var(--lp-text-primary);
+}
+
+/* ---- Reaction bubbles -------------------------------------------- */
+
+.ls-reaction {
+  animation: ls-reaction-pop var(--ls-reaction) ease-out both;
+}
+
+@keyframes ls-reaction-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(0.4rem) scale(0.7);
+  }
+  12% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-0.2rem) scale(0.98);
+  }
+}
+
+/* ---- Drawers, sheets & overlays ---------------------------------- */
+
+.ls-sheet {
+  animation: ls-sheet-in var(--ls-place) ease-out both;
+}
+
+@keyframes ls-sheet-in {
+  0% {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ls-result {
+  animation: ls-result-in var(--ls-result) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ls-result-badge {
+  animation: ls-result-in var(--ls-result) cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 160ms;
+}
+
+@keyframes ls-result-in {
+  0% {
+    opacity: 0;
+    transform: translateY(0.8rem) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Reduced motion: hold every state at its resting frame.              *
+ * ------------------------------------------------------------------ */
+
+[data-reduced-motion='true'] .ls-pod-ring[data-active='true'],
+[data-reduced-motion='true'] .ls-rail-card[data-just-placed='true'],
+[data-reduced-motion='true'] .ls-rail[data-opening='true'] .ls-rail-seven,
+[data-reduced-motion='true'] .ls-rail[data-hearts-open='true'] .ls-rail-seven,
+[data-reduced-motion='true'] .ls-hand-card,
+[data-reduced-motion='true'] .ls-hand-card[data-invalid='true'],
+[data-reduced-motion='true'] .ls-slot,
+[data-reduced-motion='true'] .ls-reaction,
+[data-reduced-motion='true'] .ls-sheet,
+[data-reduced-motion='true'] .ls-result,
+[data-reduced-motion='true'] .ls-result-badge {
+  animation: none;
+  transition: none;
+}
+
+[data-reduced-motion='true'] .ls-rail-card[data-just-placed='true'],
+[data-reduced-motion='true'] .ls-rail[data-hearts-open='true'] .ls-rail-seven,
+[data-reduced-motion='true'] .ls-result,
+[data-reduced-motion='true'] .ls-result-badge {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+[data-reduced-motion='true'] .ls-hand-card[data-playable='true'] {
+  transform: translateY(-0.5rem);
+}
+
+[data-reduced-motion='true'] .ls-slot {
+  opacity: 0.8;
+}
