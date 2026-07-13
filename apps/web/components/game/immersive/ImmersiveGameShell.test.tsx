@@ -76,7 +76,13 @@ describe('ImmersiveGameShell', () => {
   it('renders selectable hidden cards on the human turn and reports the chosen token', () => {
     const onChooseCard = vi.fn();
     const slots: HiddenCardSlot[] = [
-      { ownerId: 'ba', ownerName: 'Ba', positionToken: 'tok-1', displayIndex: 1, isSelectable: true },
+      {
+        ownerId: 'ba',
+        ownerName: 'Ba',
+        positionToken: 'tok-1',
+        displayIndex: 1,
+        isSelectable: true,
+      },
     ];
     renderShell(makeView({ hiddenCards: slots }), onChooseCard);
 
@@ -88,7 +94,13 @@ describe('ImmersiveGameShell', () => {
 
   it('hides the visible position number but keeps it in the accessible name', () => {
     const slots: HiddenCardSlot[] = [
-      { ownerId: 'ba', ownerName: 'Ba', positionToken: 'tok-1', displayIndex: 1, isSelectable: true },
+      {
+        ownerId: 'ba',
+        ownerName: 'Ba',
+        positionToken: 'tok-1',
+        displayIndex: 1,
+        isSelectable: true,
+      },
     ];
     renderShell(makeView({ hiddenCards: slots }));
     // The owner+position label is on the button; no bare "1" digit is shown.
