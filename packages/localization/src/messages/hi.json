@@ -243,6 +243,7 @@
   "rooms.youAreGadhaChor": "अरे नहीं — आप गधा चोर हैं!",
   "rooms.gadhaChorIs": "{name} के पास अकेला पत्ता बचा — गधा चोर!",
   "rooms.spectating": "खेल देख रहे हैं…",
+  "rooms.playerSafe": "सुरक्षित",
   "rooms.playerCards": "{count, plural, one {# पत्ता} other {# पत्ते}}",
   "rooms.lalSattiTurnYours": "आपकी बारी — पत्ता खेलें या पास करें",
   "rooms.lalSattiTableau": "लाल सत्ती टेबल",

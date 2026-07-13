@@ -47,22 +47,29 @@ The Supabase CLI is already a dev dependency. From the repo root:
 ```bash
 pnpm supabase login                      # once
 pnpm exec supabase link --project-ref <ref>
-pnpm exec supabase db push               # applies 0001 → 0006 in order
+pnpm exec supabase db push               # applies 0001 → 0007 in order
 ```
 
 Because the project is brand new, `db push` runs every migration from scratch —
-this is the definitive proof the migration set is forward-clean (local dev had
-0006 applied additively, so this is the real check).
+the definitive proof the migration set is forward-clean.
 
-Then verify the result with the read-only check script — every row must read
-`PASS` (migrations applied, tables + RLS, authority tables server-only, RPCs
-`SECURITY DEFINER` and not client-executable):
+Then run the read-only **schema / security-boundary** check script. The first row
+(`0_overall`) rolls up the rest; every row must read `PASS` (exact migration set
+0001–0007, tables + RLS, authority tables server-only with no client DML and no
+policies, the exact lifecycle policy set, and the RPCs `SECURITY DEFINER` with a
+pinned `search_path` and service-role-only `EXECUTE`):
 
 ```bash
-psql "$SUPABASE_DB_URL" -f supabase/verify/hosted-schema-check.sql
+psql -v ON_ERROR_STOP=1 "$SUPABASE_DB_URL" -f supabase/verify/hosted-schema-check.sql
 ```
 
 Or paste `supabase/verify/hosted-schema-check.sql` into the Supabase **SQL editor**.
+
+> This asserts the **database-level** boundary only. Because the authority route
+> handlers use the _service-role_ credential (which bypasses RLS by design), the
+> complete "no card leakage" guarantee still requires the step-6 two-device smoke
+> test plus inspection of the actual API/network responses — the SQL cannot observe
+> what the server chooses to return.
 
 ### 3. Configure hosted Auth (email OTP)
 

@@ -243,6 +243,7 @@
   "rooms.youAreGadhaChor": "Oh no — you're the Gadha Chor!",
   "rooms.gadhaChorIs": "{name} is left holding the odd card — the Gadha Chor!",
   "rooms.spectating": "Watching the game…",
+  "rooms.playerSafe": "Safe",
   "rooms.playerCards": "{count, plural, one {# card} other {# cards}}",
   "rooms.lalSattiTurnYours": "Your turn — play a card or pass",
   "rooms.lalSattiTableau": "Lal Satti tableau",

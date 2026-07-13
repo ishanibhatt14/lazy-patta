@@ -243,6 +243,7 @@
   "rooms.youAreGadhaChor": "અરે ના — તમે ગધા ચોર છો!",
   "rooms.gadhaChorIs": "{name} પાસે એકલું પત્તું રહ્યું — ગધા ચોર!",
   "rooms.spectating": "રમત જોવાઈ રહી છે…",
+  "rooms.playerSafe": "સલામત",
   "rooms.playerCards": "{count, plural, one {# પત્તું} other {# પત્તાં}}",
   "rooms.lalSattiTurnYours": "તમારો વારો — પત્તું રમો અથવા પાસ કરો",
   "rooms.lalSattiTableau": "લાલ સત્તી ટેબલ",
