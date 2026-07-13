@@ -15,8 +15,11 @@ const VIEWPORTS = [
 
 async function startGame(page: Page, players: number): Promise<void> {
   await page.goto(ROUTE);
-  await page.getByRole('button', { name: String(players), exact: true }).click();
-  await page.getByRole('button', { name: 'Start game' }).click();
+  if (players !== 3) {
+    await page.getByText('Customize table').click();
+    await page.getByRole('button', { name: String(players), exact: true }).click();
+  }
+  await page.getByRole('button', { name: /Quick game|Start game/i }).click();
   await expect(page.getByRole('status')).toBeVisible();
   await expect(page.locator('[data-seat-id]')).toHaveCount(players);
   // Wait for the settled steady state: the intro sequence has finished, it is the
