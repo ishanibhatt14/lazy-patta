@@ -11,6 +11,9 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
  */
 
 const SERVICE_KEY_ENV = 'SUPABASE_SERVICE_ROLE_KEY';
+const VERCEL_SUPABASE_URL_ENV = 'SUPABASE_URL_SUPABASE_URL';
+const VERCEL_SUPABASE_PUBLIC_URL_ENV = 'NEXT_PUBLIC_SUPABASE_URL_SUPABASE_URL';
+const VERCEL_SUPABASE_SERVICE_KEY_ENV = 'SUPABASE_URL_SUPABASE_SERVICE_ROLE_KEY';
 
 function readEnv(name: string): string | undefined {
   const value = process.env[name];
@@ -19,14 +22,31 @@ function readEnv(name: string): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
+function readFirstEnv(names: readonly string[]): string | undefined {
+  for (const name of names) {
+    const value = readEnv(name);
+    if (value) return value;
+  }
+  return undefined;
+}
+
 /** The Supabase project URL for server use (falls back to the public one). */
 function readUrl(): string | undefined {
-  return readEnv('SUPABASE_URL') ?? readEnv('NEXT_PUBLIC_SUPABASE_URL');
+  return readFirstEnv([
+    'SUPABASE_URL',
+    VERCEL_SUPABASE_URL_ENV,
+    'NEXT_PUBLIC_SUPABASE_URL',
+    VERCEL_SUPABASE_PUBLIC_URL_ENV,
+  ]);
+}
+
+function readServiceKey(): string | undefined {
+  return readFirstEnv([SERVICE_KEY_ENV, VERCEL_SUPABASE_SERVICE_KEY_ENV]);
 }
 
 /** Whether server-authoritative online play is configured in this environment. */
 export function isAuthorityConfigured(): boolean {
-  return readUrl() !== undefined && readEnv(SERVICE_KEY_ENV) !== undefined;
+  return readUrl() !== undefined && readServiceKey() !== undefined;
 }
 
 let cached: SupabaseClient | undefined;
@@ -38,7 +58,7 @@ export function getSupabaseAdminClient(): SupabaseClient {
   if (cached) return cached;
 
   const url = readUrl();
-  const serviceKey = readEnv(SERVICE_KEY_ENV);
+  const serviceKey = readServiceKey();
   if (!url || !serviceKey) {
     throw new Error(
       `Online authority is not configured: set SUPABASE_URL and ${SERVICE_KEY_ENV}. ` +
