@@ -19,9 +19,6 @@ export function LandingFooter({ locale }: { readonly locale: Locale }): ReactEle
         <p className="mt-1 max-w-xl text-sm leading-6 text-text-primary">
           {t('landing.footer.descriptor')}
         </p>
-        <p className="mt-2 text-sm font-semibold text-brand-accent">
-          {t('landing.footer.creator')}
-        </p>
       </div>
       <nav className="flex flex-wrap gap-2" aria-label={t('landing.footer.label')}>
         <Link
