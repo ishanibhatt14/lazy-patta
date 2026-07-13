@@ -90,6 +90,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@lazy-patta/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@lazy-patta/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
@@ -102,6 +105,9 @@ importers:
       '@lazy-patta/localization':
         specifier: workspace:*
         version: link:../../packages/localization
+      '@supabase/supabase-js':
+        specifier: ^2.110.2
+        version: 2.110.2
       next:
         specifier: ^16.2.10
         version: 16.2.10(@babel/core@7.29.7)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -246,34 +252,6 @@ importers:
         version: 2.1.9(@types/node@22.20.1)(jsdom@25.0.1)(lightningcss@1.32.0)(terser@5.49.0)
 
   packages/game-engine:
-    dependencies:
-      '@lazy-patta/game-contracts':
-        specifier: workspace:*
-        version: link:../game-contracts
-    devDependencies:
-      '@lazy-patta/eslint-config':
-        specifier: workspace:*
-        version: link:../eslint-config
-      '@lazy-patta/test-fixtures':
-        specifier: workspace:*
-        version: link:../test-fixtures
-      '@lazy-patta/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
-      '@types/node':
-        specifier: ^20.17.10
-        version: 20.19.43
-      eslint:
-        specifier: ^8.57.0
-        version: 8.57.1
-      typescript:
-        specifier: ^5.7.2
-        version: 5.9.3
-      vitest:
-        specifier: ^2.1.8
-        version: 2.1.9(@types/node@20.19.43)(jsdom@25.0.1)(lightningcss@1.32.0)(terser@5.49.0)
-
-  packages/lal-satti-engine:
     dependencies:
       '@lazy-patta/game-contracts':
         specifier: workspace:*
