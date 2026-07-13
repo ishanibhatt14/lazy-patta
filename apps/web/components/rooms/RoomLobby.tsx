@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState, type ReactElement } from 'react';
 
 import { useAuth } from '../../lib/auth/auth-context';
 import { createTranslator } from '../../lib/i18n';
+import { startGame } from '../../lib/online-game/games-client';
 import {
   addBotSeat,
   fetchRoomByCode,
@@ -17,6 +18,8 @@ import {
 import { getSupabaseBrowserClient } from '../../lib/supabase/browser-client';
 import { Button } from '../Button';
 import { LoginPanel } from '../auth/LoginPanel';
+
+import { GameBoard } from './GameBoard';
 
 /**
  * Room lobby. Joining is idempotent, so landing here (via create, join, or a
@@ -99,8 +102,10 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
   const seats = data?.seats ?? [];
   const isHost = room ? room.host_id === userId : false;
   const mySeat = seats.find((s) => s.user_id === userId);
-  const humanCount = seats.filter((s) => s.occupant !== 'empty').length;
+  const occupiedSeats = seats.filter((s) => s.occupant !== 'empty');
+  const humanCount = occupiedSeats.length;
   const isFull = room ? humanCount >= room.max_seats : false;
+  const canStart = humanCount >= 2 && occupiedSeats.every((s) => s.is_ready);
 
   const withBusy = async (fn: () => Promise<void>): Promise<void> => {
     setBusy(true);
@@ -114,6 +119,42 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
       setBusy(false);
     }
   };
+
+  // Once the host starts, the room leaves 'lobby' — swap the seat list for the
+  // live board. Truth still comes from the server; the board only reads + draws.
+  if (room && room.status !== 'lobby') {
+    return (
+      <div className="flex w-full max-w-md flex-col gap-6">
+        <header className="flex flex-col items-center gap-1">
+          <span className="text-sm text-text-primary">{t.t('rooms.roomCodeLabel')}</span>
+          <span className="text-3xl font-bold tracking-[0.3em] text-action-primary">{code}</span>
+        </header>
+
+        <GameBoard
+          roomId={room.id}
+          seats={seats}
+          userId={state.session.user.userId}
+          locale={room.locale}
+        />
+
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={busy}
+          onClick={() =>
+            withBusy(async () => {
+              await leaveRoom(getSupabaseBrowserClient(), room.id);
+              router.push('/play/online');
+            })
+          }
+        >
+          {t.t('rooms.leave')}
+        </Button>
+
+        {error ? <p className="text-center text-sm text-status-error">{error}</p> : null}
+      </div>
+    );
+  }
 
   return (
     <div className="flex w-full max-w-md flex-col gap-6">
@@ -175,6 +216,19 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
             }
           >
             {t.t('rooms.addBot')}
+          </Button>
+        ) : null}
+
+        {isHost && room ? (
+          <Button
+            disabled={busy || !canStart}
+            onClick={() =>
+              withBusy(async () => {
+                await startGame(getSupabaseBrowserClient(), room.id);
+              })
+            }
+          >
+            {busy ? t.t('rooms.starting') : t.t('rooms.startGame')}
           </Button>
         ) : null}
 

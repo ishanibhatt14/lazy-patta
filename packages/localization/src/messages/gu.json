@@ -157,5 +157,20 @@
   "rooms.markNotReady": "હજી તૈયાર નથી",
   "rooms.addBot": "કમ્પ્યુટર ખેલાડી ઉમેરો",
   "rooms.leave": "રૂમ છોડો",
-  "rooms.errorGeneric": "કંઈક ખોટું થયું. ફરી પ્રયાસ કરો."
+  "rooms.errorGeneric": "કંઈક ખોટું થયું. ફરી પ્રયાસ કરો.",
+  "rooms.startGame": "રમત શરૂ કરો",
+  "rooms.starting": "શરૂ થાય છે…",
+  "rooms.waitingToStart": "યજમાન રમત શરૂ કરે તેની રાહ જોવાઈ રહી છે…",
+  "rooms.turnYours": "તમારો વારો — પત્તું ખેંચો",
+  "rooms.turnWaiting": "{name} ની રાહ જોવાઈ રહી છે",
+  "rooms.drawFrom": "{name} પાસેથી છુપું પત્તું પસંદ કરો",
+  "rooms.yourHand": "તમારો હાથ",
+  "rooms.handEmpty": "તમે બહાર — તમારો હાથ ખાલી છે!",
+  "rooms.drawing": "ખેંચાઈ રહ્યું છે…",
+  "rooms.gameOver": "રમત પૂરી",
+  "rooms.youWon": "તમે તમારો હાથ ખાલી કરી દીધો!",
+  "rooms.youAreGadhaChor": "અરે ના — તમે ગધા ચોર છો!",
+  "rooms.gadhaChorIs": "{name} પાસે એકલું પત્તું રહ્યું — ગધા ચોર!",
+  "rooms.spectating": "રમત જોવાઈ રહી છે…",
+  "rooms.playerCards": "{count, plural, one {# પત્તું} other {# પત્તાં}}"
 }

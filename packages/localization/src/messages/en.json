@@ -157,5 +157,20 @@
   "rooms.markNotReady": "Not ready yet",
   "rooms.addBot": "Add computer player",
   "rooms.leave": "Leave room",
-  "rooms.errorGeneric": "Something went wrong. Please try again."
+  "rooms.errorGeneric": "Something went wrong. Please try again.",
+  "rooms.startGame": "Start game",
+  "rooms.starting": "Starting…",
+  "rooms.waitingToStart": "Waiting for the host to start the game…",
+  "rooms.turnYours": "Your turn — draw a card",
+  "rooms.turnWaiting": "Waiting for {name}",
+  "rooms.drawFrom": "Pick a hidden card from {name}",
+  "rooms.yourHand": "Your hand",
+  "rooms.handEmpty": "You're out — your hand is empty!",
+  "rooms.drawing": "Drawing…",
+  "rooms.gameOver": "Game over",
+  "rooms.youWon": "You emptied your hand!",
+  "rooms.youAreGadhaChor": "Oh no — you're the Gadha Chor!",
+  "rooms.gadhaChorIs": "{name} is left holding the odd card — the Gadha Chor!",
+  "rooms.spectating": "Watching the game…",
+  "rooms.playerCards": "{count, plural, one {# card} other {# cards}}"
 }
