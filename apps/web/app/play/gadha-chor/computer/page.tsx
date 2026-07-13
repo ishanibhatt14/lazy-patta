@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactElement } from 'react';
 
-import { ComputerGameExperience } from '../../../components/game/ComputerGameExperience';
+import { ComputerGameExperience } from '../../../../components/game/ComputerGameExperience';
 
 import './computer-game.css';
 

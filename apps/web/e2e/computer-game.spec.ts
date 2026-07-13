@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const ROUTE = '/play/computer';
+const ROUTE = '/play/gadha-chor/computer';
 
 async function startGame(page: Page, players: number): Promise<void> {
   await page.goto(ROUTE);

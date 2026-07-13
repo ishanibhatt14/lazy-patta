@@ -252,5 +252,21 @@
   "rooms.lalSattiPass": "Pass",
   "rooms.lalSattiFinished": "Finished",
   "rooms.lalSattiWinner": "{name} won this round.",
-  "rooms.lalSattiLeftover": "{name}: {count, plural, one {# card left} other {# cards left}}"
+  "rooms.lalSattiLeftover": "{name}: {count, plural, one {# card left} other {# cards left}}",
+  "lobby.chooseGame": "Choose a game",
+  "lobby.moreGamesTitle": "More games coming soon",
+  "lobby.moreGamesBody": "Teen Do Paanch, Mendicot, and Judgement are next up.",
+  "lobby.backToGames": "All games",
+  "games.status.available": "Available",
+  "games.status.comingSoon": "Coming soon",
+  "games.gadhaChor.name": "Gadha Chor",
+  "games.gadhaChor.description": "Make pairs, draw cards, and avoid being the Gadha Chor.",
+  "games.lalSatti.name": "Lal Satti",
+  "games.lalSatti.description": "Play your cards in sequence and finish first.",
+  "lalSattiTutorial.sevensTitle": "Start from the sevens",
+  "lalSattiTutorial.sevensBody": "Each suit opens with its seven, laid down first to start that suit's row.",
+  "lalSattiTutorial.sequenceTitle": "Build the sequence",
+  "lalSattiTutorial.sequenceBody": "On your turn, play a card that extends a suit up or down from its seven — or pass if you can't.",
+  "lalSattiTutorial.winTitle": "Race to empty your hand",
+  "lalSattiTutorial.winBody": "First to play every card wins the round."
 }

@@ -252,5 +252,21 @@
   "rooms.lalSattiPass": "पास",
   "rooms.lalSattiFinished": "समाप्त",
   "rooms.lalSattiWinner": "{name} ने यह राउंड जीता.",
-  "rooms.lalSattiLeftover": "{name}: {count, plural, one {# पत्ता बचा} other {# पत्ते बचे}}"
+  "rooms.lalSattiLeftover": "{name}: {count, plural, one {# पत्ता बचा} other {# पत्ते बचे}}",
+  "lobby.chooseGame": "एक खेल चुनें",
+  "lobby.moreGamesTitle": "और खेल जल्द आ रहे हैं",
+  "lobby.moreGamesBody": "तीन दो पांच, मेंडिकोट और जजमेंट जल्द आएंगे।",
+  "lobby.backToGames": "सभी खेल",
+  "games.status.available": "उपलब्ध",
+  "games.status.comingSoon": "जल्द आ रहा है",
+  "games.gadhaChor.name": "गधा चोर",
+  "games.gadhaChor.description": "जोड़े बनाएं, पत्ते खींचें, और गधा चोर बनने से बचें।",
+  "games.lalSatti.name": "लाल सत्ती",
+  "games.lalSatti.description": "क्रम में पत्ते खेलें और सबसे पहले खत्म करें।",
+  "lalSattiTutorial.sevensTitle": "सत्तों से शुरुआत करें",
+  "lalSattiTutorial.sevensBody": "हर सूट अपने सत्ते से खुलता है — उस सूट की पंक्ति शुरू करने के लिए पहले रखा जाता है।",
+  "lalSattiTutorial.sequenceTitle": "क्रम बनाएं",
+  "lalSattiTutorial.sequenceBody": "अपनी बारी पर, सत्ते से ऊपर या नीचे क्रम बढ़ाने वाला पत्ता खेलें — न खेल सकें तो पास करें।",
+  "lalSattiTutorial.winTitle": "हाथ खाली करने की दौड़",
+  "lalSattiTutorial.winBody": "जो सबसे पहले सभी पत्ते खेल दे, वह राउंड जीतता है।"
 }
