@@ -150,9 +150,15 @@ begin
     return v_game;
   end if;
 
+  -- Optimistic-concurrency guard. This is a deterministic *business* conflict,
+  -- not a transient DB serialization failure, so it must NOT use SQLSTATE 40001:
+  -- PostgREST auto-retries 40001/40P01, and since this raise always re-fires it
+  -- would loop until the request times out. The 'PT409' code uses PostgREST's
+  -- status-override convention (PTxxx → HTTP xxx) to return a clean 409 with no
+  -- retry; the route handler maps that to a VersionConflictError.
   if v_game.state_version <> p_expected_version then
     raise exception 'version conflict: expected %, found %', p_expected_version, v_game.state_version
-      using errcode = '40001';
+      using errcode = 'PT409';
   end if;
 
   update public.games

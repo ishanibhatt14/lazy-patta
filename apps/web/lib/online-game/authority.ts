@@ -70,7 +70,12 @@ function resultFor(state: GameState): GameResult | null {
   return engine.isComplete(state) ? engine.result(state) : null;
 }
 
-/** Raised when a concurrent action already advanced the version (Postgres 40001). */
+/**
+ * Raised when a concurrent action already advanced the version. The RPC signals
+ * this with SQLSTATE 'PT409' (PostgREST status-override → HTTP 409). We
+ * deliberately avoid 40001 there: PostgREST auto-retries serialization failures,
+ * and this deterministic conflict would otherwise loop until timeout.
+ */
 export class VersionConflictError extends Error {
   constructor(message = 'version conflict') {
     super(message);
@@ -80,7 +85,7 @@ export class VersionConflictError extends Error {
 
 function isVersionConflict(error: { code?: string; message?: string } | null): boolean {
   if (!error) return false;
-  return error.code === '40001' || (error.message ?? '').includes('version conflict');
+  return error.code === 'PT409' || (error.message ?? '').includes('version conflict');
 }
 
 /** Build the initial authoritative state for an ordered set of player ids. */

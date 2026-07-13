@@ -35,6 +35,12 @@ the authority runtime both bind to.
   `expectedVersion` it was based on.
 - If `expectedVersion != current` when the row is locked, the action is **rejected**
   with a version-conflict error; the client re-fetches and retries if still legal.
+  - The `commit_game_action` RPC raises this with SQLSTATE **`PT409`** (PostgREST's
+    `PTxxx` → HTTP status convention), **not** `40001`. PostgREST auto-retries
+    serialization failures (`40001`/`40P01`); because a version conflict is
+    deterministic, a `40001` raise would loop until the request times out. `PT409`
+    surfaces immediately as a clean HTTP 409 that the route maps to a
+    `VersionConflictError`. Retry policy is the client's, not the transport's.
 - Broadcasts intentionally carry only the version — clients pull the authoritative
   snapshot, so a missed/duplicated broadcast can't corrupt state.
 
