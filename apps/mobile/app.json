@@ -5,7 +5,25 @@
     "scheme": "lazypatta",
     "version": "0.0.0",
     "orientation": "portrait",
+    "icon": "./assets/images/lazy-patta-ios-icon-opaque-maroon-1024.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/images/lazy-patta-logo-transparent.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFF7E8"
+    },
+    "ios": {
+      "icon": "./assets/images/lazy-patta-ios-icon-opaque-maroon-1024.png"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/lazy-patta-logo-transparent.png",
+        "backgroundColor": "#7A1F2B"
+      }
+    },
+    "web": {
+      "favicon": "./assets/images/lazy-patta-ios-icon-opaque-maroon-1024.png"
+    },
     "plugins": ["expo-router"],
     "experiments": {
       "typedRoutes": true

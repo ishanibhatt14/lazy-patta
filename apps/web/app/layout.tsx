@@ -10,6 +10,10 @@ const messages = getMessages(DEFAULT_LOCALE);
 export const metadata: Metadata = {
   title: messages['app.name'],
   description: messages['welcome.tagline'],
+  icons: {
+    icon: '/images/lazy-patta-ios-icon-opaque-maroon-1024.png',
+    apple: '/images/lazy-patta-ios-icon-opaque-maroon-1024.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }): ReactElement {
