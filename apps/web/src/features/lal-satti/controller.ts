@@ -10,6 +10,7 @@ import {
 import type { Locale, MessageKey, MessageValues } from '@lazy-patta/localization';
 
 import { createCryptoRng } from '../../../lib/computer-game/rng';
+import { createTranslator } from '../../../lib/i18n';
 
 import { buildLalSattiRoster, LAL_SATTI_HUMAN_ID, rosterName } from './players';
 import { LAL_SATTI_CURRENT_SCORE_RULE } from './types';
@@ -57,12 +58,14 @@ function normalizeHumanName(name: string): string {
 }
 
 function canStart(state: LalSattiControllerState): boolean {
-  return normalizeHumanName(state.humanName).length > 0;
+  return state.phase === 'setup';
 }
 
 function playerDisplayName(state: LalSattiControllerState, playerId: string): string {
   if (playerId === LAL_SATTI_HUMAN_ID) {
-    return normalizeHumanName(state.humanName) || LAL_SATTI_HUMAN_ID;
+    return (
+      normalizeHumanName(state.humanName) || createTranslator(state.locale).t('computer.youName')
+    );
   }
 
   return rosterName(buildLalSattiRoster(state.playerCount), playerId);
@@ -275,7 +278,8 @@ function normalizeHydratedRoundScores(
       winnerIds: round.winnerIds ?? [],
       leftovers: round.leftovers.map((leftover) => ({
         ...leftover,
-        cardPoints: scoreRule === 'rank-value-v2' ? (leftover.cardPoints ?? 0) : 0,
+        // Legacy card-count rounds score by card count, so the penalty is the count itself.
+        cardPoints: scoreRule === 'rank-value-v2' ? (leftover.cardPoints ?? 0) : leftover.cardCount,
       })),
     };
   });

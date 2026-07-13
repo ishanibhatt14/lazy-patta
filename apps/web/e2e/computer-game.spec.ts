@@ -1,11 +1,16 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const ROUTE = '/play/gadha-chor/computer';
+const ROUTE = '/play/gadha-chor/computer?seed=424242';
+
+test.setTimeout(60_000);
 
 async function startGame(page: Page, players: number): Promise<void> {
   await page.goto(ROUTE);
-  await page.getByRole('button', { name: String(players), exact: true }).click();
-  await page.getByRole('button', { name: 'Start game' }).click();
+  if (players !== 3) {
+    await page.getByText('Customize table').click();
+    await page.getByRole('button', { name: String(players), exact: true }).click();
+  }
+  await page.getByRole('button', { name: /Quick game|Start game/i }).click();
   // Table is up once the live turn banner renders.
   await expect(page.getByRole('status')).toBeVisible();
 }

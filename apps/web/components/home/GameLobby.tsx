@@ -52,7 +52,7 @@ export function GameLobby(): ReactElement {
             duration={t('landing.game.gadhaChor.duration')}
             players={t('landing.game.gadhaChor.players')}
             computerHref="/play/gadha-chor/computer"
-            onlineHref="/play/online"
+            onlineHref="/play/online?game=gadha_chor"
             overviewHref="/games/gadha-chor"
             onHowToPlay={() => setActiveTutorial('gadha-chor')}
             artwork={<GadhaChorArtwork />}
@@ -66,7 +66,7 @@ export function GameLobby(): ReactElement {
             duration={t('landing.game.lalSatti.duration')}
             players={t('landing.game.lalSatti.players')}
             computerHref="/play/lal-satti/computer"
-            onlineHref="/play/online"
+            onlineHref="/play/online?game=lal_satti"
             overviewHref="/games/lal-satti"
             onHowToPlay={() => setActiveTutorial('lal-satti')}
             artwork={<LalSattiArtwork />}

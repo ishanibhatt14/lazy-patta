@@ -15,7 +15,7 @@ export default function LalSattiOverviewPage(): ReactElement {
       descriptionKey="games.lalSatti.description"
       status="available"
       computerHref="/play/lal-satti/computer"
-      onlineHref="/play/online"
+      onlineHref="/play/online?game=lal_satti"
       tutorialSteps={LAL_SATTI_TUTORIAL_STEPS}
     />
   );

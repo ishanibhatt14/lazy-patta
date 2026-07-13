@@ -1,4 +1,5 @@
 import type { Locale } from '@lazy-patta/localization';
+import Link from 'next/link';
 import type { ReactElement } from 'react';
 
 import { buildRoster, HUMAN_ID } from '../../lib/computer-game/players';
@@ -37,15 +38,21 @@ export function ComputerGameSetup({
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center gap-8 px-5 py-8 md:px-8">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-sm font-semibold uppercase tracking-widest text-brand-accent">
-          {t('computer.modeLabel')}
-        </p>
+        <Link
+          href="/"
+          className="text-sm font-bold text-action-primary underline decoration-action-secondary decoration-2 underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+        >
+          ← {t('lobby.backToGames')}
+        </Link>
         <LocaleSwitcher locale={locale} onLocaleChange={onLocaleChange} />
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-3">
+            <p className="text-sm font-semibold uppercase tracking-widest text-brand-accent">
+              {t('computer.modeLabel')}
+            </p>
             <h1 className="text-4xl font-bold leading-tight text-action-primary md:text-6xl">
               {t('computer.setupTitle')}
             </h1>
@@ -54,36 +61,45 @@ export function ComputerGameSetup({
             </p>
           </div>
 
-          <div className="flex flex-col gap-3 rounded-lg bg-surface-primary p-5 shadow-md">
-            <span className="text-sm font-semibold text-action-primary">
-              {t('computer.playerCount')}
-            </span>
-            <div
-              className="flex flex-wrap gap-2"
-              role="group"
-              aria-label={t('computer.playerCount')}
-            >
-              {PLAYER_COUNTS.map((count) => {
-                const selected = view.settings.playerCount === count;
-                return (
-                  <button
-                    key={count}
-                    type="button"
-                    onClick={() => onPlayerCountChange(count)}
-                    className={[
-                      'min-h-12 min-w-12 rounded-md border text-base font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent',
-                      selected
-                        ? 'border-action-primary bg-action-primary text-text-onBrand'
-                        : 'border-action-primary bg-background-canvas text-action-primary',
-                    ].join(' ')}
-                    aria-pressed={selected}
-                  >
-                    {count}
-                  </button>
-                );
-              })}
+          <Button size="lg" className="w-full min-h-14 sm:w-fit" onClick={onStart}>
+            {t('computer.quickGame')}
+          </Button>
+
+          <details className="rounded-lg bg-surface-primary p-5 shadow-md">
+            <summary className="cursor-pointer text-sm font-bold text-action-primary">
+              {t('computer.customizeTable')}
+            </summary>
+            <div className="mt-4 flex flex-col gap-3">
+              <span className="text-sm font-semibold text-action-primary">
+                {t('computer.playerCount')}
+              </span>
+              <div
+                className="flex flex-wrap gap-2"
+                role="group"
+                aria-label={t('computer.playerCount')}
+              >
+                {PLAYER_COUNTS.map((count) => {
+                  const selected = view.settings.playerCount === count;
+                  return (
+                    <button
+                      key={count}
+                      type="button"
+                      onClick={() => onPlayerCountChange(count)}
+                      className={[
+                        'min-h-12 min-w-12 rounded-md border text-base font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent',
+                        selected
+                          ? 'border-action-primary bg-action-primary text-text-onBrand'
+                          : 'border-action-primary bg-background-canvas text-action-primary',
+                      ].join(' ')}
+                      aria-pressed={selected}
+                    >
+                      {count}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          </details>
 
           <div className="flex flex-col gap-2 rounded-lg bg-surface-primary p-5 shadow-md">
             <span className="text-sm font-semibold text-action-primary">
@@ -133,9 +149,6 @@ export function ComputerGameSetup({
           </div>
 
           <div className="mt-2 flex flex-col gap-2">
-            <Button size="lg" className="w-full min-h-12" onClick={onStart}>
-              {t('computer.startGame')}
-            </Button>
             <Button
               size="lg"
               variant="ghost"

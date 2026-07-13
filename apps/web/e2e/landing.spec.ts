@@ -7,31 +7,35 @@ test.describe('rich landing page', () => {
     await expect(
       page.getByRole('heading', { name: /Desi card games\. Family game night, anywhere\./i }),
     ).toBeVisible();
-    await expect(page.getByRole('link', { name: /Play Gadha Chor/i })).toHaveAttribute(
+    await expect(page.getByRole('link', { name: /Start with Gadha Chor/i })).toHaveAttribute(
       'href',
       '/play/gadha-chor/computer',
     );
     await expect(page.getByRole('link', { name: /Start a private family room/i })).toHaveAttribute(
       'href',
-      '/play/online',
+      '/play/online?game=gadha_chor',
     );
-    await expect(page.getByRole('link', { name: /Play computer/i }).first()).toHaveAttribute(
+    await expect(page.getByRole('link', { name: /Play now/i }).first()).toHaveAttribute(
       'href',
       '/play/gadha-chor/computer',
     );
-    await expect(page.getByRole('link', { name: /Play computer/i }).nth(1)).toHaveAttribute(
+    await expect(page.getByRole('link', { name: /Play now/i }).nth(1)).toHaveAttribute(
       'href',
       '/play/lal-satti/computer',
     );
+    await expect(page.getByRole('link', { name: /Play with family/i }).nth(1)).toHaveAttribute(
+      'href',
+      '/play/online?game=lal_satti',
+    );
 
     await page
-      .getByRole('button', { name: /How to play/i })
+      .getByRole('button', { name: /Learn the rules/i })
       .first()
       .click();
     await expect(page.getByRole('dialog')).toContainText(/Match pairs/i);
     await page.getByRole('button', { name: /Skip/i }).click();
     await page
-      .getByRole('button', { name: /How to play/i })
+      .getByRole('button', { name: /Learn the rules/i })
       .nth(1)
       .click();
     await expect(page.getByRole('dialog')).toContainText(/Start from the sevens/i);

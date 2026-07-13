@@ -97,7 +97,7 @@ describe('Lal Satti web controller', () => {
     expect(afterBot.events[0]?.messageKey).toBe('lalSatti.eventCardPlayed');
   });
 
-  it('requires a table name before starting', () => {
+  it('starts with the default You name and still accepts an optional table name', () => {
     const controller = createLalSattiController(seededRng(2));
     const unnamed = controller.dispatch(controller.initialState, { type: 'start' });
     const named = controller.dispatch(controller.initialState, {
@@ -106,7 +106,8 @@ describe('Lal Satti web controller', () => {
     });
     const started = controller.dispatch(named, { type: 'start' });
 
-    expect(selectLalSattiViewState(unnamed).phase).toBe('setup');
+    expect(selectLalSattiViewState(unnamed).phase).toBe('playing');
+    expect(selectLalSattiViewState(unnamed).seats[0]?.name).toBe('You');
     expect(selectLalSattiViewState(named).canStart).toBe(true);
     expect(selectLalSattiViewState(started).phase).toBe('playing');
     expect(selectLalSattiViewState(started).seats[0]?.name).toBe('Isha Bhatt');
@@ -131,14 +132,14 @@ describe('Lal Satti web controller', () => {
     );
   });
 
-  it('keeps legacy hydrated card-count scores out of rank-value totals', () => {
+  it('ranks legacy hydrated card-count rounds by card count', () => {
     const controller = createLalSattiController(seededRng(2));
     const legacyRoundScores = [
       {
         id: 'legacy-round-1',
         roundNumber: 1,
         winnerNames: ['Isha'],
-        leftovers: [{ playerId: 'bot-ba', playerName: 'Ba', cardCount: 3 }],
+        leftovers: [{ playerId: 'bot-1', playerName: 'Ba', cardCount: 3 }],
       },
     ] as unknown as readonly LalSattiRoundScore[];
 
@@ -150,9 +151,9 @@ describe('Lal Satti web controller', () => {
     const view = selectLalSattiViewState(state);
 
     expect(view.roundScores[0]?.scoreRule).toBe('card-count-v1');
-    expect(view.roundScores[0]?.leftovers[0]?.cardPoints).toBe(0);
+    expect(view.roundScores[0]?.leftovers[0]?.cardPoints).toBe(3);
     expect(view.runningScores.reduce((total, score) => total + score.totalPenaltyPoints, 0)).toBe(
-      0,
+      3,
     );
   });
 });
