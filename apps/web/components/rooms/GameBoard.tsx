@@ -1,8 +1,17 @@
 'use client';
 
-import type { Card, PublicPlayerView } from '@lazy-patta/game-contracts';
+import {
+  cardId,
+  type Card,
+  type GameResult,
+  type PublicPlayerView,
+  type PublicSnapshot,
+  type Rank,
+  type Suit,
+} from '@lazy-patta/game-contracts';
 import { mintPositionToken } from '@lazy-patta/game-engine';
-import type { Locale } from '@lazy-patta/localization';
+import { playableCards, toTableauLanes, type LalSattiResult } from '@lazy-patta/lal-satti-engine';
+import type { Locale, MessageKey } from '@lazy-patta/localization';
 import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
 
 import { createTranslator } from '../../lib/i18n';
@@ -10,8 +19,10 @@ import {
   drawCard,
   fetchLatestGame,
   fetchMyHand,
+  submitLalSattiAction,
   type GameRow,
 } from '../../lib/online-game/games-client';
+import type { LalSattiPublicSnapshot } from '../../lib/online-game/lal-satti-authority';
 import type { RoomSeat } from '../../lib/rooms/rooms-client';
 import { getSupabaseBrowserClient } from '../../lib/supabase/browser-client';
 import { PlayingCard } from '../PlayingCard';
@@ -27,6 +38,12 @@ import { PlayingCard } from '../PlayingCard';
 
 const POLL_MS = 2000;
 const CLOCKWISE_STEP = 1;
+const SUIT_GLYPH: Record<Suit, string> = {
+  clubs: '♣',
+  diamonds: '♦',
+  hearts: '♥',
+  spades: '♠',
+};
 
 function messageFor(error: unknown, fallback: string): string {
   return error instanceof Error && error.message ? error.message : fallback;
@@ -35,6 +52,22 @@ function messageFor(error: unknown, fallback: string): string {
 function newActionId(): string {
   const maybeUuid = globalThis.crypto?.randomUUID?.();
   return maybeUuid ?? `act-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function rankKey(rank: Rank): MessageKey {
+  return `rank.${rank}` as MessageKey;
+}
+
+function suitKey(suit: Suit): MessageKey {
+  return `suit.${suit}` as MessageKey;
+}
+
+function cardLabel(card: Card, locale: Locale): string {
+  const translator = createTranslator(locale);
+  return translator.format('card.accessibleFace', {
+    rank: translator.t(rankKey(card.rank)),
+    suit: translator.t(suitKey(card.suit)),
+  });
 }
 
 /** The next active player clockwise from `currentId` — the draw source. */
@@ -97,8 +130,6 @@ export function GameBoard({ roomId, seats, userId, locale }: GameBoardProps): Re
 
   const snapshot = game?.public_snapshot;
   const isActive = game?.status === 'active';
-  const isMyTurn = Boolean(isActive && snapshot?.currentPlayerId === userId);
-  const target = snapshot ? drawTarget(snapshot.players, snapshot.currentPlayerId) : null;
 
   const onDraw = useCallback(
     async (positionToken: string): Promise<void> => {
@@ -129,13 +160,34 @@ export function GameBoard({ roomId, seats, userId, locale }: GameBoardProps): Re
     );
   }
 
-  const result = game.result;
+  if (game.game_key === 'lal_satti') {
+    return (
+      <LalSattiOnlineBoard
+        game={game}
+        snapshot={snapshot as LalSattiPublicSnapshot}
+        hand={hand}
+        userId={userId}
+        locale={locale}
+        busy={busy}
+        setBusy={setBusy}
+        setError={setError}
+        error={error}
+        refresh={refresh}
+        nameFor={nameFor}
+      />
+    );
+  }
+
+  const gadhaSnapshot = snapshot as PublicSnapshot;
+  const result = game.result as GameResult | null;
+  const target = drawTarget(gadhaSnapshot.players, gadhaSnapshot.currentPlayerId);
+  const isMyTurn = Boolean(isActive && gadhaSnapshot.currentPlayerId === userId);
 
   return (
     <div className="flex w-full flex-col gap-5">
       <ul className="flex flex-col gap-2">
-        {snapshot.players.map((player) => {
-          const isTurn = isActive && snapshot.currentPlayerId === player.id;
+        {gadhaSnapshot.players.map((player) => {
+          const isTurn = isActive && gadhaSnapshot.currentPlayerId === player.id;
           return (
             <li
               key={player.id}
@@ -160,7 +212,7 @@ export function GameBoard({ roomId, seats, userId, locale }: GameBoardProps): Re
           {isMyTurn
             ? t.t('rooms.turnYours')
             : t.format('rooms.turnWaiting', {
-                name: nameFor(snapshot.currentPlayerId ?? ''),
+                name: nameFor(gadhaSnapshot.currentPlayerId ?? ''),
               })}
         </p>
       ) : null}
@@ -172,7 +224,7 @@ export function GameBoard({ roomId, seats, userId, locale }: GameBoardProps): Re
           </span>
           <div className="flex flex-wrap justify-center gap-2">
             {Array.from({ length: target.handCount }).map((_, index) => {
-              const token = mintPositionToken(snapshot.stateVersion, target.id, index);
+              const token = mintPositionToken(gadhaSnapshot.stateVersion, target.id, index);
               return (
                 <button
                   key={token}
@@ -216,6 +268,212 @@ export function GameBoard({ roomId, seats, userId, locale }: GameBoardProps): Re
                 ? t.t('rooms.youAreGadhaChor')
                 : t.format('rooms.gadhaChorIs', { name: nameFor(result.loser) })}
           </span>
+        </div>
+      ) : null}
+
+      {error ? <p className="text-center text-sm text-status-error">{error}</p> : null}
+    </div>
+  );
+}
+
+interface LalSattiOnlineBoardProps {
+  readonly game: GameRow;
+  readonly snapshot: LalSattiPublicSnapshot;
+  readonly hand: readonly Card[];
+  readonly userId: string;
+  readonly locale: Locale;
+  readonly busy: boolean;
+  readonly setBusy: (value: boolean) => void;
+  readonly setError: (value: string | undefined) => void;
+  readonly error: string | undefined;
+  readonly refresh: () => Promise<void>;
+  readonly nameFor: (playerId: string) => string;
+}
+
+function LalSattiOnlineBoard({
+  game,
+  snapshot,
+  hand,
+  userId,
+  locale,
+  busy,
+  setBusy,
+  setError,
+  error,
+  refresh,
+  nameFor,
+}: LalSattiOnlineBoardProps): ReactElement {
+  const t = useMemo(() => createTranslator(locale), [locale]);
+  const isActive = game.status === 'active';
+  const isMyTurn = Boolean(isActive && snapshot.currentPlayerId === userId);
+  const lanes = useMemo(() => toTableauLanes(snapshot.tableau), [snapshot.tableau]);
+  const playable = useMemo(() => {
+    if (!isMyTurn) return [];
+    const openingRequired = snapshot.stateVersion === 0 && snapshot.tableau.hearts.length === 0;
+    if (openingRequired) return hand.filter((card) => card.id === cardId('hearts', '7'));
+    return playableCards(snapshot.tableau, hand);
+  }, [hand, isMyTurn, snapshot.stateVersion, snapshot.tableau]);
+  const playableIds = useMemo(() => new Set(playable.map((card) => card.id)), [playable]);
+  const canPass = isMyTurn && playable.length === 0;
+
+  const submit = useCallback(
+    async (action: { type: 'PLAY_CARD'; cardId: string } | { type: 'PASS' }): Promise<void> => {
+      if (busy) return;
+      setBusy(true);
+      setError(undefined);
+      try {
+        await submitLalSattiAction(getSupabaseBrowserClient(), game.id, {
+          clientActionId: newActionId(),
+          action,
+          expectedVersion: game.state_version,
+        });
+      } catch (caught) {
+        setError(messageFor(caught, t.t('rooms.errorGeneric')));
+      } finally {
+        await refresh();
+        setBusy(false);
+      }
+    },
+    [busy, game.id, game.state_version, refresh, setBusy, setError, t],
+  );
+
+  const result = game.result as LalSattiResult | null;
+  const leftovers = result
+    ? Object.entries(result.remainingCards).filter(([, count]) => Number(count) > 0)
+    : [];
+
+  return (
+    <div className="flex w-full flex-col gap-5">
+      <ul className="grid gap-2 sm:grid-cols-2">
+        {snapshot.players.map((player) => {
+          const isTurn = isActive && snapshot.currentPlayerId === player.id;
+          return (
+            <li
+              key={player.id}
+              className={`flex items-center justify-between gap-3 rounded-md px-4 py-2 shadow-sm ${
+                isTurn ? 'bg-action-primary/10 ring-1 ring-action-primary' : 'bg-surface-primary'
+              }`}
+            >
+              <span className="text-sm font-medium text-text-primary">
+                {nameFor(player.id)}
+                {player.status === 'finished' ? ` · ${t.t('rooms.lalSattiFinished')}` : ''}
+              </span>
+              <span className="text-xs text-text-primary">
+                {t.format('rooms.playerCards', { count: player.handCount })}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+
+      {isActive ? (
+        <p className="text-center text-sm font-medium text-text-primary">
+          {isMyTurn
+            ? t.t('rooms.lalSattiTurnYours')
+            : t.format('rooms.turnWaiting', {
+                name: nameFor(snapshot.currentPlayerId ?? ''),
+              })}
+        </p>
+      ) : null}
+
+      <section
+        className="rounded-md bg-game-table p-3 text-text-onBrand shadow-sm"
+        aria-label={t.t('rooms.lalSattiTableau')}
+      >
+        <div className="grid gap-2">
+          {lanes.map((lane) => (
+            <div key={lane.suit} className="grid grid-cols-[2rem_minmax(0,1fr)] items-center gap-2">
+              <div className="text-2xl" aria-label={t.t(suitKey(lane.suit))}>
+                {SUIT_GLYPH[lane.suit]}
+              </div>
+              <div className="flex min-h-20 items-center gap-2 overflow-x-auto rounded-md bg-surface-primary p-2 text-text-primary">
+                {lane.cards.length > 0 ? (
+                  lane.cards.map((card) => (
+                    <PlayingCard
+                      key={card.id}
+                      card={card}
+                      size="sm"
+                      label={cardLabel(card, locale)}
+                    />
+                  ))
+                ) : (
+                  <span className="text-sm text-text-primary">
+                    {t.t('rooms.lalSattiLaneEmpty')}
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="flex flex-col items-center gap-3 rounded-md bg-surface-primary px-4 py-3 shadow-sm">
+        <div className="flex w-full items-center justify-between gap-3">
+          <span className="text-xs font-semibold uppercase tracking-wide text-text-primary">
+            {t.t('rooms.yourHand')}
+          </span>
+          {canPass ? (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void submit({ type: 'PASS' })}
+              className="rounded-md bg-action-secondary px-3 py-2 text-sm font-semibold text-text-onBrand transition hover:bg-action-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary disabled:pointer-events-none disabled:opacity-60"
+            >
+              {t.t('rooms.lalSattiPass')}
+            </button>
+          ) : null}
+        </div>
+        {isMyTurn && playable.length > 0 ? (
+          <span className="text-xs text-brand-accent">{t.t('rooms.lalSattiPlayable')}</span>
+        ) : null}
+        {hand.length > 0 ? (
+          <div className="flex flex-wrap justify-center gap-2">
+            {hand.map((card) => {
+              const playableNow = playableIds.has(card.id);
+              return (
+                <button
+                  key={card.id}
+                  type="button"
+                  disabled={!playableNow || busy}
+                  onClick={() => void submit({ type: 'PLAY_CARD', cardId: card.id })}
+                  className={[
+                    'rounded-md p-1 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent disabled:pointer-events-none',
+                    playableNow ? '-translate-y-1 bg-action-secondary shadow-md' : 'opacity-70',
+                  ].join(' ')}
+                  aria-label={t.format('lalSatti.playCardLabel', {
+                    card: cardLabel(card, locale),
+                  })}
+                >
+                  <PlayingCard card={card} size="sm" label={cardLabel(card, locale)} />
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <span className="text-sm text-text-primary">{t.t('rooms.handEmpty')}</span>
+        )}
+      </div>
+
+      {game.status === 'complete' && result ? (
+        <div className="flex flex-col items-center gap-2 rounded-md bg-surface-primary px-4 py-3 text-center shadow-sm">
+          <span className="text-lg font-bold text-action-primary">{t.t('rooms.gameOver')}</span>
+          <span className="text-sm text-text-primary">
+            {t.format('rooms.lalSattiWinner', {
+              name: result.winnerIds.map(nameFor).join(', '),
+            })}
+          </span>
+          {leftovers.length > 0 ? (
+            <ul className="text-sm text-text-primary">
+              {leftovers.map(([playerId, count]) => (
+                <li key={playerId}>
+                  {t.format('rooms.lalSattiLeftover', {
+                    name: nameFor(playerId),
+                    count: Number(count),
+                  })}
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
       ) : null}
 

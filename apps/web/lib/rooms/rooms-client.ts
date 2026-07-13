@@ -10,6 +10,7 @@ import { type SupabaseClient } from '@supabase/supabase-js';
 export type RoomStatus = 'lobby' | 'in_progress' | 'complete' | 'abandoned';
 export type SeatOccupant = 'human' | 'bot' | 'empty';
 export type RoomLocale = 'en' | 'gu' | 'hi';
+export type OnlineGameKey = 'gadha_chor' | 'lal_satti';
 
 export interface Room {
   readonly id: string;
@@ -18,6 +19,7 @@ export interface Room {
   readonly status: RoomStatus;
   readonly max_seats: number;
   readonly locale: RoomLocale;
+  readonly game_key: OnlineGameKey;
   readonly created_at?: string;
 }
 
@@ -48,6 +50,7 @@ export interface CreateRoomInput {
   readonly maxSeats?: number;
   readonly locale?: RoomLocale;
   readonly displayName?: string;
+  readonly gameKey?: OnlineGameKey;
 }
 
 export async function createRoom(
@@ -59,6 +62,7 @@ export async function createRoom(
       p_max_seats: input.maxSeats ?? 6,
       p_locale: input.locale ?? 'en',
       p_display_name: input.displayName ?? null,
+      p_game_key: input.gameKey ?? 'gadha_chor',
     }),
   );
 }
@@ -96,7 +100,7 @@ export async function addBotSeat(
   return unwrap<RoomSeat>(
     await client.rpc('add_bot_seat', {
       p_room_id: roomId,
-      ...(botName ? { p_bot_name: botName } : {}),
+      ...(botName ? { p_display_name: botName } : {}),
     }),
   );
 }

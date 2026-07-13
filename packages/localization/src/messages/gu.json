@@ -208,6 +208,9 @@
   "rooms.createTitle": "ખાનગી રૂમ શરૂ કરો",
   "rooms.createDescription": "રૂમ બનાવો અને કોડ તમારા કુટુંબ સાથે વહેંચો.",
   "rooms.creating": "બનાવાય છે…",
+  "rooms.gameLabel": "રમત",
+  "rooms.gameGadhaChor": "ગધા ચોર",
+  "rooms.gameLalSatti": "લાલ સત્તી",
   "rooms.joinTitle": "કોડથી જોડાઓ",
   "rooms.codeLabel": "રૂમ કોડ",
   "rooms.codePlaceholder": "ABC123",
@@ -240,5 +243,13 @@
   "rooms.youAreGadhaChor": "અરે ના — તમે ગધા ચોર છો!",
   "rooms.gadhaChorIs": "{name} પાસે એકલું પત્તું રહ્યું — ગધા ચોર!",
   "rooms.spectating": "રમત જોવાઈ રહી છે…",
-  "rooms.playerCards": "{count, plural, one {# પત્તું} other {# પત્તાં}}"
+  "rooms.playerCards": "{count, plural, one {# પત્તું} other {# પત્તાં}}",
+  "rooms.lalSattiTurnYours": "તમારો વારો — પત્તું રમો અથવા પાસ કરો",
+  "rooms.lalSattiTableau": "લાલ સત્તી ટેબલ",
+  "rooms.lalSattiLaneEmpty": "સાતની રાહ છે",
+  "rooms.lalSattiPlayable": "રમી શકાય તે પત્તાં ઉપર દેખાય છે",
+  "rooms.lalSattiPass": "પાસ",
+  "rooms.lalSattiFinished": "પૂર્ણ",
+  "rooms.lalSattiWinner": "{name} આ રાઉન્ડ જીત્યા.",
+  "rooms.lalSattiLeftover": "{name}: {count, plural, one {# પત્તું બાકી} other {# પત્તાં બાકી}}"
 }
