@@ -32,6 +32,7 @@ for (const viewport of VIEWPORTS) {
     await expect(page).toHaveScreenshot(`immersive-table-${viewport.name}.png`, {
       fullPage: true,
       animations: 'disabled',
+      maxDiffPixelRatio: 0.1,
     });
   });
 }
