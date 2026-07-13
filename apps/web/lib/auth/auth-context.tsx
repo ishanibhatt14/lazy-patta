@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  createSupabaseAuthProvider,
-  type AuthProvider,
-  type SessionState,
-} from '@lazy-patta/auth';
+import { createSupabaseAuthProvider, type AuthProvider, type SessionState } from '@lazy-patta/auth';
 import {
   createContext,
   useCallback,

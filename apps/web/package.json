@@ -17,7 +17,6 @@
     "@lazy-patta/design-tokens": "workspace:*",
     "@lazy-patta/game-contracts": "workspace:*",
     "@lazy-patta/game-engine": "workspace:*",
-    "@lazy-patta/auth": "workspace:*",
     "@lazy-patta/lal-satti-engine": "workspace:*",
     "@lazy-patta/localization": "workspace:*",
     "@supabase/supabase-js": "^2.110.2",
