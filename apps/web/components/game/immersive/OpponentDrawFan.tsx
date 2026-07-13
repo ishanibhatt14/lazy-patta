@@ -20,7 +20,10 @@ function slotTransform(index: number, count: number): CSSProperties {
   const step = Math.min(SPREAD_STEP_DEG, (MAX_SPREAD_DEG * 2) / (count - 1));
   const angle = (index - mid) * step;
   const lift = Math.abs(index - mid) * 0.18;
-  return { transform: `rotate(${angle}deg) translateY(${lift}rem)`, transformOrigin: 'bottom center' };
+  return {
+    transform: `rotate(${angle}deg) translateY(${lift}rem)`,
+    transformOrigin: 'bottom center',
+  };
 }
 
 /**

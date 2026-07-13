@@ -36,7 +36,11 @@ export function DrawAnimationLayer({
   return (
     <div className={reducedMotion ? 'computer-pair-reduced' : 'computer-pair-animation'}>
       {draw.pairRemoved && draw.matchedCard ? (
-        <PlayingCard card={draw.matchedCard} label={cardLabel(locale, draw.matchedCard)} size="sm" />
+        <PlayingCard
+          card={draw.matchedCard}
+          label={cardLabel(locale, draw.matchedCard)}
+          size="sm"
+        />
       ) : null}
       <div className="flex flex-col items-center gap-1">
         <span className="text-xs font-semibold uppercase tracking-wide text-action-secondary">
