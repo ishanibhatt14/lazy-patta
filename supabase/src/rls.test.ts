@@ -54,3 +54,38 @@ describe('supabase RLS foundation', () => {
     }
   });
 });
+
+describe('lal_satti_score_sessions RLS', () => {
+  const sql = sqlFor('0006_lal_satti_score_sessions.sql').toLowerCase();
+
+  it('enables RLS on score sessions and score rounds', () => {
+    expect(sql).toContain('alter table public.lal_satti_score_sessions enable row level security');
+    expect(sql).toContain('alter table public.lal_satti_score_rounds enable row level security');
+  });
+
+  it('owns score sessions through auth.users and scopes session policies to auth.uid()', () => {
+    expect(sql).toMatch(/owner_id\s+uuid[\s\S]*?references\s+auth\.users/);
+    expect(sql).toContain('on delete cascade');
+
+    const sessionPolicies = policyBodies(sql).filter((body) =>
+      body.includes('lal_satti_score_sessions'),
+    );
+    expect(sessionPolicies.length).toBeGreaterThan(0);
+    for (const body of sessionPolicies) {
+      expect(body).toContain('auth.uid() = owner_id');
+    }
+  });
+
+  it('scopes round policies through an owner-only parent-session helper', () => {
+    expect(sql).toContain('function public.owns_lal_satti_score_session');
+    expect(sql).toContain('and s.owner_id = auth.uid()');
+
+    const roundPolicies = policyBodies(sql).filter((body) =>
+      body.includes('lal_satti_score_rounds'),
+    );
+    expect(roundPolicies.length).toBeGreaterThan(0);
+    for (const body of roundPolicies) {
+      expect(body).toContain('public.owns_lal_satti_score_session(session_id)');
+    }
+  });
+});

@@ -99,6 +99,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@lazy-patta/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@lazy-patta/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
@@ -114,6 +117,9 @@ importers:
       '@lazy-patta/localization':
         specifier: workspace:*
         version: link:../../packages/localization
+      '@supabase/supabase-js':
+        specifier: ^2.110.2
+        version: 2.110.2
       next:
         specifier: ^16.2.10
         version: 16.2.10(@babel/core@7.29.7)(@playwright/test@1.61.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
