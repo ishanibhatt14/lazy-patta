@@ -13,6 +13,7 @@ precedes implementation) — they are the contract the code will meet.
 | [Parallel Agent Worktrees](./parallel-agent-worktrees.md) | Safe multi-agent branches, worktrees, ownership, and merge order |
 | [Testing Strategy](./testing-strategy.md)                 | Unit/property/integration/e2e + gates                            |
 | [Release Process](./release-process.md)                   | How a change reaches users                                       |
+| [Deploying to Vercel](./deploying-vercel.md)              | UI-only vs full-online deploy, hosted Supabase, env vars         |
 
 Root-level repo files (to be created with the scaffold): `README.md`, `LICENSE`,
 `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `.github/`.

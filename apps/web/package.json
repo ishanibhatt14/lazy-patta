@@ -13,6 +13,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@lazy-patta/auth": "workspace:*",
     "@lazy-patta/design-tokens": "workspace:*",
     "@lazy-patta/game-contracts": "workspace:*",
     "@lazy-patta/game-engine": "workspace:*",
