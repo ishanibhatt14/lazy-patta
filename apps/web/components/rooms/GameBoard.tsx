@@ -145,7 +145,7 @@ export function GameBoard({ roomId, seats, userId, locale }: GameBoardProps): Re
             >
               <span className="text-sm font-medium text-text-primary">
                 {nameFor(player.id)}
-                {player.status === 'finished' ? ` · ${t.t('rooms.youWon')}` : ''}
+                {player.status === 'finished' ? ` · ${t.t('rooms.playerSafe')}` : ''}
               </span>
               <span className="text-xs text-text-primary">
                 {t.format('rooms.playerCards', { count: player.handCount })}
