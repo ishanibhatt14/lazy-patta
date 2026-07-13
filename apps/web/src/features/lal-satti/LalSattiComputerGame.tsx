@@ -15,7 +15,7 @@ import {
   type LalSattiController,
 } from './controller';
 import { LAL_SATTI_HUMAN_ID } from './players';
-import type { LalSattiControllerState, LalSattiIntent } from './types';
+import type { LalSattiControllerState, LalSattiIntent, LalSattiRoundScore } from './types';
 
 const SUIT_GLYPH: Record<Suit, string> = {
   clubs: '♣',
@@ -25,6 +25,12 @@ const SUIT_GLYPH: Record<Suit, string> = {
 };
 
 const PLAYER_COUNTS = [3, 4, 5, 6] as const;
+const SESSION_STORAGE_KEY = 'lazy-patta:lal-satti-session:v1';
+
+interface StoredLalSattiSession {
+  readonly humanName?: string;
+  readonly roundScores?: readonly LalSattiRoundScore[];
+}
 
 function rankKey(rank: Rank): MessageKey {
   return `rank.${rank}` as MessageKey;
@@ -45,6 +51,33 @@ function cardLabel(card: Card, locale: Locale): string {
 function displayName(playerName: string, locale: Locale): string {
   if (playerName === LAL_SATTI_HUMAN_ID) return createTranslator(locale).t('computer.youName');
   return playerName;
+}
+
+function readStoredSession(): StoredLalSattiSession {
+  if (typeof window === 'undefined') return {};
+  const raw = window.localStorage.getItem(SESSION_STORAGE_KEY);
+  if (!raw) return {};
+
+  try {
+    const parsed = JSON.parse(raw) as StoredLalSattiSession;
+    return {
+      humanName: typeof parsed.humanName === 'string' ? parsed.humanName : undefined,
+      roundScores: Array.isArray(parsed.roundScores) ? parsed.roundScores : undefined,
+    };
+  } catch {
+    return {};
+  }
+}
+
+function writeStoredSession(state: LalSattiControllerState): void {
+  if (typeof window === 'undefined' || !state.hasHydratedSession) return;
+  window.localStorage.setItem(
+    SESSION_STORAGE_KEY,
+    JSON.stringify({
+      humanName: state.humanName,
+      roundScores: state.roundScores,
+    }),
+  );
 }
 
 function prefersReducedMotion(): boolean {
@@ -73,13 +106,22 @@ export function LalSattiComputerGame(): ReactElement {
   );
   const view = selectLalSattiViewState(state);
   const t = createTranslator(view.locale);
+  const latestRound = view.roundScores.at(-1);
 
   useEffect(() => {
-    if (view.phase !== 'playing' || view.currentPlayerName === LAL_SATTI_HUMAN_ID) return;
+    dispatch({ type: 'hydrateSession', ...readStoredSession() });
+  }, []);
+
+  useEffect(() => {
+    writeStoredSession(state);
+  }, [state]);
+
+  useEffect(() => {
+    if (view.phase !== 'playing' || view.isHumanTurn) return;
     const delay = view.reducedMotion ? 250 : 700;
     const timer = window.setTimeout(() => dispatch({ type: 'botStep' }), delay);
     return () => window.clearTimeout(timer);
-  }, [view.phase, view.currentPlayerName, view.reducedMotion]);
+  }, [view.phase, view.isHumanTurn, view.currentPlayerName, view.reducedMotion]);
 
   if (view.phase === 'setup') {
     return (
@@ -113,6 +155,22 @@ export function LalSattiComputerGame(): ReactElement {
               </div>
 
               <label className="mt-5 flex flex-col gap-2 text-sm font-semibold text-text-primary">
+                {t.t('lalSatti.nameLabel')}
+                <input
+                  className="min-h-12 rounded-md border border-brand-accent bg-surface-primary px-3 py-2"
+                  value={view.humanName}
+                  maxLength={32}
+                  placeholder={t.t('lalSatti.namePlaceholder')}
+                  onChange={(event) =>
+                    dispatch({ type: 'setHumanName', humanName: event.target.value })
+                  }
+                />
+                <span className="text-xs font-normal leading-5 text-text-primary">
+                  {t.t('lalSatti.nameHelp')}
+                </span>
+              </label>
+
+              <label className="mt-5 flex flex-col gap-2 text-sm font-semibold text-text-primary">
                 {t.t('settings.language')}
                 <select
                   className="min-h-12 rounded-md border border-brand-accent bg-surface-primary px-3 py-2"
@@ -143,7 +201,7 @@ export function LalSattiComputerGame(): ReactElement {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Button size="lg" onClick={() => dispatch({ type: 'start' })}>
+            <Button size="lg" disabled={!view.canStart} onClick={() => dispatch({ type: 'start' })}>
               {t.t('lalSatti.startGame')}
             </Button>
             <Button
@@ -192,7 +250,7 @@ export function LalSattiComputerGame(): ReactElement {
                     {seat.avatarInitial}
                   </div>
                   <div>
-                    <p className="font-bold">{seat.isSelf ? t.t('computer.youName') : seat.name}</p>
+                    <p className="font-bold">{seat.name}</p>
                     <p className="text-sm">
                       {seat.isFinished
                         ? t.t('label.finished')
@@ -259,7 +317,7 @@ export function LalSattiComputerGame(): ReactElement {
                         ? '-translate-y-2 bg-action-secondary shadow-md'
                         : 'bg-transparent opacity-70',
                     ].join(' ')}
-                    disabled={!playable || view.currentPlayerName !== LAL_SATTI_HUMAN_ID}
+                    disabled={!playable || !view.isHumanTurn}
                     aria-label={t.format('lalSatti.playCardLabel', {
                       card: cardLabel(card, view.locale),
                     })}
@@ -281,6 +339,23 @@ export function LalSattiComputerGame(): ReactElement {
                 })}
               </h2>
               <p className="mt-2">{t.t('lalSatti.resultInstruction')}</p>
+              {latestRound && latestRound.leftovers.length > 0 ? (
+                <div className="mt-4 rounded-md bg-surface-primary p-3 text-text-primary">
+                  <h3 className="font-bold text-action-primary">
+                    {t.t('lalSatti.leftoversTitle')}
+                  </h3>
+                  <ul className="mt-2 space-y-1 text-sm">
+                    {latestRound.leftovers.map((leftover) => (
+                      <li key={leftover.playerId}>
+                        {t.format('lalSatti.leftoverLine', {
+                          name: leftover.playerName,
+                          count: leftover.cardCount,
+                        })}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
               <Button
                 className="mt-4"
                 variant="secondary"
@@ -292,17 +367,82 @@ export function LalSattiComputerGame(): ReactElement {
           ) : null}
         </div>
 
-        <aside className="rounded-lg bg-surface-primary p-4 shadow-md lg:self-start">
-          <h2 className="text-lg font-bold text-action-primary">{t.t('computer.eventLog')}</h2>
-          <ol className="mt-3 space-y-2 text-sm leading-6">
-            {view.events.length === 0 ? (
-              <li>{t.t('computer.eventReady')}</li>
+        <aside className="flex flex-col gap-4 lg:self-start">
+          <section className="rounded-lg bg-surface-primary p-4 shadow-md">
+            <h2 className="text-lg font-bold text-action-primary">
+              {t.t('lalSatti.scoreboardTitle')}
+            </h2>
+            <p className="mt-1 text-sm leading-6">{t.t('lalSatti.scoreboardHelp')}</p>
+
+            {view.roundScores.length === 0 ? (
+              <p className="mt-3 text-sm font-semibold text-brand-accent">
+                {t.t('lalSatti.scoreboardEmpty')}
+              </p>
             ) : (
-              view.events.map((event) => (
-                <li key={event.id}>{t.format(event.messageKey, event.values)}</li>
-              ))
+              <>
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="text-action-primary">
+                      <tr>
+                        <th className="py-2 pr-3">{t.t('lalSatti.scoreboardPlayer')}</th>
+                        <th className="py-2 pr-3">{t.t('lalSatti.scoreboardTotalLeft')}</th>
+                        <th className="py-2">{t.t('lalSatti.scoreboardRoundsNotWon')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {view.runningScores.map((score) => (
+                        <tr key={score.playerId} className="border-t border-brand-accent">
+                          <td className="py-2 pr-3 font-semibold">{score.playerName}</td>
+                          <td className="py-2 pr-3">{score.totalLeftoverCards}</td>
+                          <td className="py-2">{score.roundsNotWon}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <ol className="mt-4 space-y-3 text-sm leading-6">
+                  {view.roundScores.map((round) => (
+                    <li key={round.id} className="rounded-md bg-background-canvas p-3">
+                      <p className="font-bold text-action-primary">
+                        {t.format('lalSatti.roundScoreLabel', { round: round.roundNumber })}
+                      </p>
+                      <p>
+                        {t.format('lalSatti.roundWinnerLine', {
+                          name: round.winnerNames
+                            .map((name) => displayName(name, view.locale))
+                            .join(', '),
+                        })}
+                      </p>
+                      <ul className="mt-1 space-y-1">
+                        {round.leftovers.map((leftover) => (
+                          <li key={leftover.playerId}>
+                            {t.format('lalSatti.leftoverLine', {
+                              name: leftover.playerName,
+                              count: leftover.cardCount,
+                            })}
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  ))}
+                </ol>
+              </>
             )}
-          </ol>
+          </section>
+
+          <section className="rounded-lg bg-surface-primary p-4 shadow-md">
+            <h2 className="text-lg font-bold text-action-primary">{t.t('computer.eventLog')}</h2>
+            <ol className="mt-3 space-y-2 text-sm leading-6">
+              {view.events.length === 0 ? (
+                <li>{t.t('computer.eventReady')}</li>
+              ) : (
+                view.events.map((event) => (
+                  <li key={event.id}>{t.format(event.messageKey, event.values)}</li>
+                ))
+              )}
+            </ol>
+          </section>
         </aside>
       </section>
     </main>
