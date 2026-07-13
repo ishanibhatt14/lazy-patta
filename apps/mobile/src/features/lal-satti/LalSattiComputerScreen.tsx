@@ -15,7 +15,7 @@ import {
 } from '@lazy-patta/localization';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 const color = reactNativeTokens.color;
 const engine = new LalSattiEngine();
@@ -27,6 +27,19 @@ const BOT_NAME_KEYS: Record<string, MessageKey> = {
   kaka: 'lalSatti.botKaka',
   krina: 'lalSatti.botKrina',
 };
+
+interface MobileLeftoverScore {
+  readonly playerId: string;
+  readonly playerName: string;
+  readonly cardCount: number;
+}
+
+interface MobileRoundScore {
+  readonly id: string;
+  readonly roundNumber: number;
+  readonly winnerNames: readonly string[];
+  readonly leftovers: readonly MobileLeftoverScore[];
+}
 
 function seededRng(seed: number): Rng {
   let value = seed >>> 0;
@@ -55,9 +68,13 @@ function suitGlyph(suit: Suit): string {
   return '♠';
 }
 
-function playerName(messages: Record<MessageKey, string>, id: string): string {
+function normalizeHumanName(name: string): string {
+  return name.trim().replace(/\s+/g, ' ').slice(0, 24);
+}
+
+function playerName(messages: Record<MessageKey, string>, id: string, humanName: string): string {
   return id === HUMAN_ID
-    ? messages['computer.youName']
+    ? normalizeHumanName(humanName) || messages['computer.youName']
     : (messages[BOT_NAME_KEYS[id] ?? 'computer.botSeat'] ?? id);
 }
 
@@ -102,10 +119,51 @@ function CardTile({
   );
 }
 
+function roundScoreFor(
+  game: ReturnType<LalSattiEngine['init']>,
+  messages: Record<MessageKey, string>,
+  roundNumber: number,
+  humanName: string,
+): MobileRoundScore {
+  const winnerIds = new Set(game.winnerIds);
+  return {
+    id: `mobile-lal-satti-round-${roundNumber}`,
+    roundNumber,
+    winnerNames: game.winnerIds.map((id) => playerName(messages, id, humanName)),
+    leftovers: game.players
+      .filter((player) => !winnerIds.has(player.id))
+      .map((player) => ({
+        playerId: player.id,
+        playerName: playerName(messages, player.id, humanName),
+        cardCount: player.hand.length,
+      })),
+  };
+}
+
+function runningScoresFor(
+  scores: readonly MobileRoundScore[],
+  messages: Record<MessageKey, string>,
+  humanName: string,
+): readonly MobileLeftoverScore[] {
+  return PLAYER_IDS.map((playerId) => {
+    const leftovers = scores.flatMap((round) =>
+      round.leftovers.filter((leftover) => leftover.playerId === playerId),
+    );
+    return {
+      playerId,
+      playerName: leftovers[0]?.playerName ?? playerName(messages, playerId, humanName),
+      cardCount: leftovers.reduce((total, leftover) => total + leftover.cardCount, 0),
+    };
+  });
+}
+
 export function LalSattiComputerScreen(): ReactElement {
   const rngRef = useRef(seededRng(Date.now()));
   const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE);
   const messages = useMemo(() => getMessages(locale), [locale]);
+  const [hasStarted, setHasStarted] = useState(false);
+  const [humanName, setHumanName] = useState('');
+  const [roundScores, setRoundScores] = useState<readonly MobileRoundScore[]>([]);
   const [game, setGame] = useState(() =>
     engine.init(PLAYER_IDS, rngRef.current, undefined, BOT_IDS),
   );
@@ -117,8 +175,15 @@ export function LalSattiComputerScreen(): ReactElement {
   const human = game.players.find((player) => player.id === HUMAN_ID)!;
   const currentPlayer = game.players[game.currentPlayerIndex];
   const result = engine.result(game);
+  const currentRoundScore =
+    result && game.phase === 'completed'
+      ? roundScoreFor(game, messages, roundScores.length + 1, humanName)
+      : null;
+  const visibleRoundScores = currentRoundScore ? [...roundScores, currentRoundScore] : roundScores;
+  const runningScores = runningScoresFor(visibleRoundScores, messages, humanName);
 
   useEffect(() => {
+    if (!hasStarted) return;
     if (game.phase === 'completed' || currentPlayer?.id === HUMAN_ID || !currentPlayer) return;
     const timer = setTimeout(() => {
       const decision = chooseLalSattiBotAction(game, currentPlayer.id);
@@ -126,7 +191,14 @@ export function LalSattiComputerScreen(): ReactElement {
       setGame(engine.reduce(game, decision.action).state);
     }, 700);
     return () => clearTimeout(timer);
-  }, [currentPlayer, game]);
+  }, [currentPlayer, game, hasStarted]);
+
+  function start(): void {
+    if (!normalizeHumanName(humanName)) return;
+    rngRef.current = seededRng(Date.now());
+    setGame(engine.init(PLAYER_IDS, rngRef.current, undefined, BOT_IDS));
+    setHasStarted(true);
+  }
 
   function play(cardId: string): void {
     const action = legalActions.find(
@@ -143,8 +215,73 @@ export function LalSattiComputerScreen(): ReactElement {
   }
 
   function rematch(): void {
+    if (currentRoundScore) {
+      setRoundScores((scores) => [...scores, currentRoundScore]);
+    }
     rngRef.current = seededRng(Date.now());
     setGame(engine.init(PLAYER_IDS, rngRef.current, undefined, BOT_IDS));
+  }
+
+  if (!hasStarted) {
+    return (
+      <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+        <StatusBar style="dark" />
+        <View style={styles.header}>
+          <Text style={styles.mode}>{messages['lalSatti.modeLabel']}</Text>
+          <Text style={styles.title}>{messages['lalSatti.setupTitle']}</Text>
+          <Text style={styles.headerCopy}>{messages['lalSatti.setupDescription']}</Text>
+        </View>
+
+        <View style={styles.localeRow} accessibilityLabel={messages['settings.language']}>
+          {LOCALES.map((option) => (
+            <Pressable
+              key={option}
+              accessibilityRole="button"
+              accessibilityState={{ selected: locale === option }}
+              style={[styles.localeButton, locale === option ? styles.localeButtonActive : null]}
+              onPress={() => setLocale(option)}
+            >
+              <Text
+                style={[
+                  styles.localeButtonText,
+                  locale === option ? styles.localeButtonTextActive : null,
+                ]}
+              >
+                {option.toUpperCase()}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        <View style={styles.panel}>
+          <Text style={styles.sectionTitle}>{messages['lalSatti.nameLabel']}</Text>
+          <TextInput
+            accessibilityLabel={messages['lalSatti.nameLabel']}
+            autoCapitalize="words"
+            maxLength={32}
+            placeholder={messages['lalSatti.namePlaceholder']}
+            placeholderTextColor={color['text.primary']}
+            style={styles.nameInput}
+            value={humanName}
+            onChangeText={setHumanName}
+          />
+          <Text style={styles.helpText}>{messages['lalSatti.nameHelp']}</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={messages['lalSatti.startGame']}
+            accessibilityState={{ disabled: !normalizeHumanName(humanName) }}
+            disabled={!normalizeHumanName(humanName)}
+            style={[
+              styles.primaryButton,
+              !normalizeHumanName(humanName) ? styles.disabledButton : null,
+            ]}
+            onPress={start}
+          >
+            <Text style={styles.primaryButtonText}>{messages['lalSatti.startGame']}</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    );
   }
 
   return (
@@ -158,7 +295,7 @@ export function LalSattiComputerScreen(): ReactElement {
             : currentPlayer?.id === HUMAN_ID
               ? messages['lalSatti.yourTurnInstruction']
               : formatMessage(locale, 'lalSatti.waitingInstruction', {
-                  name: playerName(messages, currentPlayer?.id ?? ''),
+                  name: playerName(messages, currentPlayer?.id ?? '', humanName),
                 })}
         </Text>
       </View>
@@ -190,7 +327,7 @@ export function LalSattiComputerScreen(): ReactElement {
             key={player.id}
             style={[styles.seat, player.id === currentPlayer?.id ? styles.activeSeat : null]}
           >
-            <Text style={styles.seatName}>{playerName(messages, player.id)}</Text>
+            <Text style={styles.seatName}>{playerName(messages, player.id, humanName)}</Text>
             <Text style={styles.seatCount}>
               {formatMessage(locale, 'game.cardsRemainingCount', {
                 count: player.hand.length,
@@ -260,9 +397,22 @@ export function LalSattiComputerScreen(): ReactElement {
         <View style={styles.result}>
           <Text style={styles.resultTitle}>
             {formatMessage(locale, 'lalSatti.winnerLine', {
-              name: result.winnerIds.map((id) => playerName(messages, id)).join(', '),
+              name: result.winnerIds.map((id) => playerName(messages, id, humanName)).join(', '),
             })}
           </Text>
+          {currentRoundScore && currentRoundScore.leftovers.length > 0 ? (
+            <View style={styles.resultLeftovers}>
+              <Text style={styles.resultSubtitle}>{messages['lalSatti.leftoversTitle']}</Text>
+              {currentRoundScore.leftovers.map((leftover) => (
+                <Text key={leftover.playerId} style={styles.resultCopy}>
+                  {formatMessage(locale, 'lalSatti.leftoverLine', {
+                    name: leftover.playerName,
+                    count: leftover.cardCount,
+                  })}
+                </Text>
+              ))}
+            </View>
+          ) : null}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={messages['action.rematch']}
@@ -273,6 +423,39 @@ export function LalSattiComputerScreen(): ReactElement {
           </Pressable>
         </View>
       ) : null}
+
+      <View style={styles.panel}>
+        <Text style={styles.sectionTitle}>{messages['lalSatti.scoreboardTitle']}</Text>
+        <Text style={styles.helpText}>{messages['lalSatti.scoreboardHelp']}</Text>
+        {visibleRoundScores.length === 0 ? (
+          <Text style={styles.playableText}>{messages['lalSatti.scoreboardEmpty']}</Text>
+        ) : (
+          <View style={styles.scoreboard}>
+            {runningScores.map((score) => (
+              <View key={score.playerId} style={styles.scoreRow}>
+                <Text style={styles.scoreName}>{score.playerName}</Text>
+                <Text style={styles.scoreValue}>
+                  {messages['lalSatti.scoreboardTotalLeft']}: {score.cardCount}
+                </Text>
+              </View>
+            ))}
+            {visibleRoundScores.map((round) => (
+              <View key={round.id} style={styles.roundCard}>
+                <Text style={styles.roundTitle}>
+                  {formatMessage(locale, 'lalSatti.roundScoreLabel', {
+                    round: round.roundNumber,
+                  })}
+                </Text>
+                <Text style={styles.helpText}>
+                  {formatMessage(locale, 'lalSatti.roundWinnerLine', {
+                    name: round.winnerNames.join(', '),
+                  })}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
     </ScrollView>
   );
 }
@@ -302,6 +485,30 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     lineHeight: 30,
+  },
+  headerCopy: {
+    color: color['text.onBrand'],
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  panel: {
+    gap: reactNativeTokens.space.md,
+    borderRadius: reactNativeTokens.radius.lg,
+    backgroundColor: color['surface.primary'],
+    padding: reactNativeTokens.space.md,
+  },
+  nameInput: {
+    minHeight: 48,
+    borderWidth: 1,
+    borderColor: color['brand.accent'],
+    borderRadius: reactNativeTokens.radius.md,
+    color: color['text.primary'],
+    paddingHorizontal: reactNativeTokens.space.md,
+  },
+  helpText: {
+    color: color['text.primary'],
+    fontSize: 13,
+    lineHeight: 20,
   },
   seats: {
     flexDirection: 'row',
@@ -431,6 +638,9 @@ const styles = StyleSheet.create({
     backgroundColor: color['action.secondary'],
     padding: reactNativeTokens.space.md,
   },
+  disabledButton: {
+    opacity: 0.5,
+  },
   primaryButtonText: {
     color: color['text.primary'],
     fontSize: 16,
@@ -457,5 +667,50 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '800',
     lineHeight: 28,
+  },
+  resultLeftovers: {
+    gap: reactNativeTokens.space.xs,
+    borderRadius: reactNativeTokens.radius.md,
+    backgroundColor: color['surface.primary'],
+    padding: reactNativeTokens.space.md,
+  },
+  resultSubtitle: {
+    color: color['action.primary'],
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  resultCopy: {
+    color: color['text.primary'],
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  scoreboard: {
+    gap: reactNativeTokens.space.sm,
+  },
+  scoreRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: reactNativeTokens.space.sm,
+    borderTopWidth: 1,
+    borderTopColor: color['brand.accent'],
+    paddingTop: reactNativeTokens.space.sm,
+  },
+  scoreName: {
+    color: color['text.primary'],
+    fontWeight: '800',
+  },
+  scoreValue: {
+    color: color['text.primary'],
+    fontSize: 13,
+  },
+  roundCard: {
+    gap: reactNativeTokens.space.xs,
+    borderRadius: reactNativeTokens.radius.md,
+    backgroundColor: color['background.canvas'],
+    padding: reactNativeTokens.space.md,
+  },
+  roundTitle: {
+    color: color['action.primary'],
+    fontWeight: '800',
   },
 });

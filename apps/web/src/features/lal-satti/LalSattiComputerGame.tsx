@@ -17,7 +17,11 @@ import {
   type LalSattiController,
 } from './controller';
 import { LAL_SATTI_HUMAN_ID } from './players';
-import { saveLalSattiScoreSession } from './saved-scores';
+import {
+  listLalSattiScoreSessions,
+  saveLalSattiScoreSession,
+  type SavedLalSattiScoreSession,
+} from './saved-scores';
 import type { LalSattiControllerState, LalSattiIntent, LalSattiRoundScore } from './types';
 
 const SUIT_GLYPH: Record<Suit, string> = {
@@ -481,6 +485,17 @@ type SaveState =
   | { readonly status: 'saved' }
   | { readonly status: 'error' };
 
+type HistoryState = 'idle' | 'loading' | 'error';
+
+function savedSessionDate(session: SavedLalSattiScoreSession, locale: Locale): string {
+  return new Intl.DateTimeFormat(locale, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(new Date(session.createdAt));
+}
+
 function LalSattiAccountPanel({
   className = '',
   locale,
@@ -497,6 +512,8 @@ function LalSattiAccountPanel({
   const [hasRequestedCode, setHasRequestedCode] = useState(false);
   const [authMessageKey, setAuthMessageKey] = useState<MessageKey | null>(null);
   const [saveState, setSaveState] = useState<SaveState>({ status: 'idle' });
+  const [historyState, setHistoryState] = useState<HistoryState>('idle');
+  const [savedSessions, setSavedSessions] = useState<readonly SavedLalSattiScoreSession[]>([]);
 
   useEffect(() => {
     const client = getBrowserSupabaseClient();
@@ -517,6 +534,32 @@ function LalSattiAccountPanel({
   useEffect(() => {
     setSaveState({ status: 'idle' });
   }, [roundScores.length]);
+
+  useEffect(() => {
+    const client = getBrowserSupabaseClient();
+    if (!client || authState.status !== 'signed-in') {
+      setSavedSessions([]);
+      setHistoryState('idle');
+      return undefined;
+    }
+
+    let cancelled = false;
+    setHistoryState('loading');
+    void listLalSattiScoreSessions(client)
+      .then((sessions) => {
+        if (cancelled) return;
+        setSavedSessions(sessions);
+        setHistoryState('idle');
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setHistoryState('error');
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authState]);
 
   const handleRequestPasscode = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
@@ -565,6 +608,8 @@ function LalSattiAccountPanel({
         locale,
         roundScores,
       });
+      setSavedSessions(await listLalSattiScoreSessions(client));
+      setHistoryState('idle');
       setSaveState({ status: 'saved' });
     } catch {
       setSaveState({ status: 'error' });
@@ -619,6 +664,53 @@ function LalSattiAccountPanel({
               {t.t('lalSatti.saveScoresError')}
             </p>
           ) : null}
+
+          <div className="pt-2">
+            <h3 className="text-sm font-bold text-action-primary">
+              {t.t('lalSatti.savedHistoryTitle')}
+            </h3>
+            {historyState === 'loading' ? (
+              <p className="mt-2 text-sm text-text-primary">
+                {t.t('lalSatti.savedHistoryLoading')}
+              </p>
+            ) : null}
+            {historyState === 'error' ? (
+              <p className="mt-2 text-sm font-semibold text-action-primary">
+                {t.t('lalSatti.savedHistoryError')}
+              </p>
+            ) : null}
+            {historyState !== 'loading' && savedSessions.length === 0 ? (
+              <p className="mt-2 text-sm text-text-primary">{t.t('lalSatti.savedHistoryEmpty')}</p>
+            ) : null}
+            {savedSessions.length > 0 ? (
+              <ol className="mt-3 space-y-2 text-sm">
+                {savedSessions.map((session) => {
+                  const latestSavedRound = session.rounds.at(-1);
+                  return (
+                    <li key={session.id} className="rounded-md bg-background-canvas p-3">
+                      <p className="font-bold text-action-primary">
+                        {t.format('lalSatti.savedHistorySummary', {
+                          name: session.displayName,
+                          count: session.rounds.length,
+                        })}
+                      </p>
+                      <p className="mt-1 text-xs leading-5 text-text-primary">
+                        {savedSessionDate(session, locale)} -{' '}
+                        {t.format('lobby.playerCount', { count: session.playerCount })}
+                      </p>
+                      {latestSavedRound ? (
+                        <p className="mt-1 text-xs leading-5 text-text-primary">
+                          {t.format('lalSatti.roundWinnerLine', {
+                            name: latestSavedRound.winnerNames.join(', '),
+                          })}
+                        </p>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ol>
+            ) : null}
+          </div>
         </div>
       ) : null}
 
@@ -626,9 +718,7 @@ function LalSattiAccountPanel({
         <form
           className="mt-4 grid gap-3"
           onSubmit={(event) =>
-            hasRequestedCode
-              ? void handleVerifyPasscode(event)
-              : void handleRequestPasscode(event)
+            hasRequestedCode ? void handleVerifyPasscode(event) : void handleRequestPasscode(event)
           }
         >
           <label className="flex flex-col gap-2 text-sm font-semibold text-text-primary">
