@@ -13,6 +13,7 @@ type AuthChangeHandler = (event: string, session: unknown) => void;
 function fakeClient(session: unknown = null) {
   const calls = {
     signInWithOtp: vi.fn(async () => ({ error: null })),
+    signInAnonymously: vi.fn(async () => ({ error: null })),
     verifyOtp: vi.fn(async () => ({ error: null })),
     signOut: vi.fn(async () => ({ error: null })),
   };
@@ -25,6 +26,7 @@ function fakeClient(session: unknown = null) {
         return { data: { subscription: { unsubscribe: vi.fn() } } };
       }),
       signInWithOtp: calls.signInWithOtp,
+      signInAnonymously: calls.signInAnonymously,
       verifyOtp: calls.verifyOtp,
       signOut: calls.signOut,
     },
@@ -45,6 +47,21 @@ describe('createSupabaseAuthProvider', () => {
     });
   });
 
+  it('includes an explicit email redirect URL when configured', async () => {
+    const { client, calls } = fakeClient();
+    const provider = createSupabaseAuthProvider(client, {
+      getEmailRedirectTo: () => ' https://lazy-patta-web.vercel.app/play/online ',
+    });
+    await provider.requestPasscode('nani@example.test');
+    expect(calls.signInWithOtp).toHaveBeenCalledWith({
+      email: 'nani@example.test',
+      options: {
+        shouldCreateUser: true,
+        emailRedirectTo: 'https://lazy-patta-web.vercel.app/play/online',
+      },
+    });
+  });
+
   it('verifies a passcode via verifyOtp with type email', async () => {
     const { client, calls } = fakeClient();
     const provider = createSupabaseAuthProvider(client);
@@ -53,6 +70,24 @@ describe('createSupabaseAuthProvider', () => {
       email: 'nani@example.test',
       token: '123456',
       type: 'email',
+    });
+  });
+
+  it('signs in as an anonymous guest with normalized display metadata', async () => {
+    const { client, calls } = fakeClient();
+    const provider = createSupabaseAuthProvider(client);
+    await provider.signInAsGuest('  Ba   Player  ');
+    expect(calls.signInAnonymously).toHaveBeenCalledWith({
+      options: { data: { display_name: 'Ba Player' } },
+    });
+  });
+
+  it('signs in as an anonymous guest without metadata for a blank name', async () => {
+    const { client, calls } = fakeClient();
+    const provider = createSupabaseAuthProvider(client);
+    await provider.signInAsGuest('   ');
+    expect(calls.signInAnonymously).toHaveBeenCalledWith({
+      options: undefined,
     });
   });
 

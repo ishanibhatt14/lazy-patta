@@ -15,6 +15,8 @@ import {
 
 import { getSupabaseBrowserClient, isSupabaseConfigured } from '../supabase/browser-client';
 
+import { getBrowserAuthRedirectUrl } from './redirect-url';
+
 /**
  * React binding over the provider-agnostic {@link AuthProvider}.
  *
@@ -30,6 +32,7 @@ export interface AuthContextValue {
   readonly configured: boolean;
   requestPasscode(contact: string): Promise<void>;
   verifyPasscode(contact: string, passcode: string): Promise<void>;
+  signInAsGuest(displayName: string): Promise<void>;
   signOut(): Promise<void>;
 }
 
@@ -46,7 +49,9 @@ export function AuthContextProvider({ children }: { children: ReactNode }): Reac
 
   useEffect(() => {
     if (!configured) return;
-    const provider = createSupabaseAuthProvider(getSupabaseBrowserClient());
+    const provider = createSupabaseAuthProvider(getSupabaseBrowserClient(), {
+      getEmailRedirectTo: getBrowserAuthRedirectUrl,
+    });
     providerRef.current = provider;
     const unsubscribe = provider.onStateChange(setState);
     return () => {
@@ -67,6 +72,7 @@ export function AuthContextProvider({ children }: { children: ReactNode }): Reac
       configured,
       requestPasscode: (contact) => requireProvider().requestPasscode(contact),
       verifyPasscode: (contact, passcode) => requireProvider().verifyPasscode(contact, passcode),
+      signInAsGuest: (displayName) => requireProvider().signInAsGuest(displayName),
       signOut: () => requireProvider().signOut(),
     }),
     [state, configured, requireProvider],

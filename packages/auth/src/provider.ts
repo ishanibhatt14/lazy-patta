@@ -25,6 +25,9 @@ export interface AuthProvider {
   /** Complete sign-in by verifying a passcode previously requested. */
   verifyPasscode(contact: string, passcode: string): Promise<void>;
 
+  /** Create a temporary authenticated guest account for low-friction play. */
+  signInAsGuest(displayName: string): Promise<void>;
+
   /** End the current session. */
   signOut(): Promise<void>;
 }
