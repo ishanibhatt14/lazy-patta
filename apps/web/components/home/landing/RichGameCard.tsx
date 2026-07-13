@@ -109,28 +109,33 @@ export function RichGameCard({
           ))}
         </dl>
 
-        <div className="mt-auto grid gap-2 sm:grid-cols-2">
+        <div className="mt-auto flex flex-col gap-3">
           <Link
             href={computerHref}
-            className="inline-flex min-h-12 items-center justify-center rounded-md bg-action-primary px-4 text-sm font-bold text-text-onBrand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+            className="inline-flex min-h-14 flex-col items-center justify-center rounded-md bg-action-primary px-4 py-2 text-sm font-bold text-text-onBrand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
           >
-            {t('action.playComputer')}
+            <span>{t('action.playNow')}</span>
+            <span className="text-xs font-semibold opacity-90">
+              {t('landing.game.computerHint')}
+            </span>
           </Link>
-          <Link
-            href={onlineHref}
-            className="inline-flex min-h-12 items-center justify-center rounded-md border border-action-primary px-4 text-sm font-bold text-action-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-          >
-            {t('action.playOnline')}
-          </Link>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Link
+              href={onlineHref}
+              className="inline-flex min-h-12 items-center justify-center rounded-md border border-action-primary px-4 text-sm font-bold text-action-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+            >
+              {t('landing.game.playWithFamily')}
+            </Link>
+            <Button variant="ghost" size="sm" className="min-h-12" onClick={onHowToPlay}>
+              {t('landing.game.learnRules')}
+            </Button>
+          </div>
           <Link
             href={overviewHref}
-            className="inline-flex min-h-12 items-center justify-center rounded-md border border-action-primary/30 px-4 text-sm font-bold text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+            className="text-center text-xs font-bold text-text-primary underline decoration-action-secondary decoration-2 underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
           >
             {t('landing.game.overview')}
           </Link>
-          <Button variant="ghost" size="sm" className="min-h-12" onClick={onHowToPlay}>
-            {t('action.howToPlay')}
-          </Button>
         </div>
       </div>
     </article>

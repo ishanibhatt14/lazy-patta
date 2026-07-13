@@ -8,9 +8,10 @@ const PLAIN_ROUTE = '/play/lal-satti/computer';
 
 async function startGame(page: Page, players: number, route = ROUTE): Promise<void> {
   await page.goto(route);
+  await page.getByText('Customize table').click();
   await page.getByRole('button', { name: `${players} players`, exact: true }).click();
-  await page.getByPlaceholder('Enter your name').fill('Aanya');
-  await page.getByRole('button', { name: 'Start Lal Satti' }).click();
+  await page.getByRole('textbox', { name: 'Your table name' }).fill('Aanya');
+  await page.getByRole('button', { name: 'Start quick game' }).click();
   // The table is up once the single live turn status renders.
   await expect(page.getByRole('status')).toBeVisible();
   await expect(page.locator('[data-seat-id]')).toHaveCount(players);
@@ -77,9 +78,9 @@ test('opens the scoreboard drawer from the top bar', async ({ page }) => {
 test('switches the setup language to Gujarati', async ({ page }) => {
   await page.goto(PLAIN_ROUTE);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await page.getByLabel('Language').selectOption('gu');
+  await page.getByRole('button', { name: /ગુજરાતી Gujarati/ }).click();
   // The start action re-localizes to the Gujarati Lal Satti label.
-  await expect(page.getByRole('button', { name: 'લાલ સત્તી શરૂ કરો' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'ઝડપી રમત શરૂ કરો' })).toBeVisible();
 });
 
 test('is usable on a narrow mobile viewport without horizontal overflow', async ({ page }) => {
@@ -192,10 +193,11 @@ test('plays a full round to the result overlay, reviews scores, and deals again'
 test('plays a Gujarati table on a narrow viewport without overflow', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto(ROUTE);
-  await page.getByLabel('Language').selectOption('gu');
+  await page.getByRole('button', { name: /ગુજરાતી Gujarati/ }).click();
+  await page.getByText('ટેબલ બદલો').click();
   await page.getByRole('button', { name: '4 ખેલાડીઓ', exact: true }).click();
-  await page.getByPlaceholder('તમારું નામ લખો').fill('આન્યા');
-  await page.getByRole('button', { name: 'લાલ સત્તી શરૂ કરો' }).click();
+  await page.getByRole('textbox', { name: 'તમારું ટેબલ નામ' }).fill('આન્યા');
+  await page.getByRole('button', { name: 'ઝડપી રમત શરૂ કરો' }).click();
   await expect(page.getByRole('status')).toBeVisible();
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -206,10 +208,11 @@ test('plays a Gujarati table on a narrow viewport without overflow', async ({ pa
 test('plays a Hindi table on a narrow viewport without overflow', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto(ROUTE);
-  await page.getByLabel('Language').selectOption('hi');
+  await page.getByRole('button', { name: /हिन्दी Hindi/ }).click();
+  await page.getByText('मेज़ बदलें').click();
   await page.getByRole('button', { name: '4 खिलाड़ी', exact: true }).click();
-  await page.getByPlaceholder('अपना नाम लिखें').fill('आन्या');
-  await page.getByRole('button', { name: 'लाल सत्ती शुरू करें' }).click();
+  await page.getByRole('textbox', { name: 'आपका टेबल नाम' }).fill('आन्या');
+  await page.getByRole('button', { name: 'क्विक गेम शुरू करें' }).click();
   await expect(page.getByRole('status')).toBeVisible();
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

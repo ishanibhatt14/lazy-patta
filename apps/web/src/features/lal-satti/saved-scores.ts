@@ -1,11 +1,7 @@
 import type { Locale } from '@lazy-patta/localization';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-import {
-  LAL_SATTI_CURRENT_SCORE_RULE,
-  type LalSattiRoundScore,
-  type LalSattiSavedScoreRule,
-} from './types';
+import { type LalSattiRoundScore, type LalSattiSavedScoreRule } from './types';
 
 export interface SaveLalSattiScoreSessionInput {
   readonly humanName: string;
@@ -67,7 +63,7 @@ function savedRoundFromRow(
     winnerNames: row.winner_names,
     leftovers: row.leftovers.map((leftover) => ({
       ...leftover,
-      cardPoints: scoreRule === 'rank-value-v2' ? (leftover.cardPoints ?? 0) : 0,
+      cardPoints: scoreRule === 'rank-value-v2' ? (leftover.cardPoints ?? 0) : leftover.cardCount,
     })),
   };
 }
@@ -81,6 +77,11 @@ export async function saveLalSattiScoreSession(
   if (!userData.user) throw new Error('Sign in before saving scores.');
 
   const displayName = displayNameForSave(input.humanName);
+  const scoreRule: LalSattiSavedScoreRule = input.roundScores.every(
+    (round) => round.scoreRule === 'rank-value-v2',
+  )
+    ? 'rank-value-v2'
+    : 'card-count-v1';
   const profile = await client
     .from('profiles')
     .upsert({ id: userData.user.id, display_name: displayName }, { onConflict: 'id' })
@@ -95,7 +96,7 @@ export async function saveLalSattiScoreSession(
       display_name: displayName,
       player_count: input.playerCount,
       locale: input.locale,
-      score_rule: LAL_SATTI_CURRENT_SCORE_RULE,
+      score_rule: scoreRule,
     })
     .select('id')
     .single();

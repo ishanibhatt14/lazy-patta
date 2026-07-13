@@ -24,28 +24,32 @@ describe('GameLobby landing page', () => {
         name: /Desi card games\. Family game night, anywhere\./i,
       }),
     ).toBeVisible();
-    expect(screen.getByRole('link', { name: /Play Gadha Chor/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /Start with Gadha Chor/i })).toHaveAttribute(
       'href',
       '/play/gadha-chor/computer',
     );
-    expect(screen.getAllByRole('link', { name: /Play computer/i })[0]).toHaveAttribute(
+    expect(screen.getAllByRole('link', { name: /Play now/i })[0]).toHaveAttribute(
       'href',
       '/play/gadha-chor/computer',
     );
-    expect(screen.getAllByRole('link', { name: /Play computer/i })[1]).toHaveAttribute(
+    expect(screen.getAllByRole('link', { name: /Play now/i })[1]).toHaveAttribute(
       'href',
       '/play/lal-satti/computer',
     );
-    expect(screen.getAllByRole('link', { name: /Play online/i })[0]).toHaveAttribute(
+    expect(screen.getAllByRole('link', { name: /Play with family/i })[0]).toHaveAttribute(
       'href',
-      '/play/online',
+      '/play/online?game=gadha_chor',
+    );
+    expect(screen.getAllByRole('link', { name: /Play with family/i })[1]).toHaveAttribute(
+      'href',
+      '/play/online?game=lal_satti',
     );
   });
 
   it('opens both tutorial dialogs from rich game cards', async () => {
     renderLobby();
     const user = userEvent.setup();
-    const tutorialButtons = screen.getAllByRole('button', { name: /How to play/i });
+    const tutorialButtons = screen.getAllByRole('button', { name: /Learn the rules/i });
 
     await user.click(tutorialButtons[0]!);
     expect(screen.getByRole('dialog')).toBeVisible();

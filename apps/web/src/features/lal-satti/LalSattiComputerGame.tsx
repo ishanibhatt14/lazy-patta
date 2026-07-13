@@ -1,15 +1,15 @@
 'use client';
 
-import { LOCALES, type Locale } from '@lazy-patta/localization';
+import Link from 'next/link';
 import type { ReactElement } from 'react';
 import { useEffect, useReducer, useRef } from 'react';
 
 import { Button } from '../../../components/Button';
+import { LocaleSwitcher } from '../../../components/game/LocaleSwitcher';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
 import { createTranslator } from '../../../lib/i18n';
 import { usePreferredLocale } from '../../../lib/locale/preferred-locale-context';
 
-import { LalSattiAccountPanel } from './LalSattiAccountPanel';
 import {
   createLalSattiController,
   selectLalSattiViewState,
@@ -113,6 +113,22 @@ export function LalSattiComputerGame(): ReactElement {
     return (
       <main className="min-h-screen bg-background-canvas px-4 py-6 text-text-primary">
         <section className="mx-auto flex max-w-5xl flex-col gap-6">
+          <div className="flex items-center justify-between gap-4">
+            <Link
+              href="/"
+              className="text-sm font-bold text-action-primary underline decoration-action-secondary decoration-2 underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+            >
+              ← {t.t('lobby.backToGames')}
+            </Link>
+            <LocaleSwitcher
+              locale={view.locale}
+              onLocaleChange={(next) => {
+                setPreferredLocale(next);
+                dispatch({ type: 'setLocale', locale: next });
+              }}
+            />
+          </div>
+
           <div className="rounded-lg bg-game-table p-5 text-text-onBrand shadow-md">
             <p className="text-sm font-semibold uppercase">{t.t('lalSatti.modeLabel')}</p>
             <h1 className="mt-2 text-3xl font-bold">{t.t('lalSatti.setupTitle')}</h1>
@@ -120,62 +136,6 @@ export function LalSattiComputerGame(): ReactElement {
           </div>
 
           <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
-            <section className="rounded-lg bg-surface-primary p-4 shadow-md">
-              <h2 className="text-lg font-bold text-action-primary">{t.t('lalSatti.tableSize')}</h2>
-              <div className="mt-4 flex flex-wrap gap-2" aria-label={t.t('lalSatti.tableSize')}>
-                {PLAYER_COUNTS.map((count) => (
-                  <button
-                    key={count}
-                    type="button"
-                    className={[
-                      'min-h-12 rounded-md border px-4 py-2 font-semibold transition',
-                      view.playerCount === count
-                        ? 'border-action-primary bg-action-primary text-text-onBrand'
-                        : 'border-brand-accent bg-surface-primary text-text-primary',
-                    ].join(' ')}
-                    onClick={() => dispatch({ type: 'setPlayerCount', playerCount: count })}
-                  >
-                    {t.format('lobby.playerCount', { count })}
-                  </button>
-                ))}
-              </div>
-
-              <label className="mt-5 flex flex-col gap-2 text-sm font-semibold text-text-primary">
-                {t.t('lalSatti.nameLabel')}
-                <input
-                  className="min-h-12 rounded-md border border-brand-accent bg-surface-primary px-3 py-2"
-                  value={view.humanName}
-                  maxLength={32}
-                  placeholder={t.t('lalSatti.namePlaceholder')}
-                  onChange={(event) =>
-                    dispatch({ type: 'setHumanName', humanName: event.target.value })
-                  }
-                />
-                <span className="text-xs font-normal leading-5 text-text-primary">
-                  {t.t('lalSatti.nameHelp')}
-                </span>
-              </label>
-
-              <label className="mt-5 flex flex-col gap-2 text-sm font-semibold text-text-primary">
-                {t.t('settings.language')}
-                <select
-                  className="min-h-12 rounded-md border border-brand-accent bg-surface-primary px-3 py-2"
-                  value={view.locale}
-                  onChange={(event) => {
-                    const next = event.target.value as Locale;
-                    setPreferredLocale(next);
-                    dispatch({ type: 'setLocale', locale: next });
-                  }}
-                >
-                  {LOCALES.map((locale) => (
-                    <option key={locale} value={locale}>
-                      {locale.toUpperCase()}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </section>
-
             <section className="rounded-lg bg-surface-primary p-4 shadow-md">
               <h2 className="text-lg font-bold text-action-primary">
                 {t.t('lalSatti.quickRulesTitle')}
@@ -188,19 +148,72 @@ export function LalSattiComputerGame(): ReactElement {
               </ul>
             </section>
 
-            <LalSattiAccountPanel
-              className="md:col-span-2"
-              locale={view.locale}
-              humanName={view.humanName}
-              playerCount={view.playerCount}
-              roundScores={view.roundScores}
-            />
+            <section className="rounded-lg bg-surface-primary p-4 shadow-md">
+              <h2 className="text-lg font-bold text-action-primary">
+                {t.t('lalSatti.quickGameTitle')}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-text-primary">
+                {t.format('lalSatti.quickGameSummary', {
+                  name: view.humanName.trim() || t.t('computer.youName'),
+                  count: view.playerCount,
+                })}
+              </p>
+              <Button
+                size="lg"
+                className="mt-4 w-full min-h-12"
+                onClick={() => dispatch({ type: 'start' })}
+              >
+                {t.t('lalSatti.startQuickGame')}
+              </Button>
+
+              <details className="mt-4 rounded-md border border-action-primary/20 bg-background-canvas p-3">
+                <summary className="cursor-pointer text-sm font-bold text-action-primary">
+                  {t.t('computer.customizeTable')}
+                </summary>
+
+                <label className="mt-4 flex flex-col gap-2 text-sm font-semibold text-text-primary">
+                  {t.t('lalSatti.nameLabel')}
+                  <input
+                    className="min-h-12 rounded-md border border-brand-accent bg-surface-primary px-3 py-2"
+                    value={view.humanName}
+                    maxLength={32}
+                    placeholder={t.t('computer.youName')}
+                    onChange={(event) =>
+                      dispatch({ type: 'setHumanName', humanName: event.target.value })
+                    }
+                  />
+                  <span className="text-xs font-normal leading-5 text-text-primary">
+                    {t.t('lalSatti.nameHelp')}
+                  </span>
+                </label>
+
+                <div className="mt-4">
+                  <h3 className="text-sm font-bold text-action-primary">
+                    {t.t('lalSatti.tableSize')}
+                  </h3>
+                  <div className="mt-3 flex flex-wrap gap-2" aria-label={t.t('lalSatti.tableSize')}>
+                    {PLAYER_COUNTS.map((count) => (
+                      <button
+                        key={count}
+                        type="button"
+                        className={[
+                          'min-h-12 rounded-md border px-4 py-2 font-semibold transition',
+                          view.playerCount === count
+                            ? 'border-action-primary bg-action-primary text-text-onBrand'
+                            : 'border-brand-accent bg-surface-primary text-text-primary',
+                        ].join(' ')}
+                        onClick={() => dispatch({ type: 'setPlayerCount', playerCount: count })}
+                      >
+                        {t.format('lobby.playerCount', { count })}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </details>
+            </section>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Button size="lg" disabled={!view.canStart} onClick={() => dispatch({ type: 'start' })}>
-              {t.t('lalSatti.startGame')}
-            </Button>
             <Button
               variant="ghost"
               onClick={() => dispatch({ type: 'toggleReducedMotion' })}

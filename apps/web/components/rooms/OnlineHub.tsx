@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, type FormEvent, type ReactElement } from 'react';
 
 import { useAuth } from '../../lib/auth/auth-context';
@@ -21,13 +21,20 @@ function messageFor(error: unknown, fallback: string): string {
   return error instanceof Error && error.message ? error.message : fallback;
 }
 
+function gameKeyFromSearch(value: string | null): OnlineGameKey {
+  return value === 'lal_satti' ? 'lal_satti' : 'gadha_chor';
+}
+
 export function OnlineHub(): ReactElement {
   const { state } = useAuth();
   const { locale } = usePreferredLocale();
   const t = createTranslator(locale);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [code, setCode] = useState('');
-  const [gameKey, setGameKey] = useState<OnlineGameKey>('gadha_chor');
+  const [gameKey, setGameKey] = useState<OnlineGameKey>(() =>
+    gameKeyFromSearch(searchParams.get('game')),
+  );
   const [busy, setBusy] = useState<'create' | 'join' | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
 

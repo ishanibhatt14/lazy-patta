@@ -44,7 +44,7 @@ export function AnimatedHero({ locale }: { readonly locale: Locale }): ReactElem
             {t('landing.hero.secondaryCta')}
           </Link>
           <Link
-            href="/play/online"
+            href="/play/online?game=gadha_chor"
             className="inline-flex min-h-12 items-center justify-center rounded-md px-5 py-3 font-bold text-action-primary underline decoration-action-secondary decoration-2 underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
           >
             {t('landing.hero.tertiaryCta')}
