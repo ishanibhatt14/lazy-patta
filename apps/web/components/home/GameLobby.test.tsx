@@ -46,6 +46,7 @@ describe('GameLobby landing page', () => {
     );
     expect(screen.getByText(/Also known as Gulaam Chor/i)).toBeVisible();
     expect(screen.getByText(/Also known as Badam Saat/i)).toBeVisible();
+    expect(screen.getByAltText(/Ishani Bhatt, founder of Lazy Patta/i)).toBeVisible();
   });
 
   it('opens both tutorial dialogs from rich game cards', async () => {
