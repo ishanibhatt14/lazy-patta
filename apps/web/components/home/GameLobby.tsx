@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { createTranslator } from '../../lib/i18n';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import { GADHA_CHOR_TUTORIAL_STEPS, HowToPlayTutorial } from '../game/HowToPlayTutorial';
+import { JHABBU_TUTORIAL_STEPS } from '../game/jhabbu-tutorial-steps';
 import { LAL_SATTI_TUTORIAL_STEPS } from '../game/lal-satti-tutorial-steps';
 
 import { AnimatedHero } from './landing/AnimatedHero';
@@ -22,7 +23,7 @@ import {
   RichGameCard,
 } from './landing/RichGameCard';
 
-type ActiveTutorial = 'gadha-chor' | 'lal-satti' | null;
+type ActiveTutorial = 'gadha-chor' | 'lal-satti' | 'jhabbu' | null;
 
 export function GameLobby(): ReactElement {
   const { locale } = usePreferredLocale();
@@ -96,6 +97,7 @@ export function GameLobby(): ReactElement {
             computerHref="/play/jhabbu/computer"
             onlineHref="/play/online?game=jhabbu"
             overviewHref="/games/jhabbu"
+            onHowToPlay={() => setActiveTutorial('jhabbu')}
             artwork={<JhabbuArtwork locale={locale} />}
           />
         </div>
@@ -118,6 +120,13 @@ export function GameLobby(): ReactElement {
         <HowToPlayTutorial
           locale={locale}
           steps={LAL_SATTI_TUTORIAL_STEPS}
+          onClose={() => setActiveTutorial(null)}
+        />
+      ) : null}
+      {activeTutorial === 'jhabbu' ? (
+        <HowToPlayTutorial
+          locale={locale}
+          steps={JHABBU_TUTORIAL_STEPS}
           onClose={() => setActiveTutorial(null)}
         />
       ) : null}
