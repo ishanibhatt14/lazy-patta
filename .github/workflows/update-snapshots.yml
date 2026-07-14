@@ -5,6 +5,8 @@ name: Update visual snapshots
 # artifact for a maintainer to download and commit. Remove after use.
 on:
   workflow_dispatch:
+  push:
+    branches: [fix/refresh-visual-baselines]
 
 permissions:
   contents: read
