@@ -1,8 +1,9 @@
 import type { Card } from '@lazy-patta/game-contracts';
 import type { Locale } from '@lazy-patta/localization';
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import { PlayingCard } from '../../../../components/PlayingCard';
+import { fanCardStyle, useHandLayout } from '../../../../lib/hand-layout';
 import { createTranslator } from '../../../../lib/i18n';
 
 import { cardLabel } from './shared';
@@ -21,24 +22,12 @@ interface PlayerHandFanProps {
   readonly onFocusCard: (card: Card | null) => void;
 }
 
-function fanTransform(index: number, count: number): CSSProperties {
-  if (count <= 1) return { transform: 'none' };
-  const mid = (count - 1) / 2;
-  const step = Math.min(5, 44 / count);
-  const angle = (index - mid) * step;
-  const arc = Math.abs(index - mid) * 0.14;
-  return {
-    transform: `rotate(${angle}deg) translateY(${arc}rem)`,
-    transformOrigin: 'bottom center',
-  };
-}
-
 /**
  * The human hand as an overlapping curved fan anchored in the bottom thumb zone.
  * Playable cards rise with a restrained haldi outline; non-playable cards stay
  * readable. Tapping a playable card plays it; tapping a non-playable card asks
- * the shell for a gentle shake and a short rule hint. Large-card mode swaps the
- * fan for a scrollable row of bigger cards with reduced overlap.
+ * the shell for a gentle shake and a short rule hint. The rail measures itself
+ * and overlaps cards just enough to avoid horizontal scrolling or clipping.
  */
 export function PlayerHandFan({
   locale,
@@ -66,7 +55,9 @@ export function PlayerHandFan({
     );
   }
 
-  const renderCard = (card: Card, style?: CSSProperties, overlap = false): ReactElement => {
+  const { ref, layout } = useHandLayout(cards.length, largeCards);
+
+  const renderCard = (card: Card, index: number): ReactElement => {
     const playable = playableCardIds.includes(card.id);
     const label = cardLabel(card, locale);
     return (
@@ -81,10 +72,10 @@ export function PlayerHandFan({
         }
         className={[
           'ls-hand-card rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent',
-          overlap ? '-ml-3 first:ml-0 inline-block' : 'shrink-0',
+          'inline-block shrink-0',
           playable ? '' : 'opacity-70',
         ].join(' ')}
-        style={style}
+        style={fanCardStyle(index, cards.length, layout)}
         data-playable={playable ? 'true' : 'false'}
         data-focused={card.id === focusedCardId ? 'true' : 'false'}
         data-invalid={card.id === invalidCardId ? 'true' : 'false'}
@@ -94,29 +85,23 @@ export function PlayerHandFan({
         onFocus={() => onFocusCard(card)}
         onBlur={() => onFocusCard(null)}
       >
-        <PlayingCard card={card} size={largeCards ? 'lg' : 'md'} label={label} />
+        <PlayingCard card={card} size={layout.size} label={label} />
       </button>
     );
   };
 
-  if (largeCards) {
-    return (
-      <div
-        className="flex w-full max-w-full items-end gap-2 overflow-x-auto px-2 pb-1"
-        aria-label={t('lalSatti.yourCards')}
-      >
-        {cards.map((card) => renderCard(card))}
-      </div>
-    );
-  }
-
   return (
     <div
-      className="flex max-w-full items-end justify-center overflow-x-auto px-2"
+      ref={ref}
+      className="ls-hand-rail flex w-full max-w-full items-end justify-center overflow-hidden px-2 pb-2"
       aria-label={t('lalSatti.yourCards')}
+      data-large-cards={largeCards ? 'true' : 'false'}
     >
-      <div className="flex items-end">
-        {cards.map((card, index) => renderCard(card, fanTransform(index, cards.length), true))}
+      <div
+        className="flex items-end justify-center"
+        style={{ width: `${layout.totalWidth}px`, maxWidth: '100%' }}
+      >
+        {cards.map((card, index) => renderCard(card, index))}
       </div>
     </div>
   );

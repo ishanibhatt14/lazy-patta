@@ -86,6 +86,7 @@ describe('ImmersiveGameShell', () => {
     ];
     renderShell(makeView({ hiddenCards: slots }), onChooseCard);
 
+    expect(screen.getByText(/Pick from Ba's hand/i)).toBeInTheDocument();
     const button = screen.getByRole('button', { name: /Hidden card 1 from Ba/i });
     expect(button).not.toBeDisabled();
     fireEvent.click(button);
@@ -109,8 +110,9 @@ describe('ImmersiveGameShell', () => {
   });
 
   it('shows the human hand face-up with an accessible rank+suit label', () => {
-    renderShell(makeView());
+    const { container } = renderShell(makeView());
     expect(screen.getByRole('img', { name: /Queen of Spades/i })).toBeInTheDocument();
+    expect(container.querySelector('.gc-hand-rail')).not.toHaveClass('overflow-x-auto');
   });
 
   it('never renders an opponent card identity — only counts and decorative backs', () => {

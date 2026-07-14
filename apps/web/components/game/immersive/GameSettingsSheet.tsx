@@ -123,10 +123,13 @@ export function GameSettingsSheet({
           <button
             type="button"
             onClick={onToggleLargeCards}
-            className={TOGGLE_CLASS}
+            className={`${TOGGLE_CLASS} flex flex-col items-start justify-center py-2 text-left`}
             aria-pressed={largeCards}
           >
-            {t('settings.largeCards')}
+            <span className="block">{t('settings.largeCards')}</span>
+            <span className="mt-1 block text-xs font-medium leading-5 text-text-primary">
+              {t('settings.largeCardsHint')}
+            </span>
           </button>
           <button type="button" onClick={onHowToPlay} className={TOGGLE_CLASS}>
             {t('action.howToPlay')}

@@ -135,8 +135,17 @@
   overflow: hidden;
   color: var(--lp-text-onBrand);
   background:
-    radial-gradient(120% 90% at 50% -10%, color-mix(in srgb, var(--lp-accent-indigo), transparent 55%) 0, transparent 60%),
-    linear-gradient(180deg, var(--lp-scene-skyTop) 0%, var(--lp-scene-skyBottom) 78%, var(--lp-scene-rimEdge) 100%);
+    radial-gradient(
+      120% 90% at 50% -10%,
+      color-mix(in srgb, var(--lp-accent-indigo), transparent 55%) 0,
+      transparent 60%
+    ),
+    linear-gradient(
+      180deg,
+      var(--lp-scene-skyTop) 0%,
+      var(--lp-scene-skyBottom) 78%,
+      var(--lp-scene-rimEdge) 100%
+    );
 }
 
 /* Faint hanging-lantern glow near the top of the courtyard. */
@@ -146,8 +155,16 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(9rem 6rem at 18% 8%, color-mix(in srgb, var(--lp-action-secondary), transparent 72%) 0, transparent 70%),
-    radial-gradient(9rem 6rem at 82% 8%, color-mix(in srgb, var(--lp-accent-kumkum), transparent 76%) 0, transparent 70%);
+    radial-gradient(
+      9rem 6rem at 18% 8%,
+      color-mix(in srgb, var(--lp-action-secondary), transparent 72%) 0,
+      transparent 70%
+    ),
+    radial-gradient(
+      9rem 6rem at 82% 8%,
+      color-mix(in srgb, var(--lp-accent-kumkum), transparent 76%) 0,
+      transparent 70%
+    );
 }
 
 .gc-scene {
@@ -158,8 +175,7 @@
   border-radius: 1.75rem;
   padding: clamp(0.5rem, 2vw, 1.25rem);
   /* Wooden / woven rim around the felt. */
-  background:
-    linear-gradient(135deg, var(--lp-scene-rim) 0%, var(--lp-scene-rimEdge) 100%);
+  background: linear-gradient(135deg, var(--lp-scene-rim) 0%, var(--lp-scene-rimEdge) 100%);
   box-shadow:
     0 1.25rem 2.5rem rgba(0, 0, 0, 0.4),
     inset 0 0 0 0.15rem color-mix(in srgb, var(--lp-action-secondary), transparent 60%);
@@ -178,8 +194,11 @@
   position: absolute;
   inset: clamp(0.5rem, 2vw, 1.25rem);
   border-radius: 1.35rem;
-  background:
-    radial-gradient(120% 120% at 50% 42%, var(--lp-game-table) 0%, var(--lp-scene-feltDeep) 100%);
+  background: radial-gradient(
+    120% 120% at 50% 42%,
+    var(--lp-game-table) 0%,
+    var(--lp-scene-feltDeep) 100%
+  );
   box-shadow: inset 0 0 3.5rem rgba(0, 0, 0, 0.45);
   overflow: hidden;
 }
@@ -191,9 +210,12 @@
   opacity: 0.12;
   pointer-events: none;
   background:
-    radial-gradient(circle, var(--lp-action-secondary) 0 0.09rem, transparent 0.1rem) 0 0 / 2.1rem 2.1rem,
-    radial-gradient(circle, var(--lp-background-canvas) 0 0.06rem, transparent 0.07rem) 1.05rem 1.05rem / 2.1rem 2.1rem,
-    radial-gradient(circle, var(--lp-accent-kumkum) 0 0.05rem, transparent 0.06rem) 1.05rem 0 / 2.1rem 2.1rem;
+    radial-gradient(circle, var(--lp-action-secondary) 0 0.09rem, transparent 0.1rem) 0 0 / 2.1rem
+      2.1rem,
+    radial-gradient(circle, var(--lp-background-canvas) 0 0.06rem, transparent 0.07rem) 1.05rem
+      1.05rem / 2.1rem 2.1rem,
+    radial-gradient(circle, var(--lp-accent-kumkum) 0 0.05rem, transparent 0.06rem) 1.05rem 0 /
+      2.1rem 2.1rem;
 }
 
 /* A woven kinari border just inside the felt. */
@@ -222,7 +244,9 @@
   inset: -0.3rem;
   border-radius: 999rem;
   border: 0.16rem solid transparent;
-  transition: border-color var(--gc-turn-transfer) ease, box-shadow var(--gc-turn-transfer) ease;
+  transition:
+    border-color var(--gc-turn-transfer) ease,
+    box-shadow var(--gc-turn-transfer) ease;
 }
 
 .gc-pod-ring[data-active='true'] {
@@ -254,10 +278,23 @@
 /* ---- Card fans ---------------------------------------------------- */
 
 .gc-hand-card {
+  position: relative;
+  z-index: var(--card-z, 1);
   transition:
     transform var(--gc-lift) ease-out,
     filter var(--gc-lift) ease-out;
   transform-origin: bottom center;
+}
+
+.gc-hand-rail {
+  min-height: 4.75rem;
+  /* Keep the hand clear of the iOS home indicator / Android nav bar. */
+  padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+}
+
+.gc-hand-rail[data-large-cards='true'] {
+  gap: 0.55rem;
+  min-height: 6.75rem;
 }
 
 .gc-hand-card:hover,
@@ -265,7 +302,13 @@
 .gc-hand-card[data-lifted='true'] {
   transform: translateY(-0.9rem) scale(1.04);
   filter: drop-shadow(0 0.5rem 0.6rem rgba(0, 0, 0, 0.4));
-  z-index: 5;
+  z-index: 50;
+}
+
+/* Large-card mode brings the focused/hovered card fully forward for reading. */
+.gc-hand-rail[data-large-cards='true'] .gc-hand-card:hover,
+.gc-hand-rail[data-large-cards='true'] .gc-hand-card:focus-visible {
+  transform: translateY(-1.6rem) scale(1.12);
 }
 
 .gc-hand-card[data-drawn='true'] {
@@ -284,15 +327,30 @@
 }
 
 .gc-fan-card {
+  border: 0.12rem solid transparent;
   transition:
+    border-color var(--gc-lift) ease-out,
     transform var(--gc-lift) ease-out,
     filter var(--gc-lift) ease-out;
+}
+
+.gc-fan-card[data-selectable='true'] {
+  cursor: pointer;
+  border-color: color-mix(in srgb, var(--lp-action-secondary), transparent 30%);
+  background: color-mix(in srgb, var(--lp-action-secondary), transparent 84%);
+  filter: drop-shadow(0 0 0.45rem color-mix(in srgb, var(--lp-action-secondary), transparent 35%));
 }
 
 .gc-fan-card[data-selectable='true']:hover,
 .gc-fan-card[data-selectable='true']:focus-visible {
   transform: translateY(-0.8rem);
   filter: drop-shadow(0 0 0.7rem var(--lp-action-secondary));
+}
+
+.gc-pick-cue {
+  color: var(--lp-text-onBrand);
+  background: color-mix(in srgb, var(--lp-action-secondary), transparent 16%);
+  box-shadow: 0 0 0.7rem color-mix(in srgb, var(--lp-action-secondary), transparent 42%);
 }
 
 .gc-fan-card[data-selected='true'] {

@@ -108,10 +108,13 @@ export function SettingsSheet({
           <button
             type="button"
             onClick={onToggleLargeCards}
-            className={TOGGLE_CLASS}
+            className={`${TOGGLE_CLASS} flex flex-col items-start justify-center py-2 text-left`}
             aria-pressed={largeCards}
           >
-            {t('settings.largeCards')}
+            <span className="block">{t('settings.largeCards')}</span>
+            <span className="mt-1 block text-xs font-medium leading-5 text-text-primary">
+              {t('settings.largeCardsHint')}
+            </span>
           </button>
           <button
             type="button"
@@ -126,8 +129,11 @@ export function SettingsSheet({
           </button>
         </div>
 
-        <button type="button" onClick={onOpenAccount} className={TOGGLE_CLASS}>
-          {t('lalSatti.accountTitle')}
+        <button type="button" onClick={onOpenAccount} className={`${TOGGLE_CLASS} text-left`}>
+          <span className="block">{t('lalSatti.accountOptionalTitle')}</span>
+          <span className="mt-1 block text-xs font-medium leading-5 text-text-primary">
+            {t('lalSatti.accountOptionalHelp')}
+          </span>
         </button>
 
         <div className="flex flex-col gap-2">

@@ -25,8 +25,17 @@
   overflow: hidden;
   color: var(--lp-text-onBrand);
   background:
-    radial-gradient(120% 90% at 50% -10%, color-mix(in srgb, var(--lp-accent-indigo), transparent 45%) 0, transparent 62%),
-    linear-gradient(180deg, var(--lp-scene-skyTop) 0%, var(--lp-scene-skyBottom) 76%, var(--lp-scene-rimEdge) 100%);
+    radial-gradient(
+      120% 90% at 50% -10%,
+      color-mix(in srgb, var(--lp-accent-indigo), transparent 45%) 0,
+      transparent 62%
+    ),
+    linear-gradient(
+      180deg,
+      var(--lp-scene-skyTop) 0%,
+      var(--lp-scene-skyBottom) 76%,
+      var(--lp-scene-rimEdge) 100%
+    );
 }
 
 /* Faint paired-lantern glow near the top of the terrace. */
@@ -36,8 +45,16 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(9rem 6rem at 16% 7%, color-mix(in srgb, var(--lp-action-secondary), transparent 74%) 0, transparent 70%),
-    radial-gradient(9rem 6rem at 84% 7%, color-mix(in srgb, var(--lp-accent-kumkum), transparent 78%) 0, transparent 70%);
+    radial-gradient(
+      9rem 6rem at 16% 7%,
+      color-mix(in srgb, var(--lp-action-secondary), transparent 74%) 0,
+      transparent 70%
+    ),
+    radial-gradient(
+      9rem 6rem at 84% 7%,
+      color-mix(in srgb, var(--lp-accent-kumkum), transparent 78%) 0,
+      transparent 70%
+    );
 }
 
 .ls-scene {
@@ -66,7 +83,11 @@
   position: absolute;
   inset: clamp(0.5rem, 2vw, 1.25rem);
   border-radius: 1.35rem;
-  background: radial-gradient(120% 120% at 50% 40%, var(--lp-game-table) 0%, var(--lp-scene-feltDeep) 100%);
+  background: radial-gradient(
+    120% 120% at 50% 40%,
+    var(--lp-game-table) 0%,
+    var(--lp-scene-feltDeep) 100%
+  );
   box-shadow: inset 0 0 3.5rem rgba(0, 0, 0, 0.45);
   overflow: hidden;
 }
@@ -78,9 +99,18 @@
   opacity: 0.13;
   pointer-events: none;
   background:
-    repeating-linear-gradient(45deg, color-mix(in srgb, var(--lp-action-secondary), transparent 55%) 0 0.05rem, transparent 0.05rem 1.5rem),
-    repeating-linear-gradient(-45deg, color-mix(in srgb, var(--lp-accent-kumkum), transparent 60%) 0 0.05rem, transparent 0.05rem 1.5rem),
-    radial-gradient(circle, var(--lp-background-canvas) 0 0.06rem, transparent 0.07rem) 0.75rem 0.75rem / 1.5rem 1.5rem;
+    repeating-linear-gradient(
+      45deg,
+      color-mix(in srgb, var(--lp-action-secondary), transparent 55%) 0 0.05rem,
+      transparent 0.05rem 1.5rem
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      color-mix(in srgb, var(--lp-accent-kumkum), transparent 60%) 0 0.05rem,
+      transparent 0.05rem 1.5rem
+    ),
+    radial-gradient(circle, var(--lp-background-canvas) 0 0.06rem, transparent 0.07rem) 0.75rem
+      0.75rem / 1.5rem 1.5rem;
 }
 
 /* A woven kinari border just inside the mat. */
@@ -232,10 +262,23 @@
 /* ---- Player hand fan ---------------------------------------------- */
 
 .ls-hand-card {
+  position: relative;
+  z-index: var(--card-z, 1);
   transition:
     transform var(--ls-lift) ease-out,
     filter var(--ls-lift) ease-out;
   transform-origin: bottom center;
+}
+
+.ls-hand-rail {
+  min-height: 4.75rem;
+  /* Keep the hand clear of the iOS home indicator / Android nav bar. */
+  padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+}
+
+.ls-hand-rail[data-large-cards='true'] {
+  gap: 0.55rem;
+  min-height: 6.75rem;
 }
 
 .ls-hand-card[data-playable='true'] {
@@ -249,7 +292,15 @@
   transform: translateY(-1rem) scale(1.05);
   filter: drop-shadow(0 0.5rem 0.6rem rgba(0, 0, 0, 0.4))
     drop-shadow(0 0 0.55rem var(--lp-action-secondary));
-  z-index: 5;
+  z-index: 50;
+}
+
+/* Large-card mode brings the focused/hovered card fully forward for reading. */
+.ls-hand-rail[data-large-cards='true'] .ls-hand-card:hover,
+.ls-hand-rail[data-large-cards='true'] .ls-hand-card:focus-visible,
+.ls-hand-rail[data-large-cards='true'] .ls-hand-card[data-focused='true'] {
+  transform: translateY(-1.6rem) scale(1.12);
+  z-index: 50;
 }
 
 .ls-hand-card[data-invalid='true'] {
