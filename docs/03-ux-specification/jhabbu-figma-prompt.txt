@@ -1,0 +1,89 @@
+Create a premium Figma prototype for Lazy Patta’s third game: Jhabbu.
+
+Also known as Bhabho, Bhabhi, Laad and Get Away.
+
+Visual concept:
+Gujarati monsoon veranda family card night.
+
+Mood:
+fast, dramatic, warm, playful, family-friendly, non-casino.
+
+Core table:
+- family avatars around a peacock-green woven mat
+- central trick pile
+- active suit banner
+- power badge
+- human hand at bottom
+- monsoon ambience
+- warm lantern light
+- subtle original Gujarati textile geometry
+
+Design these states:
+1. Setup
+2. Tutorial
+3. Ace of Spades opening
+4. Human must follow suit
+5. Human has no led suit
+6. Thulla played
+7. Trick stops immediately
+8. Highest led-suit player picks up pile
+9. Power transfers
+10. Normal trick discarded
+11. Player gets away
+12. Power player empties hand and draws from waste
+13. Round result
+14. Match result
+15. Settings
+16. Score drawer
+17. Reconnect
+18. Large-card mode
+19. Reduced motion
+20. Gujarati and Hindi layouts
+
+Components:
+- JhabbuGameShell
+- PlayerPod
+- PowerBadge
+- LedSuitBanner
+- CurrentTrick
+- ThullaCard
+- PickupAnimationLayer
+- PlayerHandFan
+- FollowSuitHint
+- NoSuitHint
+- ExitOrderTracker
+- ScoreDrawer
+- SettingsSheet
+- RoundResultOverlay
+- MatchResultOverlay
+- ReactionBubble
+
+Interaction:
+- legal suit cards glow
+- illegal cards remain visible but inactive
+- if void in led suit, all cards become playable
+- Thulla card lands sideways
+- “THULLA!” appears
+- trick pile moves to correct player
+- their card-count badge increases
+- power ring moves to them
+- one-tap play
+- dragging optional only
+- 48px minimum touch targets
+- no horizontal hand scrolling
+- reduced-motion alternatives
+
+Design sizes:
+- 360x800
+- 390x844
+- 768x1024
+- 1440x1024
+
+Shared Lazy Patta style:
+- cream
+- maroon
+- peacock teal
+- haldi accents
+- warm wood
+- rounded premium UI
+- no coins, chips, jackpots or gambling visuals

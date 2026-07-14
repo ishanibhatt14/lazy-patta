@@ -9,6 +9,7 @@ not a new app.
 | ---------------------------------- | ------------------- | -------------------------------- |
 | **Gadha Chor** (a.k.a. Gulam Chor) | 🟢 MVP launch title | [gadha-chor.md](./gadha-chor.md) |
 | **Lal Satti**                      | ⬜ Fast-follow      | [lal-satti.md](./lal-satti.md)   |
+| **Jhabbu** (Bhabho / Bhabhi)       | ⬜ Spec ready       | [jhabbu.md](./jhabbu.md)         |
 | **Judgement** (Kachuful)           | ⬜ Fast-follow      | [judgement.md](./judgement.md)   |
 | Mendicot · 3-2-5 · Bluff           | 🔭 Backlog          | (outlined in framework)          |
 

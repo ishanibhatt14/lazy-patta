@@ -12,6 +12,7 @@ first (the core principle of this Bible).
 | [Screen Catalog](./screen-catalog.md)                     | Every screen, using a shared spec template          |
 | [Game Table UI Contract](./game-table-contract.md)        | The precise table behavior + anti-cheat interaction |
 | [Responsive & Platform](./responsive-and-platform.md)     | Phone / tablet / desktop / iOS / Android rules      |
+| [Jhabbu Figma Prompt](./jhabbu-figma-prompt.txt)          | Premium Jhabbu prototype brief and screen states    |
 
 Frame sizes (design targets): iOS **390×844**, Android **360×800**, tablet
 **768×1024**, desktop **1440×1024**. Portrait-first for the game table.
