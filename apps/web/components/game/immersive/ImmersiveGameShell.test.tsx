@@ -197,4 +197,59 @@ describe('ImmersiveGameShell', () => {
     renderShell(makeView({ settings: { ...makeView().settings, locale: 'hi' } }));
     expect(screen.getAllByText('आपकी बारी!').length).toBeGreaterThan(0);
   });
+
+  const selectableSlots: HiddenCardSlot[] = [
+    { ownerId: 'ba', ownerName: 'Ba', positionToken: 'tok-1', displayIndex: 1, isSelectable: true },
+  ];
+
+  it('shows the first-turn coach mark and clears it after the first draw', () => {
+    const onChooseCard = vi.fn();
+    renderShell(makeView({ hiddenCards: selectableSlots }), onChooseCard);
+
+    expect(screen.getByText(/Your turn to draw/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Hidden card 1 from Ba/i }));
+    expect(onChooseCard).toHaveBeenCalledWith('tok-1');
+    expect(screen.queryByText(/Your turn to draw/i)).toBeNull();
+  });
+
+  it('lets the human dismiss the coach mark with "Got it"', () => {
+    renderShell(makeView({ hiddenCards: selectableSlots }));
+    fireEvent.click(screen.getByRole('button', { name: /Got it/i }));
+    expect(screen.queryByText(/Your turn to draw/i)).toBeNull();
+  });
+
+  it('emphasizes the draw-source pod and dims the rest during the human draw', () => {
+    const otherBot: ComputerGameSeat = { ...BOT_SEAT, id: 'kaka', name: 'Kaka', position: 'left' };
+    const { container } = renderShell(
+      makeView({ hiddenCards: selectableSlots, seats: [HUMAN_SEAT, BOT_SEAT, otherBot] }),
+    );
+    expect(container.querySelector('[data-seat-id="ba"]')).toHaveAttribute(
+      'data-draw-source',
+      'true',
+    );
+    expect(container.querySelector('[data-seat-id="kaka"]')).toHaveAttribute('data-dimmed', 'true');
+    // The human's own pod is never dimmed or emphasized.
+    expect(container.querySelector('[data-seat-id="you"]')).toHaveAttribute(
+      'data-draw-source',
+      'false',
+    );
+  });
+
+  it('shows no coach mark or pod emphasis when it is not the human turn', () => {
+    const { container } = renderShell(
+      makeView({
+        hiddenCards: [],
+        currentTurn: { isSelf: false, name: 'Ba', seatId: 'ba' },
+        seats: [
+          { ...HUMAN_SEAT, isActive: false },
+          { ...BOT_SEAT, isActive: true },
+        ],
+      }),
+    );
+    expect(screen.queryByText(/Your turn to draw/i)).toBeNull();
+    expect(container.querySelector('[data-seat-id="ba"]')).toHaveAttribute(
+      'data-draw-source',
+      'false',
+    );
+  });
 });

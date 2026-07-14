@@ -275,6 +275,58 @@
   box-shadow: 0 0.1rem 0.2rem rgba(0, 0, 0, 0.35);
 }
 
+/* During the human's draw, lift the source opponent and recede the rest so the
+ * one hand to pick from is unmistakable. */
+.gc-pod {
+  transition:
+    opacity var(--gc-turn-transfer) ease,
+    transform var(--gc-turn-transfer) ease,
+    filter var(--gc-turn-transfer) ease;
+}
+
+.gc-pod[data-draw-source='true'] {
+  transform: scale(1.06);
+  filter: drop-shadow(0 0 0.7rem color-mix(in srgb, var(--lp-action-secondary), transparent 45%));
+}
+
+.gc-pod[data-dimmed='true'] {
+  opacity: 0.45;
+  filter: saturate(0.6);
+}
+
+/* ---- First-turn coach mark --------------------------------------- */
+
+.gc-coach {
+  background: color-mix(in srgb, var(--lp-action-primary), transparent 8%);
+  box-shadow: 0 0.6rem 1.4rem rgba(0, 0, 0, 0.4);
+  animation: gc-coach-in var(--gc-lift) ease-out both;
+}
+
+.gc-coach-arrow {
+  animation: gc-coach-bob 1400ms ease-in-out infinite;
+}
+
+@keyframes gc-coach-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-0.4rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gc-coach-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(0.25rem);
+  }
+}
+
 /* ---- Card fans ---------------------------------------------------- */
 
 .gc-hand-card {
@@ -458,6 +510,9 @@
  * ------------------------------------------------------------------ */
 
 [data-reduced-motion='true'] .gc-pod-ring[data-active='true'],
+[data-reduced-motion='true'] .gc-pod,
+[data-reduced-motion='true'] .gc-coach,
+[data-reduced-motion='true'] .gc-coach-arrow,
 [data-reduced-motion='true'] .gc-hand-card,
 [data-reduced-motion='true'] .gc-hand-card[data-drawn='true'],
 [data-reduced-motion='true'] .gc-fan-card,

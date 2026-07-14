@@ -59,6 +59,9 @@ export function ImmersiveGameShell({
   const { t } = createTranslator(locale);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [largeCards, setLargeCards] = useState(false);
+  // First-turn coaching: shown until the human completes one draw (or dismisses).
+  const [hasDrawnOnce, setHasDrawnOnce] = useState(false);
+  const [coachDismissed, setCoachDismissed] = useState(false);
 
   const reaction = currentReaction(view, t('game.jodiMaliGai'));
   const reactionFor = (seat: ComputerGameSeat): Reaction | null =>
@@ -70,6 +73,25 @@ export function ImmersiveGameShell({
   const selfSeat = view.seats.find((seat) => seat.isSelf);
 
   const drawnCardId = view.draw?.actorIsSelf ? (view.draw.drawnCard?.id ?? null) : null;
+
+  // The single opponent the human draws from this turn (all selectable slots
+  // share one owner). Drives pod emphasis/dim and coach-mark visibility.
+  const drawSourceOwnerId = view.hiddenCards.find((slot) => slot.isSelectable)?.ownerId ?? null;
+  const isHumanDrawTurn = view.currentTurn.isSelf && drawSourceOwnerId !== null;
+  const showCoachMark = isHumanDrawTurn && !hasDrawnOnce && !coachDismissed;
+
+  const handleChooseCard = (positionToken: string): void => {
+    setHasDrawnOnce(true);
+    onChooseCard(positionToken);
+  };
+
+  const podEmphasis = (
+    seat: ComputerGameSeat,
+  ): { drawSource: boolean; dimmed: boolean } => {
+    if (!isHumanDrawTurn || seat.isSelf) return { drawSource: false, dimmed: false };
+    const isSource = seat.id === drawSourceOwnerId;
+    return { drawSource: isSource, dimmed: !isSource };
+  };
 
   return (
     <main className="gc-shell" data-reduced-motion={view.settings.reducedMotion ? 'true' : 'false'}>
@@ -88,22 +110,46 @@ export function ImmersiveGameShell({
         <div className="gc-regions">
           <div className="flex items-start justify-center gap-4">
             {topSeats.map((seat) => (
-              <PlayerPod key={seat.id} locale={locale} seat={seat} reaction={reactionFor(seat)} />
+              <PlayerPod
+                key={seat.id}
+                locale={locale}
+                seat={seat}
+                reaction={reactionFor(seat)}
+                {...podEmphasis(seat)}
+              />
             ))}
           </div>
 
           <div className="grid min-h-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
             <div className="flex flex-col justify-center gap-4">
               {leftSeats.map((seat) => (
-                <PlayerPod key={seat.id} locale={locale} seat={seat} reaction={reactionFor(seat)} />
+                <PlayerPod
+                  key={seat.id}
+                  locale={locale}
+                  seat={seat}
+                  reaction={reactionFor(seat)}
+                  {...podEmphasis(seat)}
+                />
               ))}
             </div>
 
-            <ActionStage locale={locale} view={view} onChooseCard={onChooseCard} />
+            <ActionStage
+              locale={locale}
+              view={view}
+              onChooseCard={handleChooseCard}
+              showCoachMark={showCoachMark}
+              onDismissCoachMark={() => setCoachDismissed(true)}
+            />
 
             <div className="flex flex-col justify-center gap-4">
               {rightSeats.map((seat) => (
-                <PlayerPod key={seat.id} locale={locale} seat={seat} reaction={reactionFor(seat)} />
+                <PlayerPod
+                  key={seat.id}
+                  locale={locale}
+                  seat={seat}
+                  reaction={reactionFor(seat)}
+                  {...podEmphasis(seat)}
+                />
               ))}
             </div>
           </div>
