@@ -62,7 +62,7 @@ export function GameOverview({
         description={t(game.descriptionKey)}
         status={status}
         computerHref={game.computerHref}
-        onlineHref={game.onlineHref}
+        onlineHref={game.onlinePlayable ? game.onlineHref : undefined}
         onHowToPlay={() => setTutorialOpen(true)}
       />
 

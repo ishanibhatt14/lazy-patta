@@ -44,9 +44,17 @@ describe('GameLobby landing page', () => {
       'href',
       '/play/lal-satti/computer',
     );
+    expect(screen.getAllByRole('link', { name: /Practice with bots/i })[2]).toHaveAttribute(
+      'href',
+      '/play/jhabbu/computer',
+    );
     expect(screen.getByRole('link', { name: /Mobile app/i })).toHaveAttribute('href', '/mobile');
     expect(screen.getByText(/Also known as Gulaam Chor/i)).toBeVisible();
     expect(screen.getByText(/Also known as Badam Saat/i)).toBeVisible();
+    expect(screen.getByText(/Also known as Bhabho/i)).toBeVisible();
+    expect(
+      screen.getByText(/Family rooms for Jhabbu are coming after practice mode/i),
+    ).toBeVisible();
   });
 
   it('keeps one trust group in the hero and moves playable games directly after it', () => {
@@ -62,7 +70,7 @@ describe('GameLobby landing page', () => {
       name: /Desi card games\. Family game night, anywhere\./i,
     });
     const games = screen.getByRole('region', {
-      name: /Two family-table classics, each with its own mood\./i,
+      name: /Three family-table classics, each with its own mood\./i,
     });
 
     expect(hero.nextElementSibling).toBe(games);
@@ -155,25 +163,10 @@ describe('GameLobby landing page', () => {
     expect(screen.getByRole('img', { name: /Lal Satti card art/i })).toBeInTheDocument();
   });
 
-  it('shows a Jhabbu coming-soon teaser with a rules link and no Play buttons', () => {
+  it('renders the Jhabbu ace-led trick artwork', () => {
     renderLobby();
 
-    const teaser = screen
-      .getByRole('heading', { name: /^Jhabbu$/i, level: 2 })
-      .closest('section');
-    expect(teaser).not.toBeNull();
-    const region = within(teaser as HTMLElement);
-
-    // Coming-soon badge, not a live game.
-    expect(region.getByText(/Coming soon/i)).toBeVisible();
-    // Only action is learning the rules — a link to the crawlable detail page.
-    const rulesLink = region.getByRole('link', { name: /Learn how to play/i });
-    expect(rulesLink).toHaveAttribute('href', '/games/jhabbu');
-    // No disabled-looking Play buttons in the teaser.
-    expect(region.queryByRole('link', { name: /Play Jhabbu/i })).not.toBeInTheDocument();
-    expect(region.queryByRole('link', { name: /Practice/i })).not.toBeInTheDocument();
-    // The Monsoon Veranda artwork is present and labelled.
-    expect(region.getByRole('img', { name: /Jhabbu card art/i })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /Jhabbu card art/i })).toBeInTheDocument();
   });
 
   it('mentions the founder only in the founder signature', () => {

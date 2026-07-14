@@ -11,6 +11,13 @@ export interface GameDiscoveryConfig {
    * Play buttons and no `/play/...` sitemap entries.
    */
   readonly playable: boolean;
+  /**
+   * `true` once the game has a live online/family multiplayer experience.
+   * A game can be `playable` (computer mode is live) while `onlinePlayable`
+   * is still `false` — in that case the online/family CTA renders as a
+   * "coming soon" affordance instead of a working link.
+   */
+  readonly onlinePlayable: boolean;
   readonly nameKey: MessageKey;
   readonly pageHeadingKey: MessageKey;
   readonly descriptionKey: MessageKey;
@@ -38,6 +45,7 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
   'gadha-chor': {
     slug: 'gadha-chor',
     playable: true,
+    onlinePlayable: true,
     nameKey: 'games.gadhaChor.name',
     pageHeadingKey: 'games.gadhaChor.pageHeading',
     descriptionKey: 'games.gadhaChor.description',
@@ -75,6 +83,7 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
   'lal-satti': {
     slug: 'lal-satti',
     playable: true,
+    onlinePlayable: true,
     nameKey: 'games.lalSatti.name',
     pageHeadingKey: 'games.lalSatti.pageHeading',
     descriptionKey: 'games.lalSatti.description',
@@ -111,10 +120,11 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
   },
   jhabbu: {
     slug: 'jhabbu',
-    // Coming soon: overview + rules pages are crawlable, but there is no
-    // computer/online experience yet, so no Play buttons or play-route sitemap
-    // entries are emitted. Flip to `true` when Jhabbu computer mode ships.
-    playable: false,
+    // Computer (single-player) mode is live, so Jhabbu gets Play routes and a
+    // practice CTA. Online/family multiplayer is not built yet, so the online
+    // CTA renders as "coming soon" (see `onlinePlayable`).
+    playable: true,
+    onlinePlayable: false,
     nameKey: 'games.jhabbu.name',
     pageHeadingKey: 'games.jhabbu.pageHeading',
     descriptionKey: 'games.jhabbu.description',

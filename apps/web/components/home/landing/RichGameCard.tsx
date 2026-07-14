@@ -17,9 +17,10 @@ interface RichGameCardProps {
   readonly duration: string;
   readonly players: string;
   readonly computerHref: string;
-  readonly onlineHref: string;
-  readonly overviewHref: string;
-  readonly onHowToPlay: () => void;
+  readonly onlineHref?: string;
+  readonly onlineDisabledLabel?: string;
+  readonly overviewHref?: string;
+  readonly onHowToPlay?: () => void;
   readonly artwork: ReactNode;
 }
 
@@ -591,6 +592,7 @@ export function RichGameCard({
   players,
   computerHref,
   onlineHref,
+  onlineDisabledLabel,
   overviewHref,
   onHowToPlay,
   artwork,
@@ -625,13 +627,24 @@ export function RichGameCard({
         </dl>
 
         <div className="mt-auto flex flex-col gap-3">
-          <Link
-            href={onlineHref}
-            className="inline-flex min-h-14 flex-col items-center justify-center rounded-md bg-action-primary px-4 py-2 text-sm font-bold text-text-onBrand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-          >
-            <span>{t('landing.game.startFamilyRoom')}</span>
-            <span className="text-xs font-semibold opacity-90">{t('landing.game.familyHint')}</span>
-          </Link>
+          {onlineHref ? (
+            <Link
+              href={onlineHref}
+              className="inline-flex min-h-14 flex-col items-center justify-center rounded-md bg-action-primary px-4 py-2 text-sm font-bold text-text-onBrand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+            >
+              <span>{t('landing.game.startFamilyRoom')}</span>
+              <span className="text-xs font-semibold opacity-90">
+                {t('landing.game.familyHint')}
+              </span>
+            </Link>
+          ) : (
+            <div className="inline-flex min-h-14 flex-col items-center justify-center rounded-md border border-action-primary/25 bg-background-canvas px-4 py-2 text-center text-sm font-bold text-action-primary">
+              <span>{t('landing.game.playWithFamily')}</span>
+              <span className="text-xs font-semibold text-text-primary">
+                {onlineDisabledLabel ?? t('landing.game.familyHint')}
+              </span>
+            </div>
+          )}
           <div className="grid gap-2 sm:grid-cols-2">
             <Link
               href={computerHref}
@@ -639,16 +652,20 @@ export function RichGameCard({
             >
               {t('landing.game.practice')}
             </Link>
-            <Button variant="ghost" size="sm" className="min-h-12" onClick={onHowToPlay}>
-              {t('landing.game.learnRules')}
-            </Button>
+            {onHowToPlay ? (
+              <Button variant="ghost" size="sm" className="min-h-12" onClick={onHowToPlay}>
+                {t('landing.game.learnRules')}
+              </Button>
+            ) : null}
           </div>
-          <Link
-            href={overviewHref}
-            className="text-center text-xs font-bold text-text-primary underline decoration-action-secondary decoration-2 underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-          >
-            {t('landing.game.overview')}
-          </Link>
+          {overviewHref ? (
+            <Link
+              href={overviewHref}
+              className="text-center text-xs font-bold text-text-primary underline decoration-action-secondary decoration-2 underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+            >
+              {t('landing.game.overview')}
+            </Link>
+          ) : null}
         </div>
       </div>
     </article>

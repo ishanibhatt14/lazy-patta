@@ -41,11 +41,11 @@ describe('sitemap', () => {
     expect(urls).toContain('https://lazypatta.com/gu/how-to-play/jhabbu');
   });
 
-  it('lists computer play routes only for playable games', () => {
+  it('lists computer play routes for every playable game', () => {
     expect(urls).toContain('https://lazypatta.com/play/gadha-chor/computer');
     expect(urls).toContain('https://lazypatta.com/play/lal-satti/computer');
-    // Jhabbu has no computer experience yet, so its play route is excluded.
-    expect(urls).not.toContain('https://lazypatta.com/play/jhabbu/computer');
+    // Jhabbu now has a live computer experience, so its play route is included.
+    expect(urls).toContain('https://lazypatta.com/play/jhabbu/computer');
   });
 
   it('attaches a reciprocal hreflang set to each localized entry', () => {

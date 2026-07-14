@@ -111,6 +111,9 @@ importers:
       '@lazy-patta/game-engine':
         specifier: workspace:*
         version: link:../../packages/game-engine
+      '@lazy-patta/jhabbu-engine':
+        specifier: workspace:*
+        version: link:../../packages/jhabbu-engine
       '@lazy-patta/lal-satti-engine':
         specifier: workspace:*
         version: link:../../packages/lal-satti-engine

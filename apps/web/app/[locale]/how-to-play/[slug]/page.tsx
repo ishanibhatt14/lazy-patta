@@ -116,12 +116,24 @@ export default async function LocalizedRulesDetailPage({
             >
               {t('seo.cta.playComputer')}
             </Link>
-            <Link
-              href={game.onlineHref}
-              className="rounded-md border border-action-primary px-4 py-2 text-action-primary hover:bg-background-canvas"
-            >
-              {t('seo.cta.playOnline')}
-            </Link>
+            {/* Some games have a live computer mode but no online/family play
+                yet — surface a clear "coming soon" affordance instead of a
+                link to a route that does not exist. */}
+            {game.onlinePlayable ? (
+              <Link
+                href={game.onlineHref}
+                className="rounded-md border border-action-primary px-4 py-2 text-action-primary hover:bg-background-canvas"
+              >
+                {t('seo.cta.playOnline')}
+              </Link>
+            ) : (
+              <span
+                aria-disabled="true"
+                className="cursor-not-allowed rounded-md border border-action-primary/20 px-4 py-2 text-text-primary/50"
+              >
+                {t('seo.cta.playOnline')} · {t('games.status.comingSoon')}
+              </span>
+            )}
           </div>
         </section>
       ) : (
