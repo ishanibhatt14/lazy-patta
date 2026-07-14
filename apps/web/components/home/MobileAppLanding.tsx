@@ -33,6 +33,12 @@ function PhonePreview({
   playLabel,
   joinLabel,
 }: PhonePreviewProps): ReactElement {
+  const previewCards = [
+    { rank: 'A', suit: '♥', pose: '-rotate-12 -translate-x-14 -translate-y-4' },
+    { rank: '7', suit: '♥', pose: 'rotate-1 -translate-y-5' },
+    { rank: 'K', suit: '♠', pose: 'rotate-12 translate-x-14 -translate-y-4' },
+  ];
+
   return (
     <div
       className="relative mx-auto flex aspect-[9/16] w-full max-w-xs flex-col overflow-hidden rounded-[2rem] border border-action-primary/20 bg-surface-primary p-4 shadow-2xl"
@@ -76,17 +82,43 @@ function PhonePreview({
           ))}
         </div>
 
-        <div className="relative flex min-h-0 items-center justify-center rounded-xl border border-action-primary/10 bg-surface-primary/75">
-          {['-rotate-12 -translate-x-12', 'rotate-2', 'rotate-12 translate-x-12'].map((pose) => (
+        <div className="relative flex min-h-0 items-center justify-center overflow-hidden rounded-xl border border-action-primary/10 bg-surface-primary/75">
+          <div className="absolute left-3 top-3 flex gap-1">
+            {['B', 'K', 'M'].map((initial) => (
+              <span
+                key={initial}
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-action-secondary/30 text-xs font-black text-action-primary"
+              >
+                {initial}
+              </span>
+            ))}
+          </div>
+          <div className="absolute right-3 top-3 rounded-full bg-brand-accent/20 px-2 py-1 text-[0.62rem] font-black uppercase text-action-primary">
+            3/6
+          </div>
+          {previewCards.map((card) => (
             <div
-              key={pose}
-              className={`absolute h-24 w-16 rounded-xl border border-action-primary/20 bg-surface-primary shadow-md ${pose}`}
+              key={`${card.rank}${card.suit}`}
+              className={`absolute flex h-24 w-16 flex-col justify-between rounded-xl border border-action-primary/20 bg-surface-primary p-2 shadow-md ${card.pose}`}
             >
-              <div className="m-2 h-3 w-3 rounded-full bg-accent-kumkum" />
-              <div className="mx-auto mt-5 h-8 w-8 rounded-full bg-brand-accent/40" />
+              <div
+                className={`text-base font-black leading-none ${
+                  card.suit === '♠' ? 'text-text-primary' : 'text-accent-kumkum'
+                }`}
+              >
+                {card.rank}
+                <span className="block text-lg">{card.suit}</span>
+              </div>
+              <div
+                className={`self-center text-3xl ${
+                  card.suit === '♠' ? 'text-text-primary' : 'text-accent-kumkum'
+                }`}
+              >
+                {card.suit}
+              </div>
             </div>
           ))}
-          <div className="absolute bottom-3 rounded-full bg-action-secondary/25 px-3 py-1 text-xs font-bold text-action-primary">
+          <div className="absolute bottom-3 rounded-full bg-action-secondary/25 px-3 py-1 text-xs font-bold text-action-primary shadow-sm">
             {noDownloadLabel}
           </div>
         </div>
