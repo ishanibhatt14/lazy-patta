@@ -6,6 +6,7 @@ import type { ReactElement } from 'react';
 import { GADHA_CHOR_TUTORIAL_STEPS } from '../../../../components/game/HowToPlayTutorial';
 import { LAL_SATTI_TUTORIAL_STEPS } from '../../../../components/game/lal-satti-tutorial-steps';
 import { GameOverview } from '../../../../components/home/GameOverview';
+import { JsonLd } from '../../../../components/seo/JsonLd';
 import {
   GAME_DISCOVERY,
   GAME_LOCALES,
@@ -15,6 +16,7 @@ import {
 } from '../../../../lib/game-discovery';
 import { createTranslator } from '../../../../lib/i18n';
 import { isLocale } from '../../../../lib/locale/preference';
+import { videoGameJsonLd } from '../../../../lib/seo/structured-data';
 
 interface LocalizedGameParams {
   readonly locale: string;
@@ -57,15 +59,26 @@ export default async function LocalizedGameOverviewPage({
 }): Promise<ReactElement> {
   const resolved = resolveParams(await params);
   const game = GAME_DISCOVERY[resolved.slug];
+  const { t } = createTranslator(resolved.locale);
   const tutorialSteps =
     resolved.slug === 'gadha-chor' ? GADHA_CHOR_TUTORIAL_STEPS : LAL_SATTI_TUTORIAL_STEPS;
 
   return (
-    <GameOverview
-      game={game}
-      localeOverride={resolved.locale}
-      status="available"
-      tutorialSteps={tutorialSteps}
-    />
+    <>
+      <JsonLd
+        data={videoGameJsonLd({
+          slug: resolved.slug,
+          locale: resolved.locale,
+          name: t(game.nameKey),
+          description: t(game.descriptionKey),
+        })}
+      />
+      <GameOverview
+        game={game}
+        localeOverride={resolved.locale}
+        status="available"
+        tutorialSteps={tutorialSteps}
+      />
+    </>
   );
 }

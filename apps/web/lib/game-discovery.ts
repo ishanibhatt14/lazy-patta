@@ -22,6 +22,10 @@ export interface GameDiscoveryConfig {
   }[];
   readonly computerHref: string;
   readonly onlineHref: string;
+  /** Kebab-case URL aliases that redirect to this canonical slug (future redirect PR). */
+  readonly slugAliases: readonly string[];
+  /** Human-readable alternate names for `VideoGame` JSON-LD `alternateName`. */
+  readonly alternateNames: readonly string[];
 }
 
 export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
@@ -58,6 +62,8 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
     ],
     computerHref: '/play/gadha-chor/computer',
     onlineHref: '/play/online?game=gadha_chor',
+    slugAliases: ['gulam-chor', 'gulaam-chor', 'gaddha-chor', 'jack-thief'],
+    alternateNames: ['Gulam Chor', 'Gulaam Chor', 'Gaddha Chor', 'Jack Thief'],
   },
   'lal-satti': {
     slug: 'lal-satti',
@@ -92,6 +98,8 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
     ],
     computerHref: '/play/lal-satti/computer',
     onlineHref: '/play/online?game=lal_satti',
+    slugAliases: ['badam-saat', 'badam-satti', 'laal-satti', 'seven-of-hearts', 'sevens'],
+    alternateNames: ['Badam Saat', 'Badam Satti', 'Laal Satti', 'Seven of Hearts', 'Sevens'],
   },
 };
 

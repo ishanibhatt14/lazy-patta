@@ -3,12 +3,46 @@ import { describe, expect, it } from 'vitest';
 import sitemap from './sitemap';
 
 describe('sitemap', () => {
-  it('includes the mobile app discovery page and playable game routes', () => {
-    const urls = sitemap().map((entry) => entry.url);
+  const entries = sitemap();
+  const urls = entries.map((entry) => entry.url);
 
-    expect(urls).toContain('https://lazy-patta-web.vercel.app/mobile');
-    expect(urls).toContain('https://lazy-patta-web.vercel.app/games/gadha-chor');
-    expect(urls).toContain('https://lazy-patta-web.vercel.app/games/lal-satti');
-    expect(urls).toContain('https://lazy-patta-web.vercel.app/play/online');
+  it('lists core discovery pages on the canonical origin', () => {
+    expect(urls).toContain('https://lazypatta.com/');
+    expect(urls).toContain('https://lazypatta.com/mobile');
+    expect(urls).toContain('https://lazypatta.com/play/online');
+  });
+
+  it('lists non-prefixed and locale-prefixed game topic pages', () => {
+    expect(urls).toContain('https://lazypatta.com/games/gadha-chor');
+    expect(urls).toContain('https://lazypatta.com/games/lal-satti');
+    expect(urls).toContain('https://lazypatta.com/en/games/gadha-chor');
+    expect(urls).toContain('https://lazypatta.com/gu/games/lal-satti');
+  });
+
+  it('lists localized games and how-to-play index routes', () => {
+    expect(urls).toContain('https://lazypatta.com/en/games');
+    expect(urls).toContain('https://lazypatta.com/hi/games');
+    expect(urls).toContain('https://lazypatta.com/gu/games');
+    expect(urls).toContain('https://lazypatta.com/en/how-to-play');
+    expect(urls).toContain('https://lazypatta.com/hi/how-to-play');
+    expect(urls).toContain('https://lazypatta.com/gu/how-to-play');
+  });
+
+  it('lists localized rules detail routes for every game', () => {
+    expect(urls).toContain('https://lazypatta.com/en/how-to-play/gadha-chor');
+    expect(urls).toContain('https://lazypatta.com/gu/how-to-play/gadha-chor');
+    expect(urls).toContain('https://lazypatta.com/hi/how-to-play/lal-satti');
+  });
+
+  it('attaches a reciprocal hreflang set to each localized entry', () => {
+    const enRules = entries.find(
+      (entry) => entry.url === 'https://lazypatta.com/en/how-to-play/gadha-chor',
+    );
+    expect(enRules?.alternates?.languages).toMatchObject({
+      en: 'https://lazypatta.com/en/how-to-play/gadha-chor',
+      hi: 'https://lazypatta.com/hi/how-to-play/gadha-chor',
+      gu: 'https://lazypatta.com/gu/how-to-play/gadha-chor',
+      'x-default': 'https://lazypatta.com/en/how-to-play/gadha-chor',
+    });
   });
 });

@@ -7,6 +7,7 @@ import type { ReactElement, ReactNode } from 'react';
 
 import { PREFERRED_LOCALE_COOKIE, resolveLocale } from '../lib/locale/preference';
 import { PreferredLocaleProvider } from '../lib/locale/preferred-locale-context';
+import { SITE_URL } from '../lib/seo/site';
 
 import './globals.css';
 
@@ -14,6 +15,8 @@ const messages = getMessages(DEFAULT_LOCALE);
 const colors = resolveColors();
 
 export const metadata: Metadata = {
+  // Resolves every relative canonical/alternate/OG URL against the canonical origin.
+  metadataBase: new URL(SITE_URL),
   title: messages['app.name'],
   description: messages['welcome.tagline'],
   // Favicon uses the transparent wordmark; the Apple touch icon must be opaque
