@@ -20,6 +20,7 @@ import { Button } from '../Button';
 import { LoginPanel } from '../auth/LoginPanel';
 
 import { GameBoard } from './GameBoard';
+import { RoomSharePanel } from './RoomSharePanel';
 
 /**
  * Room lobby. Joining is idempotent, so landing here (via create, join, or a
@@ -178,6 +179,8 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
         </span>
         <span className="text-xs text-text-primary">{t.t('rooms.shareHint')}</span>
       </header>
+
+      <RoomSharePanel code={code} locale={locale} />
 
       <ul className="flex flex-col gap-2">
         {seats.map((seat) => {
