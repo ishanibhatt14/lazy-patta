@@ -40,35 +40,44 @@ export function OpponentDrawFan({
 }: OpponentDrawFanProps): ReactElement | null {
   const { t, format } = createTranslator(locale);
   if (slots.length === 0) return null;
+  const ownerName = slots.find((slot) => slot.isSelectable)?.ownerName ?? slots[0]?.ownerName ?? '';
 
   return (
     <div
-      className="flex items-end justify-center"
+      className="flex flex-col items-center justify-center gap-2"
       role="group"
       aria-label={t('computer.eligibleCards')}
     >
-      {slots.map((slot, index) => (
-        <span
-          key={slot.positionToken}
-          className="-ml-4 first:ml-0 inline-block"
-          style={slotTransform(index, slots.length)}
-        >
-          <button
-            type="button"
-            disabled={!slot.isSelectable}
-            onClick={() => onChooseCard(slot.positionToken)}
-            className="gc-fan-card flex min-h-12 min-w-12 items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent disabled:cursor-not-allowed disabled:opacity-80"
-            aria-label={format('card.hiddenAccessible', {
-              position: slot.displayIndex,
-              name: slot.ownerName,
-            })}
-            data-position-token={slot.positionToken}
-            data-selectable={slot.isSelectable ? 'true' : 'false'}
-          >
-            <BandhaniCardBackPlaceholder className="h-16 w-12" />
-          </button>
+      {ownerName ? (
+        <span className="gc-pick-cue rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest">
+          {format('computer.pickFromCue', { name: ownerName })}
         </span>
-      ))}
+      ) : null}
+
+      <div className="flex items-end justify-center">
+        {slots.map((slot, index) => (
+          <span
+            key={slot.positionToken}
+            className="-ml-4 first:ml-0 inline-block"
+            style={slotTransform(index, slots.length)}
+          >
+            <button
+              type="button"
+              disabled={!slot.isSelectable}
+              onClick={() => onChooseCard(slot.positionToken)}
+              className="gc-fan-card flex min-h-12 min-w-12 items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent disabled:cursor-not-allowed disabled:opacity-80"
+              aria-label={format('card.hiddenAccessible', {
+                position: slot.displayIndex,
+                name: slot.ownerName,
+              })}
+              data-position-token={slot.positionToken}
+              data-selectable={slot.isSelectable ? 'true' : 'false'}
+            >
+              <BandhaniCardBackPlaceholder className="h-16 w-12" />
+            </button>
+          </span>
+        ))}
+      </div>
     </div>
   );
 }

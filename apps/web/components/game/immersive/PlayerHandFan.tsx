@@ -1,7 +1,8 @@
 import type { Card } from '@lazy-patta/game-contracts';
 import type { Locale, MessageKey } from '@lazy-patta/localization';
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
+import { fanCardStyle, useHandLayout } from '../../../lib/hand-layout';
 import { createTranslator } from '../../../lib/i18n';
 import { PlayingCard } from '../../PlayingCard';
 
@@ -21,24 +22,12 @@ function cardLabel(locale: Locale, card: Card): string {
   return format('card.accessibleFace', { rank, suit });
 }
 
-function fanTransform(index: number, count: number): CSSProperties {
-  if (count <= 1) return { transform: 'none' };
-  const mid = (count - 1) / 2;
-  const step = Math.min(5, 44 / count);
-  const angle = (index - mid) * step;
-  const arc = Math.abs(index - mid) * 0.14;
-  return {
-    transform: `rotate(${angle}deg) translateY(${arc}rem)`,
-    transformOrigin: 'bottom center',
-  };
-}
-
 /**
  * The human hand as an overlapping curved fan anchored in the bottom thumb zone.
  * Cards lift on hover; a freshly drawn card enters with a curved motion. Only
  * the human's own cards are ever rendered face-up — opponent identities never
- * reach this component. Large-card mode swaps the fan for a scrollable row of
- * bigger cards; overflow is scrollable within the track, never on the page.
+ * reach this component. The rail measures itself and overlaps cards just enough
+ * to avoid horizontal scrolling or clipping on small screens.
  */
 export function PlayerHandFan({
   locale,
@@ -61,39 +50,30 @@ export function PlayerHandFan({
     );
   }
 
-  if (largeCards) {
-    return (
-      <div
-        className="flex w-full max-w-full items-end gap-2 overflow-x-auto px-2 pb-1"
-        aria-label={t('computer.yourHand')}
-      >
-        {cards.map((card) => (
-          <span
-            key={card.id}
-            className="gc-hand-card shrink-0"
-            data-drawn={card.id === drawnCardId ? 'true' : 'false'}
-          >
-            <PlayingCard card={card} label={cardLabel(locale, card)} size="lg" />
-          </span>
-        ))}
-      </div>
-    );
-  }
+  const { ref, layout } = useHandLayout(cards.length, largeCards);
 
   return (
     <div
-      className="flex max-w-full items-end justify-center overflow-x-auto px-2"
+      ref={ref}
+      className="gc-hand-rail flex w-full max-w-full items-end justify-center overflow-hidden px-2 pb-2"
       aria-label={t('computer.yourHand')}
+      data-large-cards={largeCards ? 'true' : 'false'}
     >
-      <div className="flex items-end">
+      <div
+        className="flex items-end justify-center"
+        style={{ width: `${layout.totalWidth}px`, maxWidth: '100%' }}
+      >
         {cards.map((card, index) => (
           <span
             key={card.id}
-            className="gc-hand-card -ml-3 first:ml-0 inline-block"
-            style={fanTransform(index, cards.length)}
+            className="gc-hand-card inline-block shrink-0"
+            style={fanCardStyle(index, cards.length, layout)}
             data-drawn={card.id === drawnCardId ? 'true' : 'false'}
+            // Large-card mode lets a reader tap or keyboard-focus a single card
+            // to bring it fully forward; normal mode keeps the row uncluttered.
+            {...(largeCards ? { tabIndex: 0 } : {})}
           >
-            <PlayingCard card={card} label={cardLabel(locale, card)} size="md" />
+            <PlayingCard card={card} label={cardLabel(locale, card)} size={layout.size} />
           </span>
         ))}
       </div>
