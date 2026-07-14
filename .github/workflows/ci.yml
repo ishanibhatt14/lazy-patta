@@ -60,6 +60,9 @@ jobs:
       - name: Check documentation links
         run: pnpm check-links
 
+      - name: Check for forbidden production domain references
+        run: pnpm check-domains
+
   build-web:
     name: Next.js production build
     runs-on: ubuntu-latest

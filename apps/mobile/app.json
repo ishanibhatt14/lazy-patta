@@ -8,13 +8,26 @@
     "icon": "./assets/images/lazy-patta-ios-icon-opaque-maroon-1024.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/images/lazy-patta-ios-icon-opaque-maroon-1024.png"
+      "icon": "./assets/images/lazy-patta-ios-icon-opaque-maroon-1024.png",
+      "associatedDomains": ["applinks:lazypatta.com"]
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/lazy-patta-logo-transparent.png",
         "backgroundColor": "#7A1F2B"
-      }
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            { "scheme": "https", "host": "lazypatta.com", "pathPrefix": "/join" },
+            { "scheme": "https", "host": "lazypatta.com", "pathPrefix": "/play" },
+            { "scheme": "https", "host": "lazypatta.com", "pathPrefix": "/games" }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/images/lazy-patta-ios-icon-opaque-maroon-1024.png"

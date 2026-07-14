@@ -4,9 +4,15 @@ import type { Locale } from '@lazy-patta/localization';
 import Link from 'next/link';
 import { useState, type ReactElement } from 'react';
 
-import type { GameDiscoveryConfig } from '../../lib/game-discovery';
+import {
+  GAME_DISCOVERY,
+  GAME_SLUGS,
+  localizedGamePath,
+  type GameDiscoveryConfig,
+} from '../../lib/game-discovery';
 import { createTranslator } from '../../lib/i18n';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
+import { rulesPath } from '../../lib/seo/routes';
 import type { TutorialStep } from '../game/HowToPlayTutorial';
 import { HowToPlayTutorial } from '../game/HowToPlayTutorial';
 
@@ -34,6 +40,7 @@ export function GameOverview({
   const locale = localeOverride ?? preferredLocale.locale;
   const { t } = createTranslator(locale);
   const [tutorialOpen, setTutorialOpen] = useState(false);
+  const relatedSlug = GAME_SLUGS.find((slug) => slug !== game.slug);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-6 py-12">
@@ -90,6 +97,27 @@ export function GameOverview({
             <p className="mt-2 text-sm leading-6 text-text-primary">{t(section.bodyKey)}</p>
           </article>
         ))}
+      </section>
+
+      <section className="flex flex-col gap-4 rounded-lg bg-surface-primary p-6 shadow-sm">
+        <Link
+          href={rulesPath(locale, game.slug)}
+          className="inline-flex w-fit items-center gap-2 rounded-md bg-action-primary px-4 py-2 text-sm font-bold text-text-onBrand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+        >
+          {t('seo.cta.readRules')} →
+        </Link>
+
+        {relatedSlug ? (
+          <div className="flex flex-col gap-2">
+            <h2 className="text-lg font-black text-action-primary">{t('seo.related.heading')}</h2>
+            <Link
+              href={localizedGamePath(locale, relatedSlug)}
+              className="w-fit text-sm font-semibold text-action-primary hover:underline"
+            >
+              {t(GAME_DISCOVERY[relatedSlug].nameKey)} →
+            </Link>
+          </div>
+        ) : null}
       </section>
 
       {tutorialOpen ? (

@@ -54,6 +54,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.8,
     },
+    // Legal/support pages: English-only for now, low change frequency.
+    ...(['/privacy', '/terms', '/support', '/delete-account'] as const).map((path) => ({
+      url: absolute(path),
+      changeFrequency: 'yearly' as const,
+      priority: 0.3,
+    })),
   ];
 
   const gamesIndex = localizedFamily(gamesIndexPath, 0.7);
@@ -72,5 +78,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     localizedFamily((locale) => rulesPath(locale, slug), 0.8),
   );
 
-  return [...staticRoutes, ...gamesIndex, ...rulesIndex, ...gameRoutes, ...rulesRoutes];
+  // Static single-player "play the computer" landings carry meaningful
+  // server-rendered content, so they are indexable (spec §11).
+  const computerRoutes: MetadataRoute.Sitemap = GAME_SLUGS.map((slug: GameSlug) => ({
+    url: absolute(`/play/${slug}/computer`),
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  }));
+
+  return [
+    ...staticRoutes,
+    ...gamesIndex,
+    ...rulesIndex,
+    ...gameRoutes,
+    ...rulesRoutes,
+    ...computerRoutes,
+  ];
 }

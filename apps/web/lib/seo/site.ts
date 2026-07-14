@@ -1,10 +1,16 @@
 /**
  * Canonical public origin for Lazy Patta. `lazypatta.com` is the single
  * indexable domain; every other host (www, .games, vercel.app) redirects here.
- * Overridable per-environment (e.g. preview deployments) via NEXT_PUBLIC_SITE_URL.
+ *
+ * This module intentionally re-exports the validated origin from
+ * {@link siteConfig} so there is exactly one source of truth. `site-config.ts`
+ * performs the build-time URL validation (https-only, valid absolute URL,
+ * origin-normalized) and is overridable per-environment via NEXT_PUBLIC_SITE_URL.
  */
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lazypatta.com';
+import { siteConfig, absoluteUrl as absoluteUrlFromConfig } from '../site-config';
+
+export const SITE_URL = siteConfig.canonicalOrigin;
 
 export function absoluteUrl(path: string): string {
-  return new URL(path, SITE_URL).toString();
+  return absoluteUrlFromConfig(path);
 }
