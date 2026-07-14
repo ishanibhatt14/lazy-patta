@@ -4,8 +4,7 @@ import type { ReactElement } from 'react';
 
 import { createTranslator } from '../../../lib/i18n';
 
-import { HeroCardTable } from './HeroCardTable';
-import { ReducedMotionHero } from './ReducedMotionHero';
+import { HeroFamilyImage } from './HeroFamilyImage';
 
 export function AnimatedHero({ locale }: { readonly locale: Locale }): ReactElement {
   const { t } = createTranslator(locale);
@@ -18,7 +17,7 @@ export function AnimatedHero({ locale }: { readonly locale: Locale }): ReactElem
 
   return (
     <section
-      className="mx-auto grid w-full max-w-7xl gap-6 px-5 pb-4 pt-6 md:grid-cols-[0.95fr_1.05fr] md:items-center md:gap-10 md:px-8 md:pb-6"
+      className="mx-auto grid w-full max-w-7xl gap-8 px-5 pb-8 pt-6 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] md:items-center md:gap-10 md:px-8 md:pb-12"
       aria-labelledby="landing-hero-title"
     >
       <div className="landing-hero-copy flex flex-col gap-6">
@@ -73,9 +72,8 @@ export function AnimatedHero({ locale }: { readonly locale: Locale }): ReactElem
         </ul>
       </div>
 
-      <div className="relative">
-        <HeroCardTable label={t('landing.hero.sceneLabel')} />
-        <ReducedMotionHero label={t('landing.hero.reducedMotionLabel')} />
+      <div className="landing-hero-copy relative">
+        <HeroFamilyImage locale={locale} />
       </div>
     </section>
   );

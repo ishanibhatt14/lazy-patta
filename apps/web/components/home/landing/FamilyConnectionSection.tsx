@@ -29,7 +29,7 @@ export function FamilyConnectionSection({ locale }: { readonly locale: Locale })
         <div className="absolute inset-0 bg-action-secondary/10" aria-hidden />
         <div className="relative grid gap-5">
           <div className="flex items-center justify-center gap-3" aria-hidden>
-            {['B', 'I', 'K', 'M'].map((initial) => (
+            {['B', 'K', 'M', 'P'].map((initial) => (
               <span
                 key={initial}
                 className="grid h-14 w-14 place-items-center rounded-full border-2 border-background-canvas bg-action-primary text-lg font-black text-text-onBrand shadow"

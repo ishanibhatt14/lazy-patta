@@ -96,7 +96,7 @@ describe('GameLobby landing page', () => {
     expect(screen.getByRole('heading', { name: /દેશી પત્તાની રમતો/i })).toBeVisible();
   });
 
-  it('renders Hindi content, reduced-motion information, and unavailable mode state', async () => {
+  it('renders Hindi content, localized hero image, and unavailable mode state', async () => {
     renderLobby();
     const user = userEvent.setup();
 
@@ -104,7 +104,7 @@ describe('GameLobby landing page', () => {
     await user.click(screen.getByRole('button', { name: /हिन्दी Hindi/i }));
 
     expect(screen.getByRole('heading', { name: /देसी पत्तों के खेल/i })).toBeVisible();
-    expect(screen.getByText(/कम गति वाला परिवार कार्ड टेबल/i)).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /गुजराती परिवार/i })).toBeInTheDocument();
     const passMode = screen.getByRole('heading', { name: /पास एंड प्ले/i }).closest('article');
     expect(passMode).not.toBeNull();
     expect(within(passMode as HTMLElement).getByText(/जल्द आ रहा है|Coming soon/i)).toBeVisible();
@@ -119,5 +119,51 @@ describe('GameLobby landing page', () => {
     }
 
     expect(screen.getByRole('button', { name: /English/i })).toHaveFocus();
+  });
+
+  it('renders the Gujarati family hero image with responsive sizing', () => {
+    renderLobby();
+
+    const hero = screen.getByRole('img', {
+      name: /multigenerational Gujarati family playing cards/i,
+    });
+    expect(hero).toBeVisible();
+    expect(hero).toHaveAttribute('src', expect.stringContaining('gujarati-family-card-night'));
+    expect(hero).toHaveAttribute('sizes', expect.stringContaining('vw'));
+  });
+
+  it('renders an enlarged brand logo in the navigation', () => {
+    renderLobby();
+
+    const logo = screen.getByRole('img', { name: /Lazy Patta logo/i });
+    expect(logo).toHaveClass('h-16');
+    expect(logo).toHaveClass('md:h-[5.25rem]');
+  });
+
+  it('renders the Gulam court-card artwork instead of placeholder text', () => {
+    renderLobby();
+
+    expect(screen.getByRole('img', { name: /Gadha Chor card art/i })).toBeInTheDocument();
+    expect(screen.getByText('Gulam')).toBeInTheDocument();
+    expect(screen.queryByText(/^J \?$/)).not.toBeInTheDocument();
+    expect(screen.queryByText('J ?')).not.toBeInTheDocument();
+  });
+
+  it('renders the Lal Satti heart-sequence artwork', () => {
+    renderLobby();
+
+    expect(screen.getByRole('img', { name: /Lal Satti card art/i })).toBeInTheDocument();
+  });
+
+  it('mentions the founder only in the founder signature', () => {
+    renderLobby();
+
+    const founderMentions = screen.getAllByText(/Ishani/i);
+    expect(founderMentions).toHaveLength(1);
+    expect(founderMentions[0]).toHaveTextContent(/creator of Lazy Traveler/i);
+
+    const inviteHeading = screen.getByText(/invited you to Gadha Chor/i);
+    expect(inviteHeading).toHaveTextContent(/^Ba /);
+    expect(inviteHeading).not.toHaveTextContent(/Ishani/i);
   });
 });
