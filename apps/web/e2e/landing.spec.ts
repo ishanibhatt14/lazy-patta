@@ -15,17 +15,21 @@ test.describe('rich landing page', () => {
       'href',
       '/play/online?game=gadha_chor',
     );
-    await expect(page.getByRole('link', { name: /Play now/i }).first()).toHaveAttribute(
+    await expect(page.getByRole('link', { name: /Start family room/i }).first()).toHaveAttribute(
+      'href',
+      '/play/online?game=gadha_chor',
+    );
+    await expect(page.getByRole('link', { name: /Start family room/i }).nth(1)).toHaveAttribute(
+      'href',
+      '/play/online?game=lal_satti',
+    );
+    await expect(page.getByRole('link', { name: /Practice with bots/i }).first()).toHaveAttribute(
       'href',
       '/play/gadha-chor/computer',
     );
-    await expect(page.getByRole('link', { name: /Play now/i }).nth(1)).toHaveAttribute(
+    await expect(page.getByRole('link', { name: /Practice with bots/i }).nth(1)).toHaveAttribute(
       'href',
       '/play/lal-satti/computer',
-    );
-    await expect(page.getByRole('link', { name: /Play with family/i }).nth(1)).toHaveAttribute(
-      'href',
-      '/play/online?game=lal_satti',
     );
 
     await page

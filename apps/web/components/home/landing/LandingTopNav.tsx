@@ -17,7 +17,6 @@ export function LandingTopNav(): ReactElement {
 
   const links = [
     { href: '#games', label: t('landing.nav.games') },
-    { href: '/play/online', label: t('landing.nav.playOnline') },
     { href: '#how-to-play', label: t('landing.nav.howToPlay') },
   ];
 
@@ -52,6 +51,12 @@ export function LandingTopNav(): ReactElement {
 
       <div className="flex items-center gap-2">
         <LandingLanguageMenu />
+        <Link
+          href="/play/online"
+          className="hidden min-h-12 items-center rounded-md bg-action-primary px-4 text-sm font-bold text-text-onBrand shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent md:inline-flex"
+        >
+          {t('action.joinRoom')}
+        </Link>
         <button
           type="button"
           className="inline-flex min-h-12 items-center rounded-md border border-action-primary/30 bg-surface-primary px-4 text-sm font-bold text-action-primary md:hidden"
