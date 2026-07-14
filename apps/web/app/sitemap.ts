@@ -1,11 +1,40 @@
+import type { Locale } from '@lazy-patta/localization';
 import type { MetadataRoute } from 'next';
 
-import { GAME_SLUGS, defaultGamePath, localizedGamePath } from '../lib/game-discovery';
+import {
+  GAME_LOCALES,
+  GAME_SLUGS,
+  defaultGamePath,
+  localizedGamePath,
+  type GameSlug,
+} from '../lib/game-discovery';
+import { gamesIndexPath, rulesIndexPath, rulesPath } from '../lib/seo/routes';
+import { absoluteUrl as absolute } from '../lib/seo/site';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lazy-patta-web.vercel.app';
+type Alternates = NonNullable<MetadataRoute.Sitemap[number]['alternates']>;
 
-function absolute(path: string): string {
-  return new URL(path, siteUrl).toString();
+/** Reciprocal hreflang set (every locale + English `x-default`) for a path family. */
+function localeAlternates(pathFor: (locale: Locale) => string): Alternates {
+  const languages: Record<string, string> = {};
+  for (const locale of GAME_LOCALES) {
+    languages[locale] = absolute(pathFor(locale));
+  }
+  languages['x-default'] = absolute(pathFor('en'));
+  return { languages };
+}
+
+/** One sitemap entry per locale for a locale-prefixed page family. */
+function localizedFamily(
+  pathFor: (locale: Locale) => string,
+  priority: number,
+): MetadataRoute.Sitemap {
+  const alternates = localeAlternates(pathFor);
+  return GAME_LOCALES.map((locale) => ({
+    url: absolute(pathFor(locale)),
+    changeFrequency: 'monthly',
+    priority,
+    alternates,
+  }));
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -27,28 +56,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  const gameRoutes = GAME_SLUGS.flatMap((slug) => [
+  const gamesIndex = localizedFamily(gamesIndexPath, 0.7);
+  const rulesIndex = localizedFamily(rulesIndexPath, 0.7);
+
+  const gameRoutes = GAME_SLUGS.flatMap((slug: GameSlug) => [
     {
       url: absolute(defaultGamePath(slug)),
       changeFrequency: 'monthly' as const,
       priority: 0.9,
     },
-    {
-      url: absolute(localizedGamePath('en', slug)),
-      changeFrequency: 'monthly' as const,
-      priority: 0.75,
-    },
-    {
-      url: absolute(localizedGamePath('hi', slug)),
-      changeFrequency: 'monthly' as const,
-      priority: 0.75,
-    },
-    {
-      url: absolute(localizedGamePath('gu', slug)),
-      changeFrequency: 'monthly' as const,
-      priority: 0.75,
-    },
+    ...localizedFamily((locale) => localizedGamePath(locale, slug), 0.75),
   ]);
 
-  return [...staticRoutes, ...gameRoutes];
+  const rulesRoutes = GAME_SLUGS.flatMap((slug: GameSlug) =>
+    localizedFamily((locale) => rulesPath(locale, slug), 0.8),
+  );
+
+  return [...staticRoutes, ...gamesIndex, ...rulesIndex, ...gameRoutes, ...rulesRoutes];
 }
