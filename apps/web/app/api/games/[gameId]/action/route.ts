@@ -1,4 +1,5 @@
 import type { GameState } from '@lazy-patta/game-contracts';
+import type { JhabbuState } from '@lazy-patta/jhabbu-engine';
 import type { LalSattiState } from '@lazy-patta/lal-satti-engine';
 import { NextResponse } from 'next/server';
 
@@ -8,6 +9,12 @@ import {
   currentActor,
   VersionConflictError,
 } from '../../../../../lib/online-game/authority';
+import {
+  advanceJhabbuBots,
+  applyHumanJhabbuAction,
+  currentJhabbuActor,
+  type JhabbuClientAction,
+} from '../../../../../lib/online-game/jhabbu-authority';
 import {
   advanceLalSattiBots,
   applyHumanLalSattiAction,
@@ -32,31 +39,40 @@ interface Context {
   params: Promise<{ gameId: string }>;
 }
 
-interface GadhaDrawBody {
-  clientActionId: string;
-  positionToken: string;
-  expectedVersion: number;
+/**
+ * A normalized action envelope. The concrete move is disambiguated per game_key
+ * downstream: Gadha Chor carries an opaque `positionToken`; Lal Satti and Jhabbu
+ * carry a discriminated `action` object (their PLAY_CARD shapes overlap, so the
+ * server always parses the raw action against the loaded game's key).
+ */
+interface ParsedActionBody {
+  readonly clientActionId: string;
+  readonly expectedVersion: number;
+  readonly positionToken?: string;
+  readonly action?: Record<string, unknown>;
 }
 
-interface LalSattiActionBody {
-  clientActionId: string;
-  action: LalSattiClientAction;
-  expectedVersion: number;
-}
-
-type ActionBody = GadhaDrawBody | LalSattiActionBody;
-
-function parseLalSattiAction(value: unknown): LalSattiClientAction | null {
-  if (typeof value !== 'object' || value === null) return null;
-  const action = value as Record<string, unknown>;
-  if (action.type === 'PASS') return { type: 'PASS' };
-  if (action.type === 'PLAY_CARD' && typeof action.cardId === 'string') {
-    return { type: 'PLAY_CARD', cardId: action.cardId };
+function parseLalSattiAction(
+  value: Record<string, unknown> | undefined,
+): LalSattiClientAction | null {
+  if (!value) return null;
+  if (value.type === 'PASS') return { type: 'PASS' };
+  if (value.type === 'PLAY_CARD' && typeof value.cardId === 'string') {
+    return { type: 'PLAY_CARD', cardId: value.cardId };
   }
   return null;
 }
 
-function parseBody(value: unknown): ActionBody | null {
+function parseJhabbuAction(value: Record<string, unknown> | undefined): JhabbuClientAction | null {
+  if (!value) return null;
+  if (value.type === 'DRAW_FROM_WASTE') return { type: 'DRAW_FROM_WASTE' };
+  if (value.type === 'PLAY_CARD' && typeof value.cardId === 'string') {
+    return { type: 'PLAY_CARD', cardId: value.cardId };
+  }
+  return null;
+}
+
+function parseBody(value: unknown): ParsedActionBody | null {
   if (typeof value !== 'object' || value === null) return null;
   const { clientActionId, positionToken, expectedVersion, action } = value as Record<
     string,
@@ -64,16 +80,14 @@ function parseBody(value: unknown): ActionBody | null {
   >;
   if (typeof clientActionId !== 'string' || typeof expectedVersion !== 'number') return null;
 
-  if (typeof positionToken === 'string') {
-    return { clientActionId, positionToken, expectedVersion };
-  }
-
-  const lalSattiAction = parseLalSattiAction(action);
-  if (lalSattiAction) {
-    return { clientActionId, action: lalSattiAction, expectedVersion };
-  }
-
-  return null;
+  return {
+    clientActionId,
+    expectedVersion,
+    ...(typeof positionToken === 'string' ? { positionToken } : {}),
+    ...(typeof action === 'object' && action !== null
+      ? { action: action as Record<string, unknown> }
+      : {}),
+  };
 }
 
 export async function POST(request: Request, ctx: Context): Promise<Response> {
@@ -111,7 +125,8 @@ export async function POST(request: Request, ctx: Context): Promise<Response> {
   if (!authRow) return NextResponse.json({ error: 'game state not found' }, { status: 404 });
 
   if (game.game_key === 'lal_satti') {
-    if (!('action' in body)) {
+    const action = parseLalSattiAction(body.action);
+    if (!action) {
       return NextResponse.json({ error: 'invalid action for this game' }, { status: 400 });
     }
 
@@ -135,7 +150,7 @@ export async function POST(request: Request, ctx: Context): Promise<Response> {
         gameId,
         state,
         userId,
-        body.action,
+        action,
         body.clientActionId,
       );
       const finalState = await advanceLalSattiBots(admin, gameId, afterHuman);
@@ -151,7 +166,49 @@ export async function POST(request: Request, ctx: Context): Promise<Response> {
     }
   }
 
-  if (!('positionToken' in body)) {
+  if (game.game_key === 'jhabbu') {
+    const action = parseJhabbuAction(body.action);
+    if (!action) {
+      return NextResponse.json({ error: 'invalid action for this game' }, { status: 400 });
+    }
+
+    const state = authRow.state as JhabbuState;
+    if (!state.players.some((player) => player.id === userId)) {
+      return NextResponse.json({ error: 'not a player in this game' }, { status: 403 });
+    }
+    if (body.expectedVersion !== state.stateVersion) {
+      return NextResponse.json(
+        { error: 'version conflict', stateVersion: state.stateVersion },
+        { status: 409 },
+      );
+    }
+    if (currentJhabbuActor(state) !== userId) {
+      return NextResponse.json({ error: 'not your turn' }, { status: 409 });
+    }
+
+    try {
+      const afterHuman = await applyHumanJhabbuAction(
+        admin,
+        gameId,
+        state,
+        userId,
+        action,
+        body.clientActionId,
+      );
+      const finalState = await advanceJhabbuBots(admin, gameId, afterHuman);
+      return NextResponse.json({ ok: true, stateVersion: finalState.stateVersion });
+    } catch (caught) {
+      if (caught instanceof VersionConflictError) {
+        return NextResponse.json({ error: 'version conflict' }, { status: 409 });
+      }
+      if (caught instanceof Error && caught.message === 'INVALID_JHABBU_ACTION') {
+        return NextResponse.json({ error: 'invalid or stale move' }, { status: 400 });
+      }
+      return NextResponse.json({ error: 'could not apply the action' }, { status: 500 });
+    }
+  }
+
+  if (!body.positionToken) {
     return NextResponse.json({ error: 'invalid action for this game' }, { status: 400 });
   }
 

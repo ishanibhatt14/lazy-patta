@@ -101,26 +101,53 @@ export default async function LocalizedRulesDetailPage({
         ))}
       </div>
 
-      <section className="rounded-lg bg-surface-primary p-6 shadow-sm">
-        <h2 className="text-2xl font-black text-action-primary">
-          {t('seo.rules.practiceHeading')}
-        </h2>
-        <p className="mt-2 text-base leading-7 text-text-primary">{t('seo.rules.practiceBody')}</p>
-        <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
-          <Link
-            href={game.computerHref}
-            className="rounded-md bg-action-primary px-4 py-2 text-white hover:opacity-90"
-          >
-            {t('seo.cta.playComputer')}
-          </Link>
-          <Link
-            href={game.onlineHref}
-            className="rounded-md border border-action-primary px-4 py-2 text-action-primary hover:bg-background-canvas"
-          >
-            {t('seo.cta.playOnline')}
-          </Link>
-        </div>
-      </section>
+      {/* Coming-soon games have no Play routes yet, so the "try it now" panel
+          becomes a rules-first coming-soon note with no Play links. */}
+      {game.playable ? (
+        <section className="rounded-lg bg-surface-primary p-6 shadow-sm">
+          <h2 className="text-2xl font-black text-action-primary">
+            {t('seo.rules.practiceHeading')}
+          </h2>
+          <p className="mt-2 text-base leading-7 text-text-primary">
+            {t('seo.rules.practiceBody')}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
+            <Link
+              href={game.computerHref}
+              className="rounded-md bg-action-primary px-4 py-2 text-white hover:opacity-90"
+            >
+              {t('seo.cta.playComputer')}
+            </Link>
+            {/* Some games have a live computer mode but no online/family play
+                yet — surface a clear "coming soon" affordance instead of a
+                link to a route that does not exist. */}
+            {game.onlinePlayable ? (
+              <Link
+                href={game.onlineHref}
+                className="rounded-md border border-action-primary px-4 py-2 text-action-primary hover:bg-background-canvas"
+              >
+                {t('seo.cta.playOnline')}
+              </Link>
+            ) : (
+              <span
+                aria-disabled="true"
+                className="cursor-not-allowed rounded-md border border-action-primary/20 px-4 py-2 text-text-primary/50"
+              >
+                {t('seo.cta.playOnline')} · {t('games.status.comingSoon')}
+              </span>
+            )}
+          </div>
+        </section>
+      ) : (
+        <section className="rounded-lg bg-surface-primary p-6 shadow-sm">
+          <h2 className="text-2xl font-black text-action-primary">
+            {t('seo.rules.comingSoonHeading')}
+          </h2>
+          <p className="mt-2 text-base leading-7 text-text-primary">
+            {t('seo.rules.comingSoonBody')}
+          </p>
+        </section>
+      )}
 
       <section className="flex flex-col gap-4">
         <JsonLd

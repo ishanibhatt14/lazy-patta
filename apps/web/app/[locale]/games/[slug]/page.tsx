@@ -3,7 +3,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { ReactElement } from 'react';
 
+import type { TutorialStep } from '../../../../components/game/HowToPlayTutorial';
 import { GADHA_CHOR_TUTORIAL_STEPS } from '../../../../components/game/HowToPlayTutorial';
+import { JHABBU_TUTORIAL_STEPS } from '../../../../components/game/jhabbu-tutorial-steps';
 import { LAL_SATTI_TUTORIAL_STEPS } from '../../../../components/game/lal-satti-tutorial-steps';
 import { GameOverview } from '../../../../components/home/GameOverview';
 import { Breadcrumbs } from '../../../../components/seo/Breadcrumbs';
@@ -25,6 +27,13 @@ interface LocalizedGameParams {
   readonly locale: string;
   readonly slug: string;
 }
+
+/** Slug → tutorial steps. Keeps the page registry-driven as games are added. */
+const TUTORIAL_STEPS: Record<GameSlug, readonly TutorialStep[]> = {
+  'gadha-chor': GADHA_CHOR_TUTORIAL_STEPS,
+  'lal-satti': LAL_SATTI_TUTORIAL_STEPS,
+  jhabbu: JHABBU_TUTORIAL_STEPS,
+};
 
 function resolveParams(params: LocalizedGameParams): {
   readonly locale: Locale;
@@ -71,8 +80,7 @@ export default async function LocalizedGameOverviewPage({
   const resolved = resolveParams(await params);
   const game = GAME_DISCOVERY[resolved.slug];
   const { t } = createTranslator(resolved.locale);
-  const tutorialSteps =
-    resolved.slug === 'gadha-chor' ? GADHA_CHOR_TUTORIAL_STEPS : LAL_SATTI_TUTORIAL_STEPS;
+  const tutorialSteps = TUTORIAL_STEPS[resolved.slug];
 
   return (
     <>
@@ -97,7 +105,7 @@ export default async function LocalizedGameOverviewPage({
       <GameOverview
         game={game}
         localeOverride={resolved.locale}
-        status="available"
+        status={game.playable ? 'available' : 'comingSoon'}
         tutorialSteps={tutorialSteps}
       />
     </>

@@ -34,6 +34,20 @@ describe('sitemap', () => {
     expect(urls).toContain('https://lazypatta.com/hi/how-to-play/lal-satti');
   });
 
+  it('lists Jhabbu topic and rules pages even though it is coming soon', () => {
+    expect(urls).toContain('https://lazypatta.com/games/jhabbu');
+    expect(urls).toContain('https://lazypatta.com/en/games/jhabbu');
+    expect(urls).toContain('https://lazypatta.com/en/how-to-play/jhabbu');
+    expect(urls).toContain('https://lazypatta.com/gu/how-to-play/jhabbu');
+  });
+
+  it('lists computer play routes for every playable game', () => {
+    expect(urls).toContain('https://lazypatta.com/play/gadha-chor/computer');
+    expect(urls).toContain('https://lazypatta.com/play/lal-satti/computer');
+    // Jhabbu now has a live computer experience, so its play route is included.
+    expect(urls).toContain('https://lazypatta.com/play/jhabbu/computer');
+  });
+
   it('attaches a reciprocal hreflang set to each localized entry', () => {
     const enRules = entries.find(
       (entry) => entry.url === 'https://lazypatta.com/en/how-to-play/gadha-chor',

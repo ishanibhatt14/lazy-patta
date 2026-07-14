@@ -9,13 +9,15 @@ const nextConfig = {
   ],
   // Single alias registry: every spelling variant folds into one canonical slug
   // so SEO signal consolidates onto a single URL per game instead of spawning a
-  // low-value duplicate page for each romanization. Future games (Judgement,
-  // Mendicot, 3-2-5) are intentionally absent — their pages don't exist yet, and
-  // redirecting an alias to a 404 is worse than leaving it unhandled.
+  // low-value duplicate page for each romanization. Jhabbu is included because
+  // it has a crawlable (coming-soon) /games/jhabbu page. Games with no page yet
+  // (Judgement, Mendicot, 3-2-5) stay absent — redirecting an alias to a 404 is
+  // worse than leaving it unhandled.
   async redirects() {
     const SEO_GAME_ALIASES = {
       'gadha-chor': ['gulam-chor', 'gulaam-chor', 'gaddha-chor', 'jack-thief'],
       'lal-satti': ['badam-saat', 'badam-satti', 'laal-satti', 'seven-of-hearts', 'sevens'],
+      jhabbu: ['bhabho', 'bhabhi', 'laad', 'get-away', 'zabbu'],
     };
     const LOCALES = ['en', 'gu', 'hi'];
 

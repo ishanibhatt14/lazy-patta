@@ -38,6 +38,7 @@ export function PlayerPod({
   const countLabel = seat.isFinished
     ? t('label.finished')
     : format('game.cardsRemainingCount', { count: seat.cardCount });
+  const countShort = seat.isFinished ? t('label.finished') : String(seat.cardCount);
 
   return (
     <div
@@ -73,17 +74,21 @@ export function PlayerPod({
 
       <span
         className={[
-          'rounded-full px-2 py-0.5 text-xs font-semibold',
+          'ls-pod-count rounded-full px-2 py-0.5 text-xs font-semibold',
           seat.isFinished
             ? 'bg-brand-accent text-text-onBrand'
             : 'bg-[color-mix(in_srgb,var(--lp-background-canvas)_85%,transparent)] text-action-primary',
         ].join(' ')}
+        aria-label={countLabel}
       >
-        {countLabel}
+        <span className="ls-pod-count-full">{countLabel}</span>
+        <span className="ls-pod-count-short" aria-hidden>
+          {countShort}
+        </span>
       </span>
 
       {seat.isActive ? (
-        <span className="flex items-center gap-1 text-xs font-bold text-action-secondary">
+        <span className="ls-active-marker flex items-center gap-1 text-xs font-bold text-action-secondary">
           <span aria-hidden>●</span>
           {t('computer.activeTurnMarker')}
         </span>

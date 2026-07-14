@@ -1,7 +1,9 @@
 import type { Card, GameResult, PublicSnapshot } from '@lazy-patta/game-contracts';
+import type { JhabbuResult } from '@lazy-patta/jhabbu-engine';
 import type { LalSattiResult } from '@lazy-patta/lal-satti-engine';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+import type { JhabbuClientAction, JhabbuPublicSnapshot } from './jhabbu-authority';
 import type { LalSattiClientAction, LalSattiPublicSnapshot } from './lal-satti-authority';
 
 /**
@@ -14,11 +16,11 @@ import type { LalSattiClientAction, LalSattiPublicSnapshot } from './lal-satti-a
 
 export interface GameRow {
   readonly id: string;
-  readonly game_key: 'gadha_chor' | 'lal_satti';
+  readonly game_key: 'gadha_chor' | 'lal_satti' | 'jhabbu';
   readonly status: 'active' | 'complete' | 'abandoned';
   readonly state_version: number;
-  readonly public_snapshot: PublicSnapshot | LalSattiPublicSnapshot;
-  readonly result: GameResult | LalSattiResult | null;
+  readonly public_snapshot: PublicSnapshot | LalSattiPublicSnapshot | JhabbuPublicSnapshot;
+  readonly result: GameResult | LalSattiResult | JhabbuResult | null;
   readonly created_at?: string;
 }
 
@@ -31,6 +33,12 @@ export interface DrawInput {
 export interface LalSattiActionInput {
   readonly clientActionId: string;
   readonly action: LalSattiClientAction;
+  readonly expectedVersion: number;
+}
+
+export interface JhabbuActionInput {
+  readonly clientActionId: string;
+  readonly action: JhabbuClientAction;
   readonly expectedVersion: number;
 }
 
@@ -79,6 +87,16 @@ export async function submitLalSattiAction(
   client: SupabaseClient,
   gameId: string,
   input: LalSattiActionInput,
+): Promise<{ stateVersion: number }> {
+  const json = await authedPost(client, `/api/games/${gameId}/action`, input);
+  return { stateVersion: Number(json.stateVersion) };
+}
+
+/** Submit a Jhabbu play/draw through the authority route. */
+export async function submitJhabbuAction(
+  client: SupabaseClient,
+  gameId: string,
+  input: JhabbuActionInput,
 ): Promise<{ stateVersion: number }> {
   const json = await authedPost(client, `/api/games/${gameId}/action`, input);
   return { stateVersion: Number(json.stateVersion) };

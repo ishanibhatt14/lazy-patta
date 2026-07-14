@@ -132,6 +132,88 @@
   padding: clamp(0.5rem, 2vw, 1.1rem);
 }
 
+/* The compact number badge is hidden on roomy viewports; the small-
+   screen block below swaps it in for the verbose label. */
+.ls-pod-count-short {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ *
+ * Small-screen compaction. On short or narrow phones the four-sided   *
+ * table, suit rails, and hand must still fit one screen without pods  *
+ * overlapping the centre self cluster. Drop the decorative card-back  *
+ * stacks, tighten spacing, and shrink the side/top pods so their      *
+ * cards-remaining badges stay clear of the pass prompt.               *
+ * ------------------------------------------------------------------ */
+@media (max-width: 640px), (max-height: 740px) {
+  .ls-regions {
+    gap: 0.1rem;
+    padding: 0.35rem;
+  }
+
+  /* Card-back fans are purely decorative — the count badge already
+     communicates cards held, so recover their vertical space. */
+  .ls-pod-backs {
+    display: none;
+  }
+
+  /* Swap the verbose "N cards remaining" badge for a compact number so
+     side/top pods stay narrow (no horizontal clipping) and short (no
+     vertical overlap with the centre). The full label stays available
+     to screen readers via aria-label on the badge. */
+  .ls-pod-count-full {
+    display: none;
+  }
+
+  .ls-pod-count-short {
+    display: inline;
+  }
+
+  /* Shrink the tableau cards and slots so all four suit rails fit above
+     the hand on short phones. The rail container still scrolls as a
+     final guard, but at these sizes the rails fit without scrolling. */
+  /* Contain the rails within their own track (scrolling if ever needed)
+     so they can never overflow onto the self cluster. */
+  .ls-tableau {
+    gap: 0.25rem;
+    overflow-y: auto;
+  }
+
+  .ls-rail {
+    padding-block: 0.05rem;
+    gap: 0.35rem;
+  }
+
+  .ls-rail .ls-rail-card [role='img'],
+  .ls-rail .ls-slot {
+    height: 2.75rem;
+    width: 2.05rem;
+  }
+
+  .ls-rail .ls-rail-inner {
+    min-height: 2.9rem;
+  }
+
+  /* Your own seat is redundant with the hand fan directly below it and
+     the active-turn ring — drop the duplicate count badge and turn
+     marker to give the tableau the vertical room to show all four
+     suits without scrolling. */
+  .ls-self-region .ls-pod-count,
+  .ls-self-region .ls-active-marker {
+    display: none;
+  }
+}
+
+/* The tableau scrolls within its own track as a hard guard against the
+   rails ever overlapping the self cluster; keep that scroll invisible. */
+.ls-tableau {
+  scrollbar-width: none;
+}
+
+.ls-tableau::-webkit-scrollbar {
+  display: none;
+}
+
 /* ---- Player pods -------------------------------------------------- */
 
 .ls-pod-ring {

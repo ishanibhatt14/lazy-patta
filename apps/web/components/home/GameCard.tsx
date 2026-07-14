@@ -71,23 +71,34 @@ export function GameCard({
         <p className="text-xs font-semibold uppercase tracking-wide text-brand-accent">{alias}</p>
       ) : null}
 
-      <div className="flex flex-wrap gap-2">
-        <Link href={computerHref} className={PRIMARY_LINK_CLASSES}>
-          {t('action.playComputer')}
-        </Link>
-        {onlineHref ? (
-          <Link href={onlineHref} className={SECONDARY_LINK_CLASSES}>
-            {t('action.playOnline')}
+      {/* Coming-soon games get NO Play buttons — not even disabled-looking ones.
+          The only action is learning the rules, so the card never implies you
+          can start a game that does not exist yet. */}
+      {status === 'comingSoon' ? (
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" size="sm" onClick={onHowToPlay}>
+            {t('action.howToPlay')}
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          <Link href={computerHref} className={PRIMARY_LINK_CLASSES}>
+            {t('action.playComputer')}
           </Link>
-        ) : (
-          <span className={DISABLED_CLASSES} aria-disabled="true">
-            {t('action.playOnline')} · {t('games.status.comingSoon')}
-          </span>
-        )}
-        <Button variant="ghost" size="sm" onClick={onHowToPlay}>
-          {t('action.howToPlay')}
-        </Button>
-      </div>
+          {onlineHref ? (
+            <Link href={onlineHref} className={SECONDARY_LINK_CLASSES}>
+              {t('action.playOnline')}
+            </Link>
+          ) : (
+            <span className={DISABLED_CLASSES} aria-disabled="true">
+              {t('action.playOnline')} · {t('games.status.comingSoon')}
+            </span>
+          )}
+          <Button variant="ghost" size="sm" onClick={onHowToPlay}>
+            {t('action.howToPlay')}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

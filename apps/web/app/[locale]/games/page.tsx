@@ -103,9 +103,15 @@ export default async function LocalizedGamesIndexPage({
                 >
                   {t('seo.cta.readRules')}
                 </Link>
-                <Link href={game.computerHref} className="text-action-primary hover:underline">
-                  {t('seo.cta.playComputer')}
-                </Link>
+                {game.playable ? (
+                  <Link href={game.computerHref} className="text-action-primary hover:underline">
+                    {t('seo.cta.playComputer')}
+                  </Link>
+                ) : (
+                  <span className="font-semibold text-brand-accent">
+                    {t('games.status.comingSoon')}
+                  </span>
+                )}
               </div>
             </li>
           );

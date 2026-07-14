@@ -194,13 +194,13 @@ export function LalSattiGameShell({
             {topSeats.map((seat) => renderPod(seat, true))}
           </div>
 
-          <div className="grid min-h-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
+          <div className="grid min-h-0 grid-cols-[auto_minmax(0,1fr)_auto] items-stretch gap-2">
             <div className="flex flex-col justify-center gap-4">
               {leftSeats.map((seat) => renderPod(seat, true))}
             </div>
 
             <div
-              className="flex flex-col justify-center gap-1.5"
+              className="ls-tableau flex min-h-0 flex-col justify-center gap-1.5"
               aria-label={t('lalSatti.tableau')}
             >
               {view.lanes.map((lane) => (
@@ -221,7 +221,7 @@ export function LalSattiGameShell({
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-1.5">
+          <div className="ls-self-region flex flex-col items-center gap-1.5">
             {selfSeat ? renderPod(selfSeat) : null}
             <PassPrompt
               locale={locale}
