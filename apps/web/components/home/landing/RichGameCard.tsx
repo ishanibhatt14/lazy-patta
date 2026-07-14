@@ -42,7 +42,15 @@ const ART = {
 
 function FaceDownCard({ className = '' }: { readonly className?: string }): ReactElement {
   return (
-    <svg viewBox="0 0 120 168" className={className} aria-hidden focusable="false">
+    <svg
+      viewBox="0 0 120 168"
+      width="120"
+      height="168"
+      className={className}
+      style={{ overflow: 'visible' }}
+      aria-hidden
+      focusable="false"
+    >
       <rect
         x="3"
         y="3"
@@ -81,10 +89,18 @@ function GulamFaceCard({ label }: { readonly label: string }): ReactElement {
   return (
     <svg
       viewBox="0 0 120 168"
-      className="h-full w-full drop-shadow-lg"
+      width="120"
+      height="168"
+      className="h-full w-full"
+      style={{ overflow: 'visible' }}
       aria-hidden
       focusable="false"
     >
+      <defs>
+        <filter id="lp-gulam-shadow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2.4" floodColor="#2a1a10" floodOpacity="0.4" />
+        </filter>
+      </defs>
       <rect
         x="2.5"
         y="2.5"
@@ -94,6 +110,7 @@ function GulamFaceCard({ label }: { readonly label: string }): ReactElement {
         fill={ART.cream}
         stroke={ART.maroon}
         strokeWidth="3"
+        filter="url(#lp-gulam-shadow)"
       />
       <rect
         x="8"
@@ -184,7 +201,14 @@ function GulamFaceCard({ label }: { readonly label: string }): ReactElement {
 
 function GadhaMascot({ className = '' }: { readonly className?: string }): ReactElement {
   return (
-    <svg viewBox="0 0 90 90" className={className} aria-hidden focusable="false">
+    <svg
+      viewBox="0 0 90 90"
+      width="90"
+      height="90"
+      className={className}
+      aria-hidden
+      focusable="false"
+    >
       {/* Ears */}
       <ellipse cx="30" cy="20" rx="8" ry="20" fill="#9c9691" transform="rotate(-16 30 20)" />
       <ellipse cx="60" cy="20" rx="8" ry="20" fill="#9c9691" transform="rotate(16 60 20)" />
@@ -246,7 +270,7 @@ export function GadhaChorArtwork({ locale }: { readonly locale: Locale }): React
         <GulamFaceCard label={t('landing.game.gadhaChor.cardLabel')} />
       </div>
       {/* Mascot peeking from behind the unmatched card */}
-      <GadhaMascot className="art-mascot absolute bottom-6 right-[8%] h-[42%] w-auto drop-shadow-md" />
+      <GadhaMascot className="art-mascot absolute bottom-6 right-[8%] h-[42%] w-auto" />
     </div>
   );
 }
@@ -291,7 +315,20 @@ function HeartCard({
   };
   const heart = 'M0 4 C-5 -4 -16 -3 -16 6 C-16 14 -6 19 0 25 C6 19 16 14 16 6 C16 -3 5 -4 0 4 Z';
   return (
-    <svg viewBox="0 0 120 168" className={className} aria-hidden focusable="false">
+    <svg
+      viewBox="0 0 120 168"
+      width="120"
+      height="168"
+      className={className}
+      style={{ overflow: 'visible' }}
+      aria-hidden
+      focusable="false"
+    >
+      <defs>
+        <filter id={`lp-heart-shadow-${rank}`} x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2.4" floodColor="#2a1a10" floodOpacity="0.4" />
+        </filter>
+      </defs>
       <rect
         x="2.5"
         y="2.5"
@@ -301,6 +338,7 @@ function HeartCard({
         fill={ART.cream}
         stroke={featured ? ART.haldi : ART.maroon}
         strokeWidth={featured ? '3.4' : '2.6'}
+        filter={`url(#lp-heart-shadow-${rank})`}
       />
       <rect
         x="8"
@@ -357,10 +395,10 @@ export function LalSattiArtwork({ locale }: { readonly locale: Locale }): ReactE
           background: `radial-gradient(circle, ${ART.haldiSoft} 0 1px, transparent 2px) 0 0 / 20px 20px`,
         }}
       />
-      <div className="absolute inset-x-0 bottom-4 flex items-end justify-center gap-2">
-        <HeartCard rank="6" className="art-slide-left art-lift h-[62%] w-auto drop-shadow-lg" />
-        <HeartCard rank="7" featured className="h-[80%] w-auto drop-shadow-xl" />
-        <HeartCard rank="8" className="art-slide-right art-lift h-[62%] w-auto drop-shadow-lg" />
+      <div className="absolute inset-x-0 bottom-4 top-6 flex items-end justify-center gap-2">
+        <HeartCard rank="6" className="art-slide-left art-lift h-[62%] w-auto" />
+        <HeartCard rank="7" featured className="h-[80%] w-auto" />
+        <HeartCard rank="8" className="art-slide-right art-lift h-[62%] w-auto" />
       </div>
     </div>
   );
