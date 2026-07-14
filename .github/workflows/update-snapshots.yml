@@ -1,0 +1,54 @@
+name: Update visual snapshots
+
+# Temporary helper: regenerates the committed Playwright visual baselines on the
+# exact CI runner environment (so pixels match), then uploads them as an
+# artifact for a maintainer to download and commit. Remove after use.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: 22.21.1
+
+jobs:
+  update-snapshots:
+    name: Regenerate visual baselines
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browser (chromium)
+        run: pnpm --filter web exec playwright install --with-deps chromium
+
+      - name: Build web
+        run: pnpm --filter web build
+
+      - name: Update visual snapshots
+        run: >-
+          pnpm --filter web exec playwright test
+          computer-game.visual.spec.ts lal-satti-computer.visual.spec.ts
+          --update-snapshots
+
+      - name: Upload regenerated snapshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-snapshots
+          path: |
+            apps/web/e2e/computer-game.visual.spec.ts-snapshots/
+            apps/web/e2e/lal-satti-computer.visual.spec.ts-snapshots/
+          if-no-files-found: error
