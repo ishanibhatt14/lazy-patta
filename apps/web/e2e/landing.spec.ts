@@ -156,9 +156,17 @@ test.describe('rich landing page', () => {
     );
   });
 
-  test('renders reduced-motion-safe hero information', async ({ page }) => {
+  test('renders the family hero image and Gulam card art under reduced motion', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
-    await expect(page.getByText(/Reduced motion family card table/i)).toBeAttached();
+
+    await expect(
+      page.getByRole('img', { name: /multigenerational Gujarati family playing cards/i }),
+    ).toBeVisible();
+    await expect(page.getByRole('img', { name: /Gadha Chor card art/i })).toBeVisible();
+    await expect(page.getByText('J ?')).toHaveCount(0);
   });
 
   test('renders localized game discovery pages', async ({ page }) => {

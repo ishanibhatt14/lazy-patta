@@ -62,7 +62,7 @@ export function GameLobby(): ReactElement {
             onlineHref="/play/online?game=gadha_chor"
             overviewHref="/games/gadha-chor"
             onHowToPlay={() => setActiveTutorial('gadha-chor')}
-            artwork={<GadhaChorArtwork />}
+            artwork={<GadhaChorArtwork locale={locale} />}
           />
           <RichGameCard
             locale={locale}
@@ -77,7 +77,7 @@ export function GameLobby(): ReactElement {
             onlineHref="/play/online?game=lal_satti"
             overviewHref="/games/lal-satti"
             onHowToPlay={() => setActiveTutorial('lal-satti')}
-            artwork={<LalSattiArtwork />}
+            artwork={<LalSattiArtwork locale={locale} />}
           />
         </div>
       </section>

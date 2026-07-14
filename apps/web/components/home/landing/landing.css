@@ -32,6 +32,19 @@
       2.2rem 2.2rem;
 }
 
+.landing-hero-media {
+  animation: lp-scene-in 360ms ease-out both;
+}
+
+/* Subtle warm base for cinematic depth — kept low so faces stay bright. */
+.landing-hero-media-glow {
+  background: linear-gradient(
+    180deg,
+    transparent 60%,
+    color-mix(in srgb, var(--lp-scene-rim), transparent 66%) 100%
+  );
+}
+
 .landing-scene {
   animation: lp-scene-in 360ms ease-out both;
 }
@@ -99,6 +112,32 @@
 .rich-game-card:hover .art-slide-right,
 .rich-game-card:focus-within .art-slide-right {
   transform: translateX(0.35rem);
+}
+
+/* Gadha Chor card-art choreography */
+.art-fan,
+.art-gulam,
+.art-mascot {
+  transition: transform 220ms ease;
+}
+
+.art-gulam {
+  transform-origin: bottom center;
+}
+
+.rich-game-card:hover .art-fan,
+.rich-game-card:focus-within .art-fan {
+  transform: translateY(-0.3rem);
+}
+
+.rich-game-card:hover .art-gulam,
+.rich-game-card:focus-within .art-gulam {
+  transform: rotate(-3deg) translateY(-0.15rem);
+}
+
+.rich-game-card:hover .art-mascot,
+.rich-game-card:focus-within .art-mascot {
+  transform: translate(0.4rem, -0.35rem);
 }
 
 @keyframes lp-scene-in {
@@ -225,6 +264,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .landing-hero-media,
   .landing-scene,
   .landing-diya,
   .landing-card,
@@ -234,7 +274,10 @@
   .landing-mascot,
   .landing-hero-copy,
   .rich-game-card,
-  .rich-game-card .art-lift {
+  .rich-game-card .art-lift,
+  .art-fan,
+  .art-gulam,
+  .art-mascot {
     animation: none;
     transition: none;
     transform: none;

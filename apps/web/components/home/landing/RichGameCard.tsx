@@ -23,48 +23,344 @@ interface RichGameCardProps {
   readonly artwork: ReactNode;
 }
 
-export function GadhaChorArtwork(): ReactElement {
+/**
+ * Shared court-card palette so both game illustrations read as one system:
+ * warm maroon, cream, peacock, and haldi.
+ */
+const ART = {
+  maroon: '#7c2130',
+  maroonDeep: '#5f1721',
+  cream: '#fbf3de',
+  creamShade: '#f0e2c2',
+  peacock: '#127069',
+  peacockDeep: '#0d514c',
+  haldi: '#e8a93a',
+  haldiSoft: '#f2c66b',
+  ink: '#3a2416',
+  tan: '#e7c49b',
+} as const;
+
+function FaceDownCard({ className = '' }: { readonly className?: string }): ReactElement {
   return (
-    <div className="relative min-h-48 overflow-hidden rounded-lg bg-scene-rim p-4 text-text-onBrand">
-      <div className="absolute inset-0 bg-action-secondary/10" />
-      <div className="absolute left-5 top-5 flex -space-x-3">
-        {[0, 1, 2].map((item) => (
-          <span
-            key={item}
-            className="art-lift h-24 w-16 rounded-md border border-action-secondary/50 bg-card-back shadow-lg"
-          />
-        ))}
+    <svg viewBox="0 0 120 168" className={className} aria-hidden focusable="false">
+      <rect
+        x="3"
+        y="3"
+        width="114"
+        height="162"
+        rx="12"
+        fill={ART.maroon}
+        stroke={ART.cream}
+        strokeWidth="3"
+      />
+      <rect
+        x="11"
+        y="11"
+        width="98"
+        height="146"
+        rx="8"
+        fill="none"
+        stroke={ART.haldi}
+        strokeWidth="1.6"
+        opacity="0.85"
+      />
+      <path
+        d="M60 20 L84 60 L60 100 L36 60 Z M60 68 L84 108 L60 148 L36 108 Z"
+        fill="none"
+        stroke={ART.haldiSoft}
+        strokeWidth="1.4"
+        opacity="0.6"
+      />
+      <circle cx="60" cy="84" r="9" fill={ART.peacock} opacity="0.85" />
+      <circle cx="60" cy="84" r="4" fill={ART.haldi} />
+    </svg>
+  );
+}
+
+function GulamFaceCard({ label }: { readonly label: string }): ReactElement {
+  return (
+    <svg
+      viewBox="0 0 120 168"
+      className="h-full w-full drop-shadow-lg"
+      aria-hidden
+      focusable="false"
+    >
+      <rect
+        x="2.5"
+        y="2.5"
+        width="115"
+        height="163"
+        rx="12"
+        fill={ART.cream}
+        stroke={ART.maroon}
+        strokeWidth="3"
+      />
+      <rect
+        x="8"
+        y="8"
+        width="104"
+        height="152"
+        rx="8"
+        fill="none"
+        stroke={ART.haldi}
+        strokeWidth="1.4"
+        opacity="0.75"
+      />
+
+      {/* Corner indices: J + spade, mirrored like a real court card */}
+      <g fill={ART.maroon}>
+        <text x="13" y="27" fontSize="19" fontWeight="800" fontFamily="Georgia, serif">
+          J
+        </text>
+        <text x="14" y="41" fontSize="12">
+          ♠
+        </text>
+        <g transform="rotate(180 60 84)">
+          <text x="13" y="27" fontSize="19" fontWeight="800" fontFamily="Georgia, serif">
+            J
+          </text>
+          <text x="14" y="41" fontSize="12">
+            ♠
+          </text>
+        </g>
+      </g>
+
+      {/* Court figure: turbaned Gulam bust */}
+      <g transform="translate(60 82)">
+        <path d="M-26 40 Q-26 6 0 4 Q26 6 26 40 Z" fill={ART.maroon} />
+        <path d="M-26 40 Q-26 6 0 4 Q26 6 26 40" fill="none" stroke={ART.haldi} strokeWidth="1.6" />
+        <path d="M-13 8 Q0 20 13 8 L10 22 Q0 30 -10 22 Z" fill={ART.haldiSoft} />
+        <ellipse
+          cx="0"
+          cy="-8"
+          rx="15"
+          ry="16.5"
+          fill={ART.tan}
+          stroke={ART.ink}
+          strokeWidth="0.8"
+        />
+        {/* Turban */}
+        <path d="M-17 -12 Q-20 -34 0 -35 Q20 -34 17 -12 Q0 -22 -17 -12 Z" fill={ART.haldi} />
+        <path d="M-17 -12 Q0 -20 17 -12" fill="none" stroke={ART.peacock} strokeWidth="3" />
+        <path d="M0 -35 Q6 -46 13 -44 Q9 -37 6 -33 Z" fill={ART.peacock} />
+        <circle cx="0" cy="-24" r="2.6" fill={ART.maroonDeep} />
+        {/* Face features */}
+        <circle cx="-6" cy="-9" r="1.7" fill={ART.ink} />
+        <circle cx="6" cy="-9" r="1.7" fill={ART.ink} />
+        <path
+          d="M-8 -1 Q0 3 8 -1"
+          fill="none"
+          stroke={ART.ink}
+          strokeWidth="1.4"
+          strokeLinecap="round"
+        />
+        <path
+          d="M-9 2 Q-4 6 0 4 Q4 6 9 2"
+          fill="none"
+          stroke={ART.ink}
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+      </g>
+
+      {/* Localized label ribbon */}
+      <g>
+        <rect x="26" y="140" width="68" height="18" rx="9" fill={ART.maroon} />
+        <text
+          x="60"
+          y="153"
+          fontSize="11"
+          fontWeight="700"
+          textAnchor="middle"
+          fill={ART.cream}
+          fontFamily="Georgia, serif"
+        >
+          {label}
+        </text>
+      </g>
+    </svg>
+  );
+}
+
+function GadhaMascot({ className = '' }: { readonly className?: string }): ReactElement {
+  return (
+    <svg viewBox="0 0 90 90" className={className} aria-hidden focusable="false">
+      {/* Ears */}
+      <ellipse cx="30" cy="20" rx="8" ry="20" fill="#9c9691" transform="rotate(-16 30 20)" />
+      <ellipse cx="60" cy="20" rx="8" ry="20" fill="#9c9691" transform="rotate(16 60 20)" />
+      <ellipse cx="30" cy="22" rx="4" ry="13" fill="#c9b7ce" transform="rotate(-16 30 22)" />
+      <ellipse cx="60" cy="22" rx="4" ry="13" fill="#c9b7ce" transform="rotate(16 60 22)" />
+      {/* Head */}
+      <ellipse cx="45" cy="48" rx="26" ry="24" fill="#b3ada8" />
+      <ellipse cx="45" cy="62" rx="16" ry="14" fill="#d8d2cc" />
+      {/* Eyes */}
+      <circle cx="35" cy="44" r="3.4" fill={ART.ink} />
+      <circle cx="55" cy="44" r="3.4" fill={ART.ink} />
+      <circle cx="36" cy="43" r="1.1" fill={ART.cream} />
+      <circle cx="56" cy="43" r="1.1" fill={ART.cream} />
+      {/* Nostrils + smile */}
+      <ellipse cx="39" cy="62" rx="2.2" ry="3" fill={ART.ink} />
+      <ellipse cx="51" cy="62" rx="2.2" ry="3" fill={ART.ink} />
+      <path
+        d="M38 70 Q45 74 52 70"
+        fill="none"
+        stroke={ART.ink}
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      {/* Forelock */}
+      <path d="M45 24 Q40 30 44 34 Q48 30 45 24" fill="#8a847f" />
+    </svg>
+  );
+}
+
+export function GadhaChorArtwork({ locale }: { readonly locale: Locale }): ReactElement {
+  const { t } = createTranslator(locale);
+  return (
+    <div
+      className="relative aspect-[16/10] w-full overflow-hidden rounded-t-lg"
+      role="img"
+      aria-label={t('landing.game.gadhaChor.artLabel')}
+    >
+      <div
+        className="absolute inset-0"
+        aria-hidden
+        style={{
+          background: `radial-gradient(120% 120% at 18% 12%, ${ART.haldiSoft} 0%, ${ART.haldi} 34%, ${ART.maroon} 100%)`,
+        }}
+      />
+      <div
+        className="absolute inset-0 opacity-25"
+        aria-hidden
+        style={{
+          background: `radial-gradient(circle, ${ART.cream} 0 1px, transparent 2px) 0 0 / 18px 18px`,
+        }}
+      />
+      {/* Face-down fan */}
+      <div className="art-fan absolute bottom-3 left-[10%] top-6 w-[34%]">
+        <FaceDownCard className="absolute left-0 top-2 h-[86%] w-auto -rotate-[14deg]" />
+        <FaceDownCard className="absolute left-5 top-0 h-[92%] w-auto -rotate-[6deg]" />
       </div>
-      <div className="absolute bottom-5 right-5 grid h-24 w-24 place-items-center rounded-full border-4 border-action-secondary bg-scene-rimEdge shadow-xl">
-        <span className="text-3xl font-black">G</span>
+      {/* Gulam card */}
+      <div className="art-gulam absolute bottom-4 left-[34%] top-4 w-[36%]">
+        <GulamFaceCard label={t('landing.game.gadhaChor.cardLabel')} />
       </div>
-      <div className="absolute bottom-8 left-6 rounded-full bg-surface-primary px-3 py-2 text-sm font-bold text-action-primary">
-        J ?
-      </div>
+      {/* Mascot peeking from behind the unmatched card */}
+      <GadhaMascot className="art-mascot absolute bottom-6 right-[8%] h-[42%] w-auto drop-shadow-md" />
     </div>
   );
 }
 
-export function LalSattiArtwork(): ReactElement {
+function HeartCard({
+  rank,
+  className = '',
+  featured = false,
+}: {
+  readonly rank: string;
+  readonly className?: string;
+  readonly featured?: boolean;
+}): ReactElement {
+  const pips: Record<string, ReadonlyArray<readonly [number, number]>> = {
+    '6': [
+      [40, 42],
+      [80, 42],
+      [40, 84],
+      [80, 84],
+      [40, 126],
+      [80, 126],
+    ],
+    '7': [
+      [40, 40],
+      [80, 40],
+      [60, 62],
+      [40, 84],
+      [80, 84],
+      [40, 128],
+      [80, 128],
+    ],
+    '8': [
+      [40, 38],
+      [80, 38],
+      [40, 70],
+      [80, 70],
+      [40, 98],
+      [80, 98],
+      [40, 130],
+      [80, 130],
+    ],
+  };
+  const heart = 'M0 4 C-5 -4 -16 -3 -16 6 C-16 14 -6 19 0 25 C6 19 16 14 16 6 C16 -3 5 -4 0 4 Z';
   return (
-    <div className="relative min-h-48 overflow-hidden rounded-lg bg-accent-indigo p-4 text-text-onBrand">
-      <div className="absolute inset-0 bg-scene-skyTop/30" />
-      <div className="absolute inset-x-8 top-12 h-1 rounded-full bg-action-secondary/70" />
-      <div className="absolute inset-x-12 bottom-12 h-1 rounded-full bg-brand-accent/70" />
-      <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 items-end gap-2">
-        <div className="art-slide-left art-lift flex h-24 w-16 flex-col justify-between rounded-lg bg-card-face p-2 text-card-suitRed shadow-lg">
-          <span>6</span>
-          <span className="self-center text-2xl">♥</span>
-        </div>
-        <div className="z-10 flex h-32 w-20 flex-col justify-between rounded-lg border-2 border-action-secondary bg-card-face p-2 text-card-suitRed shadow-xl">
-          <span>7</span>
-          <span className="self-center text-3xl">♥</span>
-          <span className="self-end rotate-180">7</span>
-        </div>
-        <div className="art-slide-right art-lift flex h-24 w-16 flex-col justify-between rounded-lg bg-card-face p-2 text-card-suitRed shadow-lg">
-          <span>8</span>
-          <span className="self-center text-2xl">♥</span>
-        </div>
+    <svg viewBox="0 0 120 168" className={className} aria-hidden focusable="false">
+      <rect
+        x="2.5"
+        y="2.5"
+        width="115"
+        height="163"
+        rx="12"
+        fill={ART.cream}
+        stroke={featured ? ART.haldi : ART.maroon}
+        strokeWidth={featured ? '3.4' : '2.6'}
+      />
+      <rect
+        x="8"
+        y="8"
+        width="104"
+        height="152"
+        rx="8"
+        fill="none"
+        stroke={ART.creamShade}
+        strokeWidth="1.2"
+      />
+      <g fill="#c0392b">
+        <text x="12" y="26" fontSize="18" fontWeight="800" fontFamily="Georgia, serif">
+          {rank}
+        </text>
+        <text x="13" y="40" fontSize="12">
+          ♥
+        </text>
+        <g transform="rotate(180 60 84)">
+          <text x="12" y="26" fontSize="18" fontWeight="800" fontFamily="Georgia, serif">
+            {rank}
+          </text>
+          <text x="13" y="40" fontSize="12">
+            ♥
+          </text>
+        </g>
+        {pips[rank]?.map(([cx, cy], index) => (
+          <path key={`${cx}-${cy}-${index}`} d={heart} transform={`translate(${cx} ${cy - 8})`} />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
+export function LalSattiArtwork({ locale }: { readonly locale: Locale }): ReactElement {
+  const { t } = createTranslator(locale);
+  return (
+    <div
+      className="relative aspect-[16/10] w-full overflow-hidden rounded-t-lg"
+      role="img"
+      aria-label={t('landing.game.lalSatti.artLabel')}
+    >
+      <div
+        className="absolute inset-0"
+        aria-hidden
+        style={{
+          background: `radial-gradient(120% 130% at 82% 8%, ${ART.peacock} 0%, ${ART.peacockDeep} 46%, ${ART.maroonDeep} 100%)`,
+        }}
+      />
+      <div
+        className="absolute inset-0 opacity-20"
+        aria-hidden
+        style={{
+          background: `radial-gradient(circle, ${ART.haldiSoft} 0 1px, transparent 2px) 0 0 / 20px 20px`,
+        }}
+      />
+      <div className="absolute inset-x-0 bottom-4 flex items-end justify-center gap-2">
+        <HeartCard rank="6" className="art-slide-left art-lift h-[62%] w-auto drop-shadow-lg" />
+        <HeartCard rank="7" featured className="h-[80%] w-auto drop-shadow-xl" />
+        <HeartCard rank="8" className="art-slide-right art-lift h-[62%] w-auto drop-shadow-lg" />
       </div>
     </div>
   );

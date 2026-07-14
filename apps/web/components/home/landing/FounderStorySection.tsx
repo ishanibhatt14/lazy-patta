@@ -18,34 +18,43 @@ export function FounderStorySection({ locale }: { readonly locale: Locale }): Re
 
   return (
     <section className="mx-auto w-full max-w-3xl px-5 py-10 md:px-8">
-      <div className="flex flex-col items-center gap-6 rounded-lg border border-action-primary/15 bg-surface-primary p-6 shadow-md md:p-8">
-        <Image
-          src="/images/ishani-bhatt-founder.jpg"
-          alt={t('landing.founder.photoAlt')}
-          width={176}
-          height={220}
-          className="h-56 w-44 rounded-lg object-cover shadow-md"
-        />
-        <div className="flex flex-col gap-4">
-          <h2 className="text-center text-4xl font-black leading-tight text-action-primary">
+      <div className="flex flex-col gap-6 rounded-lg border border-action-primary/15 bg-surface-primary p-6 shadow-md md:p-8">
+        <div className="flex flex-col gap-3">
+          <h2 className="text-3xl font-black leading-tight text-action-primary md:text-4xl">
             {t('landing.founder.title')}
           </h2>
-          <p className="text-center text-lg font-semibold leading-8 text-brand-accent">
+          <p className="text-lg font-semibold leading-8 text-brand-accent">
             {t('landing.founder.subtitle')}
           </p>
+        </div>
+
+        <div className="flex flex-col gap-4">
           {paragraphs.map((paragraph) => (
             <p key={paragraph.id} className="text-lg leading-8 text-text-primary">
               {paragraph.text}
             </p>
           ))}
-          <p className="text-base font-black text-action-primary">{t('landing.founder.credit')}</p>
-          <Link
-            href="/play/online"
-            className="inline-flex min-h-12 w-fit items-center justify-center rounded-md bg-action-primary px-5 font-bold text-text-onBrand shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-          >
-            {t('landing.founder.cta')}
-          </Link>
         </div>
+
+        <div className="flex items-center gap-3 border-t border-action-primary/10 pt-5">
+          <Image
+            src="/images/ishani-bhatt-founder-288.jpg"
+            alt={t('landing.founder.photoAlt')}
+            width={144}
+            height={144}
+            className="h-12 w-12 shrink-0 rounded-full object-cover shadow-sm md:h-[4.25rem] md:w-[4.25rem]"
+          />
+          <p className="text-sm font-black leading-6 text-action-primary md:text-base">
+            {t('landing.founder.credit')}
+          </p>
+        </div>
+
+        <Link
+          href="/play/online"
+          className="inline-flex min-h-12 w-fit items-center justify-center rounded-md bg-action-primary px-5 font-bold text-text-onBrand shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+        >
+          {t('landing.founder.cta')}
+        </Link>
       </div>
     </section>
   );
