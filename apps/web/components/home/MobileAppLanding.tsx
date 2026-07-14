@@ -167,7 +167,7 @@ export function MobileAppLanding(): ReactElement {
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
-              href="/#games"
+              href="#games"
               className="inline-flex min-h-12 items-center justify-center rounded-md bg-action-primary px-5 text-sm font-bold text-text-onBrand shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
             >
               {t('mobile.hero.primaryCta')}
