@@ -17,9 +17,10 @@ interface RichGameCardProps {
   readonly duration: string;
   readonly players: string;
   readonly computerHref: string;
-  readonly onlineHref: string;
-  readonly overviewHref: string;
-  readonly onHowToPlay: () => void;
+  readonly onlineHref?: string;
+  readonly onlineDisabledLabel?: string;
+  readonly overviewHref?: string;
+  readonly onHowToPlay?: () => void;
   readonly artwork: ReactNode;
 }
 
@@ -404,6 +405,98 @@ export function LalSattiArtwork({ locale }: { readonly locale: Locale }): ReactE
   );
 }
 
+function SpadeCard({
+  rank,
+  className = '',
+  featured = false,
+}: {
+  readonly rank: string;
+  readonly className?: string;
+  readonly featured?: boolean;
+}): ReactElement {
+  const spade =
+    'M0 -24 C-18 -4 -34 8 -34 24 C-34 36 -22 42 -10 36 C-11 49 -18 58 -25 62 L25 62 C18 58 11 49 10 36 C22 42 34 36 34 24 C34 8 18 -4 0 -24 Z';
+  return (
+    <svg
+      viewBox="0 0 120 168"
+      width="120"
+      height="168"
+      className={className}
+      style={{ overflow: 'visible' }}
+      aria-hidden
+      focusable="false"
+    >
+      <defs>
+        <filter id={`lp-spade-shadow-${rank}`} x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2.4" floodColor="#2a1a10" floodOpacity="0.4" />
+        </filter>
+      </defs>
+      <rect
+        x="2.5"
+        y="2.5"
+        width="115"
+        height="163"
+        rx="12"
+        fill={ART.cream}
+        stroke={featured ? ART.haldi : ART.peacock}
+        strokeWidth={featured ? '3.4' : '2.6'}
+        filter={`url(#lp-spade-shadow-${rank})`}
+      />
+      <g fill={ART.ink}>
+        <text x="12" y="28" fontSize="19" fontWeight="900" fontFamily="Georgia, serif">
+          {rank}
+        </text>
+        <text x="13" y="42" fontSize="12">
+          ♠
+        </text>
+        <g transform="rotate(180 60 84)">
+          <text x="12" y="28" fontSize="19" fontWeight="900" fontFamily="Georgia, serif">
+            {rank}
+          </text>
+          <text x="13" y="42" fontSize="12">
+            ♠
+          </text>
+        </g>
+        <path d={spade} transform="translate(60 84) scale(0.72)" />
+      </g>
+    </svg>
+  );
+}
+
+export function JhabbuArtwork({ locale }: { readonly locale: Locale }): ReactElement {
+  const { t } = createTranslator(locale);
+  return (
+    <div
+      className="relative aspect-[16/10] w-full overflow-hidden rounded-t-lg"
+      role="img"
+      aria-label={t('landing.game.jhabbu.artLabel')}
+    >
+      <div
+        className="absolute inset-0"
+        aria-hidden
+        style={{
+          background: `radial-gradient(120% 130% at 20% 12%, ${ART.haldi} 0%, ${ART.maroon} 42%, ${ART.peacockDeep} 100%)`,
+        }}
+      />
+      <div
+        className="absolute inset-0 opacity-20"
+        aria-hidden
+        style={{
+          background: `radial-gradient(circle, ${ART.cream} 0 1px, transparent 2px) 0 0 / 18px 18px`,
+        }}
+      />
+      <div className="absolute inset-x-0 bottom-4 top-6 flex items-end justify-center gap-2">
+        <FaceDownCard className="art-slide-left h-[58%] w-auto -rotate-[14deg]" />
+        <SpadeCard rank="A" featured className="h-[82%] w-auto" />
+        <SpadeCard rank="K" className="art-slide-right h-[62%] w-auto rotate-[13deg]" />
+      </div>
+      <div className="absolute right-4 top-4 rounded-full bg-surface-primary px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-action-primary">
+        Thulla
+      </div>
+    </div>
+  );
+}
+
 export function RichGameCard({
   locale,
   title,
@@ -415,6 +508,7 @@ export function RichGameCard({
   players,
   computerHref,
   onlineHref,
+  onlineDisabledLabel,
   overviewHref,
   onHowToPlay,
   artwork,
@@ -449,13 +543,24 @@ export function RichGameCard({
         </dl>
 
         <div className="mt-auto flex flex-col gap-3">
-          <Link
-            href={onlineHref}
-            className="inline-flex min-h-14 flex-col items-center justify-center rounded-md bg-action-primary px-4 py-2 text-sm font-bold text-text-onBrand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-          >
-            <span>{t('landing.game.startFamilyRoom')}</span>
-            <span className="text-xs font-semibold opacity-90">{t('landing.game.familyHint')}</span>
-          </Link>
+          {onlineHref ? (
+            <Link
+              href={onlineHref}
+              className="inline-flex min-h-14 flex-col items-center justify-center rounded-md bg-action-primary px-4 py-2 text-sm font-bold text-text-onBrand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+            >
+              <span>{t('landing.game.startFamilyRoom')}</span>
+              <span className="text-xs font-semibold opacity-90">
+                {t('landing.game.familyHint')}
+              </span>
+            </Link>
+          ) : (
+            <div className="inline-flex min-h-14 flex-col items-center justify-center rounded-md border border-action-primary/25 bg-background-canvas px-4 py-2 text-center text-sm font-bold text-action-primary">
+              <span>{t('landing.game.playWithFamily')}</span>
+              <span className="text-xs font-semibold text-text-primary">
+                {onlineDisabledLabel ?? t('landing.game.familyHint')}
+              </span>
+            </div>
+          )}
           <div className="grid gap-2 sm:grid-cols-2">
             <Link
               href={computerHref}
@@ -463,16 +568,20 @@ export function RichGameCard({
             >
               {t('landing.game.practice')}
             </Link>
-            <Button variant="ghost" size="sm" className="min-h-12" onClick={onHowToPlay}>
-              {t('landing.game.learnRules')}
-            </Button>
+            {onHowToPlay ? (
+              <Button variant="ghost" size="sm" className="min-h-12" onClick={onHowToPlay}>
+                {t('landing.game.learnRules')}
+              </Button>
+            ) : null}
           </div>
-          <Link
-            href={overviewHref}
-            className="text-center text-xs font-bold text-text-primary underline decoration-action-secondary decoration-2 underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-          >
-            {t('landing.game.overview')}
-          </Link>
+          {overviewHref ? (
+            <Link
+              href={overviewHref}
+              className="text-center text-xs font-bold text-text-primary underline decoration-action-secondary decoration-2 underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+            >
+              {t('landing.game.overview')}
+            </Link>
+          ) : null}
         </div>
       </div>
     </article>

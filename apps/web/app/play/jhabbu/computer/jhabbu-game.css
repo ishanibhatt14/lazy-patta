@@ -1,0 +1,59 @@
+.jh-shell {
+  background:
+    radial-gradient(circle at 18% 12%, rgb(232 169 58 / 18%), transparent 30rem),
+    linear-gradient(135deg, #fbf3de 0%, #f7ead0 46%, #ead1a9 100%);
+}
+
+.jh-table {
+  background:
+    radial-gradient(circle at 50% 20%, rgb(242 198 107 / 16%), transparent 20rem),
+    linear-gradient(135deg, #127069 0%, #0d514c 52%, #5f1721 100%);
+}
+
+.jh-hand {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  overflow-x: visible;
+  padding-block: 0.4rem 0.8rem;
+}
+
+.jh-card-button {
+  flex: 0 0 auto;
+  min-height: 6.5rem;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    filter 160ms ease;
+}
+
+.jh-card-playable {
+  transform: translateY(-0.35rem);
+  filter: drop-shadow(0 0.4rem 0.75rem rgb(232 169 58 / 45%));
+}
+
+.jh-card-muted {
+  opacity: 0.48;
+}
+
+@media (min-width: 768px) {
+  .jh-hand {
+    justify-content: center;
+    overflow-x: visible;
+  }
+
+  .jh-card-button {
+    margin-inline: -0.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jh-card-button {
+    transition: none;
+  }
+
+  .jh-card-playable {
+    transform: none;
+  }
+}

@@ -15,7 +15,12 @@ import { FounderStorySection } from './landing/FounderStorySection';
 import { LandingFooter } from './landing/LandingFooter';
 import { LandingShell } from './landing/LandingShell';
 import { PlayModeSection } from './landing/PlayModeSection';
-import { GadhaChorArtwork, LalSattiArtwork, RichGameCard } from './landing/RichGameCard';
+import {
+  GadhaChorArtwork,
+  JhabbuArtwork,
+  LalSattiArtwork,
+  RichGameCard,
+} from './landing/RichGameCard';
 
 type ActiveTutorial = 'gadha-chor' | 'lal-satti' | null;
 
@@ -48,7 +53,7 @@ export function GameLobby(): ReactElement {
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-3">
           <RichGameCard
             locale={locale}
             title={t('games.gadhaChor.name')}
@@ -78,6 +83,19 @@ export function GameLobby(): ReactElement {
             overviewHref="/games/lal-satti"
             onHowToPlay={() => setActiveTutorial('lal-satti')}
             artwork={<LalSattiArtwork locale={locale} />}
+          />
+          <RichGameCard
+            locale={locale}
+            title={t('games.jhabbu.name')}
+            alias={t('games.jhabbu.aliasShort')}
+            description={t('landing.game.jhabbu.description')}
+            status={t('games.status.available')}
+            difficulty={t('landing.game.jhabbu.difficulty')}
+            duration={t('landing.game.jhabbu.duration')}
+            players={t('landing.game.jhabbu.players')}
+            computerHref="/play/jhabbu/computer"
+            onlineDisabledLabel={t('landing.game.jhabbu.familySoon')}
+            artwork={<JhabbuArtwork locale={locale} />}
           />
         </div>
       </section>

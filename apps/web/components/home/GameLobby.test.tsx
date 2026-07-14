@@ -44,9 +44,17 @@ describe('GameLobby landing page', () => {
       'href',
       '/play/lal-satti/computer',
     );
+    expect(screen.getAllByRole('link', { name: /Practice with bots/i })[2]).toHaveAttribute(
+      'href',
+      '/play/jhabbu/computer',
+    );
     expect(screen.getByRole('link', { name: /Mobile app/i })).toHaveAttribute('href', '/mobile');
     expect(screen.getByText(/Also known as Gulaam Chor/i)).toBeVisible();
     expect(screen.getByText(/Also known as Badam Saat/i)).toBeVisible();
+    expect(screen.getByText(/Also known as Bhabho/i)).toBeVisible();
+    expect(
+      screen.getByText(/Family rooms for Jhabbu are coming after practice mode/i),
+    ).toBeVisible();
   });
 
   it('keeps one trust group in the hero and moves playable games directly after it', () => {
@@ -62,7 +70,7 @@ describe('GameLobby landing page', () => {
       name: /Desi card games\. Family game night, anywhere\./i,
     });
     const games = screen.getByRole('region', {
-      name: /Two family-table classics, each with its own mood\./i,
+      name: /Three family-table classics, each with its own mood\./i,
     });
 
     expect(hero.nextElementSibling).toBe(games);
@@ -153,6 +161,12 @@ describe('GameLobby landing page', () => {
     renderLobby();
 
     expect(screen.getByRole('img', { name: /Lal Satti card art/i })).toBeInTheDocument();
+  });
+
+  it('renders the Jhabbu ace-led trick artwork', () => {
+    renderLobby();
+
+    expect(screen.getByRole('img', { name: /Jhabbu card art/i })).toBeInTheDocument();
   });
 
   it('mentions the founder only in the founder signature', () => {
