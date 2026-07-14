@@ -19,11 +19,25 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: messages['app.name'],
   description: messages['welcome.tagline'],
-  // Favicon uses the transparent wordmark; the Apple touch icon must be opaque
-  // (iOS applies its own mask), so it points at the maroon-backed variant.
   icons: {
-    icon: '/images/lazy-patta-logo-transparent.png',
-    apple: '/images/lazy-patta-ios-icon-opaque-maroon-1024.png',
+    icon: [
+      {
+        url: '/icons/favicon-48.png',
+        sizes: '48x48',
+        type: 'image/png',
+      },
+      {
+        url: '/icons/favicon-192.png',
+        sizes: '192x192',
+        type: 'image/png',
+      },
+    ],
+    shortcut: '/favicon.ico',
+    apple: {
+      url: '/icons/apple-touch-icon-180.png',
+      sizes: '180x180',
+      type: 'image/png',
+    },
   },
 };
 
