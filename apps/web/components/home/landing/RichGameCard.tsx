@@ -201,7 +201,14 @@ function GulamFaceCard({ label }: { readonly label: string }): ReactElement {
 
 function GadhaMascot({ className = '' }: { readonly className?: string }): ReactElement {
   return (
-    <svg viewBox="0 0 90 90" width="90" height="90" className={className} aria-hidden focusable="false">
+    <svg
+      viewBox="0 0 90 90"
+      width="90"
+      height="90"
+      className={className}
+      aria-hidden
+      focusable="false"
+    >
       {/* Ears */}
       <ellipse cx="30" cy="20" rx="8" ry="20" fill="#9c9691" transform="rotate(-16 30 20)" />
       <ellipse cx="60" cy="20" rx="8" ry="20" fill="#9c9691" transform="rotate(16 60 20)" />

@@ -93,7 +93,7 @@ export function PlayerHandFan({
   return (
     <div
       ref={ref}
-      className="ls-hand-rail flex w-full max-w-full items-end justify-center overflow-hidden px-2 pb-2"
+      className="ls-hand-rail flex w-[min(100%,calc(100vw-1rem))] max-w-full items-end justify-center overflow-hidden px-2 pb-2"
       aria-label={t('lalSatti.yourCards')}
       data-large-cards={largeCards ? 'true' : 'false'}
     >

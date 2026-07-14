@@ -55,7 +55,7 @@ export function PlayerHandFan({
   return (
     <div
       ref={ref}
-      className="gc-hand-rail flex w-full max-w-full items-end justify-center overflow-hidden px-2 pb-2"
+      className="gc-hand-rail flex w-[min(100%,calc(100vw-1rem))] max-w-full items-end justify-center overflow-hidden px-2 pb-2"
       aria-label={t('computer.yourHand')}
       data-large-cards={largeCards ? 'true' : 'false'}
     >
