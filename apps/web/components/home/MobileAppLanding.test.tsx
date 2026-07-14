@@ -26,7 +26,7 @@ describe('MobileAppLanding', () => {
     ).toBeVisible();
     expect(screen.getByRole('link', { name: /Play on mobile now/i })).toHaveAttribute(
       'href',
-      '/#games',
+      '#games',
     );
     expect(screen.getByRole('link', { name: /Join a private room/i })).toHaveAttribute(
       'href',
@@ -40,6 +40,11 @@ describe('MobileAppLanding', () => {
       'href',
       '/play/lal-satti/computer',
     );
+    expect(screen.getByRole('link', { name: /Play Jhabbu on mobile/i })).toHaveAttribute(
+      'href',
+      '/play/jhabbu/computer',
+    );
+    expect(screen.getByText(/Open lazypatta\.com on your phone/i)).toBeVisible();
     expect(
       screen.getByText(/Native iOS and Android app store releases are planned/i),
     ).toBeVisible();
@@ -59,7 +64,11 @@ describe('MobileAppLanding', () => {
     expect(screen.getByRole('heading', { name: /તમારા ફોન પરથી/i })).toBeVisible();
     expect(screen.getByRole('link', { name: /મોબાઇલ પર હમણાં રમો/i })).toHaveAttribute(
       'href',
-      '/#games',
+      '#games',
+    );
+    expect(screen.getByRole('link', { name: /મોબાઇલ પર ઝબ્બુ રમો/i })).toHaveAttribute(
+      'href',
+      '/play/jhabbu/computer',
     );
     expect(document.documentElement.lang).toBe('gu');
   });
