@@ -160,7 +160,7 @@ export function SuitRail({
         {SUIT_GLYPH[lane.suit]}
       </span>
 
-      <div className="flex min-h-[4.5rem] items-center overflow-x-auto py-0.5">
+      <div className="ls-rail-inner flex min-h-[4.5rem] items-center overflow-x-auto overflow-y-hidden py-0.5">
         {!isOpen ? (
           <SuitAnchorSeven suit={lane.suit} locale={locale} />
         ) : (
