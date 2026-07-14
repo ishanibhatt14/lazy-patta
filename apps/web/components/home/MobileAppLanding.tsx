@@ -18,6 +18,7 @@ interface PhonePreviewProps {
   readonly noDownloadLabel: string;
   readonly gadhaChorLabel: string;
   readonly lalSattiLabel: string;
+  readonly jhabbuLabel: string;
   readonly playLabel: string;
   readonly joinLabel: string;
 }
@@ -30,6 +31,7 @@ function PhonePreview({
   noDownloadLabel,
   gadhaChorLabel,
   lalSattiLabel,
+  jhabbuLabel,
   playLabel,
   joinLabel,
 }: PhonePreviewProps): ReactElement {
@@ -73,8 +75,8 @@ function PhonePreview({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          {[gadhaChorLabel, lalSattiLabel].map((game) => (
+        <div className="grid grid-cols-3 gap-2">
+          {[gadhaChorLabel, lalSattiLabel, jhabbuLabel].map((game) => (
             <div key={game} className="rounded-md bg-surface-primary p-2 shadow-sm">
               <div className="mb-2 h-2 w-10 rounded-full bg-brand-accent/70" />
               <p className="text-xs font-black leading-tight text-action-primary">{game}</p>
@@ -150,6 +152,23 @@ export function MobileAppLanding(): ReactElement {
     t('mobile.install.stepTwo'),
     t('mobile.install.stepThree'),
   ];
+  const mobileGames = [
+    {
+      href: '/play/gadha-chor/computer',
+      title: t('mobile.games.gadhaChor'),
+      description: t('landing.game.gadhaChor.description'),
+    },
+    {
+      href: '/play/lal-satti/computer',
+      title: t('mobile.games.lalSatti'),
+      description: t('landing.game.lalSatti.description'),
+    },
+    {
+      href: '/play/jhabbu/computer',
+      title: t('mobile.games.jhabbu'),
+      description: t('landing.game.jhabbu.description'),
+    },
+  ];
 
   return (
     <LandingShell>
@@ -204,6 +223,7 @@ export function MobileAppLanding(): ReactElement {
           noDownloadLabel={t('mobile.preview.noDownload')}
           gadhaChorLabel={t('games.gadhaChor.name')}
           lalSattiLabel={t('games.lalSatti.name')}
+          jhabbuLabel={t('games.jhabbu.name')}
           playLabel={t('action.playComputer')}
           joinLabel={t('action.joinRoom')}
         />
@@ -241,35 +261,20 @@ export function MobileAppLanding(): ReactElement {
           </h2>
           <p className="mt-4 text-base leading-7 text-text-primary">{t('mobile.games.body')}</p>
         </div>
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <Link
-            href="/play/gadha-chor/computer"
-            className="rounded-lg border border-action-primary/15 bg-surface-primary p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-          >
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-brand-accent">
-              {t('landing.game.computerHint')}
-            </p>
-            <h3 className="mt-3 text-2xl font-black text-action-primary">
-              {t('mobile.games.gadhaChor')}
-            </h3>
-            <p className="mt-3 text-sm leading-6 text-text-primary">
-              {t('landing.game.gadhaChor.description')}
-            </p>
-          </Link>
-          <Link
-            href="/play/lal-satti/computer"
-            className="rounded-lg border border-action-primary/15 bg-surface-primary p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-          >
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-brand-accent">
-              {t('landing.game.computerHint')}
-            </p>
-            <h3 className="mt-3 text-2xl font-black text-action-primary">
-              {t('mobile.games.lalSatti')}
-            </h3>
-            <p className="mt-3 text-sm leading-6 text-text-primary">
-              {t('landing.game.lalSatti.description')}
-            </p>
-          </Link>
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          {mobileGames.map((game) => (
+            <Link
+              key={game.href}
+              href={game.href}
+              className="rounded-lg border border-action-primary/15 bg-surface-primary p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+            >
+              <p className="text-sm font-black uppercase tracking-[0.18em] text-brand-accent">
+                {t('landing.game.computerHint')}
+              </p>
+              <h3 className="mt-3 text-2xl font-black text-action-primary">{game.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-text-primary">{game.description}</p>
+            </Link>
+          ))}
         </div>
       </section>
 
