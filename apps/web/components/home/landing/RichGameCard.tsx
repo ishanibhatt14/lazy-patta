@@ -562,12 +562,7 @@ export function JhabbuArtwork({ locale }: { readonly locale: Locale }): ReactEle
       </div>
       {/* The off-suit Thulla card, landing sideways over the pile */}
       <div className="art-jhabbu-thulla absolute right-[12%] top-[30%] h-[46%] w-auto">
-        <TrickCard
-          rank="7"
-          suit="♥"
-          suitColor="#c0392b"
-          className="h-full w-auto rotate-[74deg]"
-        />
+        <TrickCard rank="7" suit="♥" suitColor="#c0392b" className="h-full w-auto rotate-[74deg]" />
       </div>
       {/* "THULLA!" callout — reinforces the off-suit card without relying on motion */}
       <div

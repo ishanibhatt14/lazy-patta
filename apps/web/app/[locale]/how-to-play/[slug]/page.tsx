@@ -108,7 +108,9 @@ export default async function LocalizedRulesDetailPage({
           <h2 className="text-2xl font-black text-action-primary">
             {t('seo.rules.practiceHeading')}
           </h2>
-          <p className="mt-2 text-base leading-7 text-text-primary">{t('seo.rules.practiceBody')}</p>
+          <p className="mt-2 text-base leading-7 text-text-primary">
+            {t('seo.rules.practiceBody')}
+          </p>
           <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
             <Link
               href={game.computerHref}
