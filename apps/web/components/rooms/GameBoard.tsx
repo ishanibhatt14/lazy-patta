@@ -36,6 +36,7 @@ import { PlayerPod as LalSattiPod } from '../../src/features/lal-satti/immersive
 import { SuitRail } from '../../src/features/lal-satti/immersive/SuitRail';
 import { positionSeats, type PositionedSeat } from '../../src/features/lal-satti/immersive/shared';
 import type { LalSattiSeatView } from '../../src/features/lal-satti/types';
+import { CourtyardBackdropPlaceholder } from '../game/art';
 import { OpponentDrawFan } from '../game/immersive/OpponentDrawFan';
 import { PlayerHandFan as GadhaHandFan } from '../game/immersive/PlayerHandFan';
 import { PlayerPod as GadhaPod } from '../game/immersive/PlayerPod';
@@ -104,30 +105,85 @@ function drawTarget(
   return null;
 }
 
-/** The continuous felt table: sky + wooden rim + peacock felt, pods on top. */
-function FeltTable({
+/**
+ * The full-screen immersive table, sharing the exact solo scene structure:
+ * an evening-sky shell, the courtyard backdrop, a wooden-rim felt mat, and the
+ * three-row region grid (opponents along the rim, the table in the middle, the
+ * viewer + hand at the bottom). `variant` picks the game's prefixed class set
+ * (`gc-*` for Gadha Chor, `ls-*` for Lal Satti) so the felt CSS matches solo
+ * one-for-one. Rendered as a fixed layer so it escapes the lobby's narrow
+ * column and takes over the viewport like the solo route does. The solo shells
+ * use a `<main>`; here it is a `<div>` since this mounts inside the page's own
+ * `<main>`.
+ */
+function OnlineShell({
+  variant,
   reducedMotion,
+  label,
+  gameLabel,
+  code,
+  onLeave,
+  leaveLabel,
+  error,
+  overlay,
   children,
 }: {
+  readonly variant: 'gc' | 'ls';
   readonly reducedMotion: boolean;
+  readonly label: string;
+  readonly gameLabel: string;
+  readonly code?: string;
+  readonly onLeave?: () => void;
+  readonly leaveLabel: string;
+  readonly error?: string;
+  readonly overlay?: ReactNode;
   readonly children: ReactNode;
 }): ReactElement {
   return (
-    <div
-      className="online-felt relative isolate overflow-hidden rounded-2xl p-2 text-text-onBrand shadow-md sm:p-3"
-      data-reduced-motion={reducedMotion ? 'true' : 'false'}
-      style={{
-        background: 'linear-gradient(135deg, var(--lp-scene-rim) 0%, var(--lp-scene-rimEdge) 100%)',
-      }}
-    >
-      <div className="relative min-h-[24rem] rounded-xl">
-        <div className="gc-felt">
-          <div className="gc-felt-pattern" aria-hidden />
-          <div className="gc-felt-border" aria-hidden />
+    <div className="fixed inset-0 z-40">
+      <div className={`${variant}-shell`} data-reduced-motion={reducedMotion ? 'true' : 'false'}>
+        <CourtyardBackdropPlaceholder />
+
+        <div className="relative z-10 flex items-center justify-between gap-3 px-3 pt-2">
+          <div className="flex flex-col leading-tight">
+            <span className="text-[0.6rem] font-semibold uppercase tracking-widest text-text-onBrand/70">
+              {gameLabel}
+            </span>
+            {code ? (
+              <span className="text-base font-bold tracking-[0.25em] text-text-onBrand">
+                {code}
+              </span>
+            ) : null}
+          </div>
+          {onLeave ? (
+            <button
+              type="button"
+              onClick={onLeave}
+              className="rounded-md border border-text-onBrand/30 px-3 py-1.5 text-xs font-semibold text-text-onBrand/90 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent"
+            >
+              {leaveLabel}
+            </button>
+          ) : null}
         </div>
-        <div className="relative z-10 grid grid-rows-[auto_minmax(0,1fr)_auto] gap-3 p-2 sm:p-3">
-          {children}
-        </div>
+
+        <section className={`${variant}-scene`} aria-label={label}>
+          <div className={`${variant}-felt`}>
+            <div className={`${variant}-felt-pattern`} aria-hidden />
+            <div className={`${variant}-felt-border`} aria-hidden />
+          </div>
+
+          <div className={`${variant}-regions`}>{children}</div>
+
+          {overlay}
+
+          {error ? (
+            <div className="absolute inset-x-0 bottom-3 z-40 flex justify-center px-4">
+              <p className="rounded-md bg-status-error/95 px-3 py-1.5 text-center text-sm font-semibold text-text-onBrand shadow-md">
+                {error}
+              </p>
+            </div>
+          ) : null}
+        </section>
       </div>
     </div>
   );
@@ -138,9 +194,18 @@ export interface GameBoardProps {
   readonly seats: readonly RoomSeat[];
   readonly userId: string;
   readonly locale: Locale;
+  readonly code?: string;
+  readonly onLeave?: () => void;
 }
 
-export function GameBoard({ roomId, seats, userId, locale }: GameBoardProps): ReactElement {
+export function GameBoard({
+  roomId,
+  seats,
+  userId,
+  locale,
+  code,
+  onLeave,
+}: GameBoardProps): ReactElement {
   const t = useMemo(() => createTranslator(locale), [locale]);
   const reducedMotion = usePrefersReducedMotion();
   const [game, setGame] = useState<GameRow | null>(null);
@@ -229,6 +294,10 @@ export function GameBoard({ roomId, seats, userId, locale }: GameBoardProps): Re
     );
   }
 
+  const gameLabel =
+    game.game_key === 'lal_satti' ? t.t('rooms.gameLalSatti') : t.t('rooms.gameGadhaChor');
+  const leaveLabel = t.t('rooms.leave');
+
   if (game.game_key === 'lal_satti') {
     return (
       <LalSattiOnlineBoard
@@ -245,6 +314,10 @@ export function GameBoard({ roomId, seats, userId, locale }: GameBoardProps): Re
         error={error}
         refresh={refresh}
         nameFor={nameFor}
+        gameLabel={gameLabel}
+        leaveLabel={leaveLabel}
+        code={code}
+        onLeave={onLeave}
       />
     );
   }
@@ -270,63 +343,10 @@ export function GameBoard({ roomId, seats, userId, locale }: GameBoardProps): Re
         }))
       : [];
 
-  return (
-    <div className="flex w-full flex-col gap-4">
-      <FeltTable reducedMotion={reducedMotion}>
-        <div className="flex items-start justify-center gap-4">
-          {topSeats.map((seat) => (
-            <GadhaPod key={seat.id} locale={locale} seat={seat} />
-          ))}
-        </div>
-
-        <div className="grid min-h-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
-          <div className="flex flex-col justify-center gap-4">
-            {leftSeats.map((seat) => (
-              <GadhaPod key={seat.id} locale={locale} seat={seat} />
-            ))}
-          </div>
-
-          <div className="flex flex-col items-center justify-center gap-3 text-center">
-            {isActive ? (
-              <p
-                className="text-balance text-base font-bold text-text-onBrand drop-shadow-sm"
-                aria-live="polite"
-              >
-                {isMyTurn
-                  ? t.t('rooms.turnYours')
-                  : t.format('rooms.turnWaiting', {
-                      name: nameFor(gadhaSnapshot.currentPlayerId ?? ''),
-                    })}
-              </p>
-            ) : null}
-            {isMyTurn && target ? (
-              <>
-                <span className="text-xs font-semibold uppercase tracking-widest text-action-secondary">
-                  {t.format('rooms.drawFrom', { name: nameFor(target.id) })}
-                </span>
-                <OpponentDrawFan locale={locale} slots={drawSlots} onChooseCard={onDraw} />
-                {busy ? (
-                  <span className="text-xs text-text-onBrand/90">{t.t('rooms.drawing')}</span>
-                ) : null}
-              </>
-            ) : null}
-          </div>
-
-          <div className="flex flex-col justify-center gap-4">
-            {rightSeats.map((seat) => (
-              <GadhaPod key={seat.id} locale={locale} seat={seat} />
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col items-center gap-2">
-          {selfSeat ? <GadhaPod locale={locale} seat={selfSeat} /> : null}
-          <GadhaHandFan locale={locale} cards={hand} />
-        </div>
-      </FeltTable>
-
-      {game.status === 'complete' && result ? (
-        <div className="flex flex-col items-center gap-1 rounded-md bg-surface-primary px-4 py-3 text-center shadow-sm">
+  const gadhaOverlay =
+    game.status === 'complete' && result ? (
+      <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 p-4">
+        <div className="flex max-w-sm flex-col items-center gap-1 rounded-lg bg-surface-primary px-5 py-4 text-center shadow-md">
           <span className="text-lg font-bold text-action-primary">{t.t('rooms.gameOver')}</span>
           <span className="text-sm text-text-primary">
             {result.winners.includes(userId)
@@ -336,10 +356,72 @@ export function GameBoard({ roomId, seats, userId, locale }: GameBoardProps): Re
                 : t.format('rooms.gadhaChorIs', { name: nameFor(result.loser) })}
           </span>
         </div>
-      ) : null}
+      </div>
+    ) : null;
 
-      {error ? <p className="text-center text-sm text-status-error">{error}</p> : null}
-    </div>
+  return (
+    <OnlineShell
+      variant="gc"
+      reducedMotion={reducedMotion}
+      label={t.t('rooms.gameGadhaChor')}
+      gameLabel={gameLabel}
+      code={code}
+      onLeave={onLeave}
+      leaveLabel={leaveLabel}
+      error={error}
+      overlay={gadhaOverlay}
+    >
+      <div className="flex items-start justify-center gap-4">
+        {topSeats.map((seat) => (
+          <GadhaPod key={seat.id} locale={locale} seat={seat} />
+        ))}
+      </div>
+
+      <div className="grid min-h-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
+        <div className="flex flex-col justify-center gap-4">
+          {leftSeats.map((seat) => (
+            <GadhaPod key={seat.id} locale={locale} seat={seat} />
+          ))}
+        </div>
+
+        <div className="flex flex-col items-center justify-center gap-3 text-center">
+          {isActive ? (
+            <p
+              className="text-balance text-base font-bold text-text-onBrand drop-shadow-sm"
+              aria-live="polite"
+            >
+              {isMyTurn
+                ? t.t('rooms.turnYours')
+                : t.format('rooms.turnWaiting', {
+                    name: nameFor(gadhaSnapshot.currentPlayerId ?? ''),
+                  })}
+            </p>
+          ) : null}
+          {isMyTurn && target ? (
+            <>
+              <span className="text-xs font-semibold uppercase tracking-widest text-action-secondary">
+                {t.format('rooms.drawFrom', { name: nameFor(target.id) })}
+              </span>
+              <OpponentDrawFan locale={locale} slots={drawSlots} onChooseCard={onDraw} />
+              {busy ? (
+                <span className="text-xs text-text-onBrand/90">{t.t('rooms.drawing')}</span>
+              ) : null}
+            </>
+          ) : null}
+        </div>
+
+        <div className="flex flex-col justify-center gap-4">
+          {rightSeats.map((seat) => (
+            <GadhaPod key={seat.id} locale={locale} seat={seat} />
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center gap-2">
+        {selfSeat ? <GadhaPod locale={locale} seat={selfSeat} /> : null}
+        <GadhaHandFan locale={locale} cards={hand} />
+      </div>
+    </OnlineShell>
   );
 }
 
@@ -357,6 +439,10 @@ interface LalSattiOnlineBoardProps {
   readonly error: string | undefined;
   readonly refresh: () => Promise<void>;
   readonly nameFor: (playerId: string) => string;
+  readonly gameLabel: string;
+  readonly leaveLabel: string;
+  readonly code?: string;
+  readonly onLeave?: () => void;
 }
 
 function LalSattiOnlineBoard({
@@ -373,6 +459,10 @@ function LalSattiOnlineBoard({
   error,
   refresh,
   nameFor,
+  gameLabel,
+  leaveLabel,
+  code,
+  onLeave,
 }: LalSattiOnlineBoardProps): ReactElement {
   const t = useMemo(() => createTranslator(locale), [locale]);
   const isActive = game.status === 'active';
@@ -438,81 +528,10 @@ function LalSattiOnlineBoard({
     ? Object.entries(result.remainingCards).filter(([, count]) => Number(count) > 0)
     : [];
 
-  return (
-    <div className="flex w-full flex-col gap-4">
-      <FeltTable reducedMotion={reducedMotion}>
-        <div className="flex items-start justify-center gap-4">
-          {topSeats.map((seat) => (
-            <LalSattiPod key={seat.id} locale={locale} seat={seat} compact reaction={null} />
-          ))}
-        </div>
-
-        <div className="grid min-h-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
-          <div className="flex flex-col justify-center gap-4">
-            {leftSeats.map((seat) => (
-              <LalSattiPod key={seat.id} locale={locale} seat={seat} compact reaction={null} />
-            ))}
-          </div>
-
-          <div className="flex flex-col justify-center gap-2">
-            {isActive ? (
-              <p
-                className="text-center text-base font-bold text-text-onBrand drop-shadow-sm"
-                aria-live="polite"
-              >
-                {isMyTurn
-                  ? t.t('rooms.lalSattiTurnYours')
-                  : t.format('rooms.turnWaiting', {
-                      name: nameFor(snapshot.currentPlayerId ?? ''),
-                    })}
-              </p>
-            ) : null}
-            <div className="flex flex-col gap-1.5" aria-label={t.t('rooms.lalSattiTableau')}>
-              {lanes.map((lane) => (
-                <SuitRail
-                  key={lane.suit}
-                  locale={locale}
-                  lane={lane}
-                  highlighted={focusedCard?.suit === lane.suit}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col justify-center gap-4">
-            {rightSeats.map((seat) => (
-              <LalSattiPod key={seat.id} locale={locale} seat={seat} compact reaction={null} />
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col items-center gap-2">
-          {selfSeat ? <LalSattiPod locale={locale} seat={selfSeat} reaction={null} /> : null}
-          {canPass ? (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => void submit({ type: 'PASS' })}
-              className="rounded-md bg-action-secondary px-4 py-2 text-sm font-semibold text-text-onBrand transition hover:bg-action-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent disabled:pointer-events-none disabled:opacity-60"
-            >
-              {t.t('rooms.lalSattiPass')}
-            </button>
-          ) : null}
-          <LalSattiHandFan
-            locale={locale}
-            cards={hand}
-            playableCardIds={playableIds}
-            isHumanTurn={isMyTurn}
-            focusedCardId={focusedCard?.id ?? null}
-            invalidCardId={invalidCardId}
-            onSelect={onSelectCard}
-            onFocusCard={setFocusedCard}
-          />
-        </div>
-      </FeltTable>
-
-      {game.status === 'complete' && result ? (
-        <div className="flex flex-col items-center gap-2 rounded-md bg-surface-primary px-4 py-3 text-center shadow-sm">
+  const lalSattiOverlay =
+    game.status === 'complete' && result ? (
+      <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 p-4">
+        <div className="flex max-w-sm flex-col items-center gap-2 rounded-lg bg-surface-primary px-5 py-4 text-center shadow-md">
           <span className="text-lg font-bold text-action-primary">{t.t('rooms.gameOver')}</span>
           <span className="text-sm text-text-primary">
             {t.format('rooms.lalSattiWinner', {
@@ -533,9 +552,89 @@ function LalSattiOnlineBoard({
             </ul>
           ) : null}
         </div>
-      ) : null}
+      </div>
+    ) : null;
 
-      {error ? <p className="text-center text-sm text-status-error">{error}</p> : null}
-    </div>
+  return (
+    <OnlineShell
+      variant="ls"
+      reducedMotion={reducedMotion}
+      label={t.t('rooms.gameLalSatti')}
+      gameLabel={gameLabel}
+      code={code}
+      onLeave={onLeave}
+      leaveLabel={leaveLabel}
+      error={error}
+      overlay={lalSattiOverlay}
+    >
+      <div className="flex items-start justify-center gap-4">
+        {topSeats.map((seat) => (
+          <LalSattiPod key={seat.id} locale={locale} seat={seat} compact reaction={null} />
+        ))}
+      </div>
+
+      <div className="grid min-h-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
+        <div className="flex flex-col justify-center gap-4">
+          {leftSeats.map((seat) => (
+            <LalSattiPod key={seat.id} locale={locale} seat={seat} compact reaction={null} />
+          ))}
+        </div>
+
+        <div className="flex flex-col justify-center gap-2">
+          {isActive ? (
+            <p
+              className="text-center text-base font-bold text-text-onBrand drop-shadow-sm"
+              aria-live="polite"
+            >
+              {isMyTurn
+                ? t.t('rooms.lalSattiTurnYours')
+                : t.format('rooms.turnWaiting', {
+                    name: nameFor(snapshot.currentPlayerId ?? ''),
+                  })}
+            </p>
+          ) : null}
+          <div className="flex flex-col gap-1.5" aria-label={t.t('rooms.lalSattiTableau')}>
+            {lanes.map((lane) => (
+              <SuitRail
+                key={lane.suit}
+                locale={locale}
+                lane={lane}
+                highlighted={focusedCard?.suit === lane.suit}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-col justify-center gap-4">
+          {rightSeats.map((seat) => (
+            <LalSattiPod key={seat.id} locale={locale} seat={seat} compact reaction={null} />
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center gap-2">
+        {selfSeat ? <LalSattiPod locale={locale} seat={selfSeat} reaction={null} /> : null}
+        {canPass ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void submit({ type: 'PASS' })}
+            className="rounded-md bg-action-secondary px-4 py-2 text-sm font-semibold text-text-onBrand transition hover:bg-action-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent disabled:pointer-events-none disabled:opacity-60"
+          >
+            {t.t('rooms.lalSattiPass')}
+          </button>
+        ) : null}
+        <LalSattiHandFan
+          locale={locale}
+          cards={hand}
+          playableCardIds={playableIds}
+          isHumanTurn={isMyTurn}
+          focusedCardId={focusedCard?.id ?? null}
+          invalidCardId={invalidCardId}
+          onSelect={onSelectCard}
+          onFocusCard={setFocusedCard}
+        />
+      </div>
+    </OnlineShell>
   );
 }
