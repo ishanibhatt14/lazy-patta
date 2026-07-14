@@ -12,17 +12,24 @@ export function AnimatedHero({ locale }: { readonly locale: Locale }): ReactElem
   const trust = [
     t('landing.hero.trust.noCash'),
     t('landing.hero.trust.guest'),
+    t('landing.hero.trust.rooms'),
     t('landing.hero.trust.languages'),
   ];
 
   return (
-    <section className="mx-auto grid w-full max-w-7xl gap-10 px-5 pb-8 pt-6 md:grid-cols-[0.95fr_1.05fr] md:items-center md:px-8 md:pb-12">
+    <section
+      className="mx-auto grid w-full max-w-7xl gap-6 px-5 pb-4 pt-6 md:grid-cols-[0.95fr_1.05fr] md:items-center md:gap-10 md:px-8 md:pb-6"
+      aria-labelledby="landing-hero-title"
+    >
       <div className="landing-hero-copy flex flex-col gap-6">
         <p className="text-sm font-black uppercase tracking-[0.18em] text-brand-accent">
           {t('landing.hero.eyebrow')}
         </p>
         <div className="flex flex-col gap-4">
-          <h1 className="max-w-3xl text-5xl font-black leading-none text-action-primary md:text-7xl">
+          <h1
+            id="landing-hero-title"
+            className="max-w-3xl text-5xl font-black leading-none text-action-primary md:text-7xl"
+          >
             {t('landing.hero.headline')}
           </h1>
           <p className="max-w-2xl text-lg leading-8 text-text-primary md:text-xl">
@@ -51,11 +58,14 @@ export function AnimatedHero({ locale }: { readonly locale: Locale }): ReactElem
           </Link>
         </div>
 
-        <ul className="flex flex-wrap gap-2 text-sm font-bold text-text-primary">
+        <ul
+          className="flex flex-wrap gap-2 text-sm font-bold text-text-primary"
+          aria-label={t('landing.trust.label')}
+        >
           {trust.map((item) => (
             <li
               key={item}
-              className="rounded-full border border-action-primary/20 bg-surface-primary px-3 py-2"
+              className="rounded-full border border-action-primary/20 bg-surface-primary px-3 py-2 leading-5"
             >
               {item}
             </li>

@@ -39,7 +39,7 @@ function MiniCard({
 export function HeroCardTable({ label }: { readonly label: string }): ReactElement {
   return (
     <div
-      className="landing-scene relative min-h-[24rem] overflow-hidden rounded-[2rem] border border-action-secondary/30 bg-scene-rim p-4 shadow-2xl"
+      className="landing-scene relative min-h-[16rem] overflow-hidden rounded-[2rem] border border-action-secondary/30 bg-scene-rim p-4 shadow-2xl sm:min-h-[20rem] md:min-h-[24rem]"
       aria-label={label}
     >
       <div className="absolute inset-4 rounded-[1.5rem] bg-game-table shadow-inner" />
