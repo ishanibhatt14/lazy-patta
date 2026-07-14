@@ -97,7 +97,11 @@ export function computeHandLayout({
   count,
   largeCards,
 }: ComputeHandLayoutOptions): HandLayout {
-  const available = Math.max(containerWidth - EDGE_PADDING * 2, MIN_AVAILABLE);
+  // Respect the real container: a positive measurement is always the ceiling,
+  // so we never assume more width than exists and never overflow the clipped
+  // rail. The MIN_AVAILABLE floor only rescues the unmeasured (SSR / 0) case.
+  const usable = containerWidth - EDGE_PADDING * 2;
+  const available = usable > 0 ? usable : MIN_AVAILABLE;
   const ladder = sizeLadder(largeCards);
   const { rotationStep, arcUnit } = rotationAndArc(count, largeCards);
 

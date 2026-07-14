@@ -5,6 +5,7 @@ import type { ComputerGameViewState } from '../../../lib/computer-game/types';
 import { createTranslator } from '../../../lib/i18n';
 
 import { DrawAnimationLayer } from './DrawAnimationLayer';
+import { GadhaCoachMark } from './GadhaCoachMark';
 import { OpponentDrawFan } from './OpponentDrawFan';
 import { PairDiscardPile } from './PairDiscardPile';
 
@@ -12,6 +13,9 @@ interface ActionStageProps {
   readonly locale: Locale;
   readonly view: ComputerGameViewState;
   readonly onChooseCard: (positionToken: string) => void;
+  /** First-turn coach mark pointing at the eligible hidden hand. */
+  readonly showCoachMark: boolean;
+  readonly onDismissCoachMark: () => void;
 }
 
 /**
@@ -20,11 +24,18 @@ interface ActionStageProps {
  * white panel. It is a live region (no role="status"; the top bar owns the one
  * turn status) so instruction changes are announced without stealing focus.
  */
-export function ActionStage({ locale, view, onChooseCard }: ActionStageProps): ReactElement {
+export function ActionStage({
+  locale,
+  view,
+  onChooseCard,
+  showCoachMark,
+  onDismissCoachMark,
+}: ActionStageProps): ReactElement {
   const { t, format } = createTranslator(locale);
 
   return (
     <div className="flex flex-col items-center justify-center gap-3">
+      {showCoachMark ? <GadhaCoachMark locale={locale} onDismiss={onDismissCoachMark} /> : null}
       <OpponentDrawFan locale={locale} slots={view.hiddenCards} onChooseCard={onChooseCard} />
 
       <div className="flex flex-col items-center gap-2 text-center">

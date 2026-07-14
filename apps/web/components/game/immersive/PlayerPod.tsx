@@ -12,6 +12,10 @@ interface PlayerPodProps {
   readonly locale: Locale;
   readonly seat: ComputerGameSeat;
   readonly reaction?: { readonly kind: ReactionKind; readonly text: string } | null;
+  /** During the human's draw, the source opponent is emphasized... */
+  readonly drawSource?: boolean;
+  /** ...and the other, non-interactive opponents are dimmed back. */
+  readonly dimmed?: boolean;
 }
 
 /**
@@ -20,7 +24,13 @@ interface PlayerPodProps {
  * ring is color-only, so an active pod also carries a textual "current turn"
  * marker for non-color and screen-reader users.
  */
-export function PlayerPod({ locale, seat, reaction = null }: PlayerPodProps): ReactElement {
+export function PlayerPod({
+  locale,
+  seat,
+  reaction = null,
+  drawSource = false,
+  dimmed = false,
+}: PlayerPodProps): ReactElement {
   const { t, format } = createTranslator(locale);
   const displayName = seat.isSelf ? t('computer.youName') : seat.name;
   const backs = Math.min(seat.cardCount, 4);
@@ -31,9 +41,11 @@ export function PlayerPod({ locale, seat, reaction = null }: PlayerPodProps): Re
 
   return (
     <div
-      className="relative flex flex-col items-center gap-1 text-center"
+      className="gc-pod relative flex flex-col items-center gap-1 text-center"
       data-seat-id={seat.id}
       data-active={seat.isActive ? 'true' : 'false'}
+      data-draw-source={drawSource ? 'true' : 'false'}
+      data-dimmed={dimmed ? 'true' : 'false'}
     >
       {reaction ? <ReactionBubble kind={reaction.kind} text={reaction.text} /> : null}
 

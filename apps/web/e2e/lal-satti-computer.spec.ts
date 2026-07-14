@@ -92,6 +92,34 @@ test('is usable on a narrow mobile viewport without horizontal overflow', async 
   expect(overflow).toBeLessThanOrEqual(1);
 });
 
+/** A four-player deal gives the human a full 13-card hand — the worst case the
+ * responsive fan must fit across every device tier with no horizontal scroll. */
+const HAND_VIEWPORTS = [
+  { width: 320, height: 800 },
+  { width: 390, height: 844 },
+  { width: 430, height: 932 },
+  { width: 768, height: 1024 },
+  { width: 1440, height: 1024 },
+] as const;
+
+for (const vp of HAND_VIEWPORTS) {
+  test(`fits the full 13-card hand with no horizontal scroll at ${vp.width}x${vp.height}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: vp.width, height: vp.height });
+    await startGame(page, 4);
+    const docOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(docOverflow).toBeLessThanOrEqual(1);
+    // The whole 13-card rail sits within the screen — no card row runs off-edge.
+    const rail = await page.locator('.ls-hand-rail').boundingBox();
+    expect(rail).not.toBeNull();
+    expect(rail!.x).toBeGreaterThanOrEqual(-1);
+    expect(rail!.x + rail!.width).toBeLessThanOrEqual(vp.width + 1);
+  });
+}
+
 test('builds all four suit rails on the mat', async ({ page }) => {
   await startGame(page, 4);
   await expect(page.locator('.ls-rail')).toHaveCount(4);

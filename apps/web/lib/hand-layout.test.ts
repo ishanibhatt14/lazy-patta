@@ -7,9 +7,10 @@ const WIDTHS = [280, 320, 360, 390, 430, 768, 1440] as const;
 /** Gadha Chor and Lal Satti both top out at 13 cards. */
 const COUNTS = Array.from({ length: 13 }, (_, i) => i + 1);
 
-/** The usable width the algorithm lays cards into (mirrors the module constant). */
+/** The usable width the algorithm lays cards into (mirrors the module logic). */
 function availableFor(containerWidth: number): number {
-  return Math.max(containerWidth - 24, 240);
+  const usable = containerWidth - 24;
+  return usable > 0 ? usable : 240;
 }
 
 describe('computeHandLayout', () => {
