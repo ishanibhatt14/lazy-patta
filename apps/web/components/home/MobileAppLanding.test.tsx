@@ -43,6 +43,9 @@ describe('MobileAppLanding', () => {
     expect(
       screen.getByText(/Native iOS and Android app store releases are planned/i),
     ).toBeVisible();
+    expect(screen.getByText(/Mobile web ready/i)).toBeVisible();
+    expect(screen.getByText(/Family table/i)).toBeVisible();
+    expect(screen.getByText(/No download needed/i)).toBeVisible();
     expect(screen.queryByRole('link', { name: /App Store|Google Play/i })).not.toBeInTheDocument();
   });
 

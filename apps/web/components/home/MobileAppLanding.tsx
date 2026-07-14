@@ -10,7 +10,29 @@ import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import { LandingFooter } from './landing/LandingFooter';
 import { LandingShell } from './landing/LandingShell';
 
-function PhonePreview({ guestLabel }: { readonly guestLabel: string }): ReactElement {
+interface PhonePreviewProps {
+  readonly guestLabel: string;
+  readonly readyLabel: string;
+  readonly tableLabel: string;
+  readonly roomLabel: string;
+  readonly noDownloadLabel: string;
+  readonly gadhaChorLabel: string;
+  readonly lalSattiLabel: string;
+  readonly playLabel: string;
+  readonly joinLabel: string;
+}
+
+function PhonePreview({
+  guestLabel,
+  readyLabel,
+  tableLabel,
+  roomLabel,
+  noDownloadLabel,
+  gadhaChorLabel,
+  lalSattiLabel,
+  playLabel,
+  joinLabel,
+}: PhonePreviewProps): ReactElement {
   return (
     <div
       className="relative mx-auto flex aspect-[9/16] w-full max-w-xs flex-col overflow-hidden rounded-[2rem] border border-action-primary/20 bg-surface-primary p-4 shadow-2xl"
@@ -29,25 +51,53 @@ function PhonePreview({ guestLabel }: { readonly guestLabel: string }): ReactEle
           {guestLabel}
         </div>
       </div>
-      <div className="mt-6 grid flex-1 grid-rows-[auto_1fr_auto] gap-4 rounded-2xl bg-background-canvas p-4">
-        <div>
-          <div className="h-3 w-24 rounded-full bg-brand-accent/70" />
-          <div className="mt-3 h-8 w-48 max-w-full rounded-full bg-action-primary/90" />
+      <div className="mt-5 grid flex-1 grid-rows-[auto_auto_1fr_auto] gap-3 rounded-2xl bg-background-canvas p-4">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-accent">
+              {readyLabel}
+            </p>
+            <p className="mt-1 text-lg font-black text-action-primary">{tableLabel}</p>
+          </div>
+          <div className="rounded-md bg-surface-primary px-2 py-1 text-right shadow-sm">
+            <p className="text-[0.6rem] font-black uppercase tracking-[0.12em] text-text-primary">
+              {roomLabel}
+            </p>
+            <p className="text-sm font-black text-action-primary">LP57</p>
+          </div>
         </div>
-        <div className="relative flex items-center justify-center">
-          {['-rotate-12 -translate-x-12', 'rotate-2', 'rotate-12 translate-x-12'].map((pose) => (
-            <div
-              key={pose}
-              className={`absolute h-28 w-20 rounded-xl border border-action-primary/20 bg-surface-primary shadow-md ${pose}`}
-            >
-              <div className="m-2 h-3 w-3 rounded-full bg-accent-kumkum" />
-              <div className="mx-auto mt-6 h-10 w-10 rounded-full bg-brand-accent/40" />
+
+        <div className="grid grid-cols-2 gap-2">
+          {[gadhaChorLabel, lalSattiLabel].map((game) => (
+            <div key={game} className="rounded-md bg-surface-primary p-2 shadow-sm">
+              <div className="mb-2 h-2 w-10 rounded-full bg-brand-accent/70" />
+              <p className="text-xs font-black leading-tight text-action-primary">{game}</p>
             </div>
           ))}
         </div>
+
+        <div className="relative flex min-h-0 items-center justify-center rounded-xl border border-action-primary/10 bg-surface-primary/75">
+          {['-rotate-12 -translate-x-12', 'rotate-2', 'rotate-12 translate-x-12'].map((pose) => (
+            <div
+              key={pose}
+              className={`absolute h-24 w-16 rounded-xl border border-action-primary/20 bg-surface-primary shadow-md ${pose}`}
+            >
+              <div className="m-2 h-3 w-3 rounded-full bg-accent-kumkum" />
+              <div className="mx-auto mt-5 h-8 w-8 rounded-full bg-brand-accent/40" />
+            </div>
+          ))}
+          <div className="absolute bottom-3 rounded-full bg-action-secondary/25 px-3 py-1 text-xs font-bold text-action-primary">
+            {noDownloadLabel}
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-2">
-          <div className="h-12 rounded-md bg-action-primary" />
-          <div className="h-12 rounded-md border border-action-primary/30 bg-surface-primary" />
+          <div className="flex h-12 items-center justify-center rounded-md bg-action-primary px-2 text-center text-xs font-black text-text-onBrand">
+            {playLabel}
+          </div>
+          <div className="flex h-12 items-center justify-center rounded-md border border-action-primary/30 bg-surface-primary px-2 text-center text-xs font-black text-action-primary">
+            {joinLabel}
+          </div>
         </div>
       </div>
     </div>
@@ -114,7 +164,17 @@ export function MobileAppLanding(): ReactElement {
           </p>
         </div>
 
-        <PhonePreview guestLabel={t('landing.hero.trust.guest')} />
+        <PhonePreview
+          guestLabel={t('landing.hero.trust.guest')}
+          readyLabel={t('mobile.preview.ready')}
+          tableLabel={t('mobile.preview.table')}
+          roomLabel={t('mobile.preview.room')}
+          noDownloadLabel={t('mobile.preview.noDownload')}
+          gadhaChorLabel={t('games.gadhaChor.name')}
+          lalSattiLabel={t('games.lalSatti.name')}
+          playLabel={t('action.playComputer')}
+          joinLabel={t('action.joinRoom')}
+        />
       </section>
 
       <section
