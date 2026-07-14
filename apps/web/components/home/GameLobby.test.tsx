@@ -28,21 +28,21 @@ describe('GameLobby landing page', () => {
       'href',
       '/play/gadha-chor/computer',
     );
-    expect(screen.getAllByRole('link', { name: /Play now/i })[0]).toHaveAttribute(
-      'href',
-      '/play/gadha-chor/computer',
-    );
-    expect(screen.getAllByRole('link', { name: /Play now/i })[1]).toHaveAttribute(
-      'href',
-      '/play/lal-satti/computer',
-    );
-    expect(screen.getAllByRole('link', { name: /Play with family/i })[0]).toHaveAttribute(
+    expect(screen.getAllByRole('link', { name: /Start family room/i })[0]).toHaveAttribute(
       'href',
       '/play/online?game=gadha_chor',
     );
-    expect(screen.getAllByRole('link', { name: /Play with family/i })[1]).toHaveAttribute(
+    expect(screen.getAllByRole('link', { name: /Start family room/i })[1]).toHaveAttribute(
       'href',
       '/play/online?game=lal_satti',
+    );
+    expect(screen.getAllByRole('link', { name: /Practice with bots/i })[0]).toHaveAttribute(
+      'href',
+      '/play/gadha-chor/computer',
+    );
+    expect(screen.getAllByRole('link', { name: /Practice with bots/i })[1]).toHaveAttribute(
+      'href',
+      '/play/lal-satti/computer',
     );
     expect(screen.getByText(/Also known as Gulaam Chor/i)).toBeVisible();
     expect(screen.getByText(/Also known as Badam Saat/i)).toBeVisible();
@@ -94,7 +94,7 @@ describe('GameLobby landing page', () => {
     renderLobby();
     const user = userEvent.setup();
 
-    for (let index = 0; index < 5; index += 1) {
+    for (let index = 0; index < 4; index += 1) {
       await user.tab();
     }
 

@@ -20,7 +20,13 @@ export function LandingFooter({ locale }: { readonly locale: Locale }): ReactEle
           {t('landing.footer.descriptor')}
         </p>
       </div>
-      <nav className="flex flex-wrap gap-2" aria-label={t('landing.footer.label')}>
+      <nav className="flex flex-wrap items-center gap-2" aria-label={t('landing.footer.label')}>
+        <Link
+          href="/play/online"
+          className="inline-flex min-h-12 items-center rounded-md bg-action-primary px-4 text-sm font-bold text-text-onBrand shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+        >
+          {t('action.joinRoom')}
+        </Link>
         <Link
           href="#games"
           className="inline-flex min-h-12 items-center rounded-md px-3 text-sm font-semibold text-text-primary hover:text-action-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
