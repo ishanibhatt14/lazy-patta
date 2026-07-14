@@ -33,6 +33,12 @@ export function LandingFooter({ locale }: { readonly locale: Locale }): ReactEle
         >
           {t('landing.footer.games')}
         </Link>
+        <Link
+          href="/mobile"
+          className="inline-flex min-h-12 items-center rounded-md px-3 text-sm font-semibold text-text-primary hover:text-action-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+        >
+          {t('landing.footer.mobileApp')}
+        </Link>
         {policyItems.map((item) => (
           <Link
             key={item.href}

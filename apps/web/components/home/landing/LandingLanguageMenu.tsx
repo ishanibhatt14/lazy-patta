@@ -14,7 +14,7 @@ export function LandingLanguageMenu(): ReactElement {
   const { t } = createTranslator(locale);
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0">
       <button
         type="button"
         className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-action-primary/30 bg-surface-primary px-4 text-sm font-semibold text-action-primary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
@@ -30,7 +30,7 @@ export function LandingLanguageMenu(): ReactElement {
         <div
           role="dialog"
           aria-label={t('settings.language')}
-          className="fixed inset-x-4 bottom-4 z-40 rounded-lg border border-action-primary/20 bg-surface-primary p-3 shadow-2xl md:absolute md:bottom-auto md:right-0 md:top-[calc(100%+0.5rem)] md:w-72"
+          className="language-menu fixed inset-x-4 bottom-4 z-40 max-w-[calc(100vw-2rem)] rounded-lg border border-action-primary/20 bg-surface-primary p-3 shadow-2xl md:absolute md:bottom-auto md:inset-x-auto md:right-0 md:top-[calc(100%+0.5rem)] md:mr-2 md:w-72"
         >
           <div className="mb-2 flex items-center justify-between gap-3">
             <span className="text-sm font-bold text-text-primary">{t('settings.language')}</span>
@@ -51,7 +51,7 @@ export function LandingLanguageMenu(): ReactElement {
                   key={code}
                   type="button"
                   className={[
-                    'flex min-h-12 items-center justify-between rounded-md border px-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent',
+                    'flex min-h-12 min-w-0 items-center justify-between gap-3 rounded-md border px-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent',
                     selected
                       ? 'border-action-primary bg-action-primary text-text-onBrand'
                       : 'border-action-primary/20 bg-background-canvas text-text-primary hover:border-action-primary',
@@ -62,12 +62,12 @@ export function LandingLanguageMenu(): ReactElement {
                     setOpen(false);
                   }}
                 >
-                  <span className="flex flex-col">
-                    <span className="font-bold" lang={code}>
+                  <span className="flex min-w-0 flex-col">
+                    <span className="break-words font-bold" lang={code}>
                       {label.native}
                     </span>
                     {label.english !== label.native ? (
-                      <span className="text-xs opacity-80" lang="en">
+                      <span className="break-words text-xs opacity-80" lang="en">
                         {label.english}
                       </span>
                     ) : null}

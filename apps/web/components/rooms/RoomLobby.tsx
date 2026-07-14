@@ -131,41 +131,24 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
   };
 
   // Once the host starts, the room leaves 'lobby' — swap the seat list for the
-  // live board. Truth still comes from the server; the board only reads + draws.
+  // live board, which takes over the viewport as a full-screen immersive table
+  // (matching the solo experience). Truth still comes from the server; the board
+  // only reads + draws, and owns its own room-code header and leave control.
   if (room && room.status !== 'lobby') {
     return (
-      <div className="flex w-full max-w-md flex-col gap-6">
-        <header className="flex flex-col items-center gap-1">
-          <span className="text-sm text-text-primary">{t.t('rooms.roomCodeLabel')}</span>
-          <span className="text-3xl font-bold tracking-[0.3em] text-action-primary">{code}</span>
-          <span className="text-xs font-semibold text-brand-accent">
-            {gameLabel(room.game_key, t)}
-          </span>
-        </header>
-
-        <GameBoard
-          roomId={room.id}
-          seats={seats}
-          userId={state.session.user.userId}
-          locale={room.locale}
-        />
-
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled={busy}
-          onClick={() =>
-            withBusy(async () => {
-              await leaveRoom(getSupabaseBrowserClient(), room.id);
-              router.push('/play/online');
-            })
-          }
-        >
-          {t.t('rooms.leave')}
-        </Button>
-
-        {error ? <p className="text-center text-sm text-status-error">{error}</p> : null}
-      </div>
+      <GameBoard
+        roomId={room.id}
+        seats={seats}
+        userId={state.session.user.userId}
+        locale={room.locale}
+        code={code}
+        onLeave={() =>
+          withBusy(async () => {
+            await leaveRoom(getSupabaseBrowserClient(), room.id);
+            router.push('/play/online');
+          })
+        }
+      />
     );
   }
 

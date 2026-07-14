@@ -31,7 +31,7 @@ and are the owner's to perform.
 | `robots.txt` (private/API disallowed)               | `apps/web/app/robots.ts`            |
 | Alias path redirects (308)                          | `apps/web/next.config.mjs`          |
 | Canonical room-invite links → `/join/<code>`        | `apps/web/lib/room-invite.ts`       |
-| `/download` (env-gated store badges)                | `apps/web/app/download/page.tsx`    |
+| Mobile/app discovery page (`/download` → `/mobile`) | `apps/web/app/mobile/page.tsx`      |
 | `/privacy`, `/terms`, `/support`, `/delete-account` | `apps/web/app/*`                    |
 | Universal Link / App Link association files         | `apps/web/app/.well-known/*`        |
 | Expo associated domains + Android intent filters    | `apps/mobile/app.json`              |

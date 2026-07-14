@@ -1,60 +1,97 @@
+import type { Locale } from '@lazy-patta/localization';
 import type { MetadataRoute } from 'next';
 
-import { GAME_LOCALES, GAME_SLUGS } from '../lib/game-discovery';
-import { absoluteUrl } from '../lib/site-config';
+import {
+  GAME_LOCALES,
+  GAME_SLUGS,
+  defaultGamePath,
+  localizedGamePath,
+  type GameSlug,
+} from '../lib/game-discovery';
+import { gamesIndexPath, rulesIndexPath, rulesPath } from '../lib/seo/routes';
+import { absoluteUrl as absolute } from '../lib/seo/site';
 
-/**
- * Canonical sitemap. Lists only durable, indexable, public pages on the
- * canonical domain. Deliberately excludes: private room pages (`/join/*`,
- * `/play/online/*`), internal APIs, the component gallery, and any preview or
- * alias hosts. Localized game routes are emitted with reciprocal hreflang
- * alternates so Google can pick the right language per query.
- */
+type Alternates = NonNullable<MetadataRoute.Sitemap[number]['alternates']>;
+
+/** Reciprocal hreflang set (every locale + English `x-default`) for a path family. */
+function localeAlternates(pathFor: (locale: Locale) => string): Alternates {
+  const languages: Record<string, string> = {};
+  for (const locale of GAME_LOCALES) {
+    languages[locale] = absolute(pathFor(locale));
+  }
+  languages['x-default'] = absolute(pathFor('en'));
+  return { languages };
+}
+
+/** One sitemap entry per locale for a locale-prefixed page family. */
+function localizedFamily(
+  pathFor: (locale: Locale) => string,
+  priority: number,
+): MetadataRoute.Sitemap {
+  const alternates = localeAlternates(pathFor);
+  return GAME_LOCALES.map((locale) => ({
+    url: absolute(pathFor(locale)),
+    changeFrequency: 'monthly',
+    priority,
+    alternates,
+  }));
+}
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
-
-  const staticPaths = [
-    '/',
-    '/play/online',
-    '/download',
-    '/privacy',
-    '/terms',
-    '/support',
-    '/delete-account',
+  const staticRoutes: MetadataRoute.Sitemap = [
+    {
+      url: absolute('/'),
+      changeFrequency: 'weekly',
+      priority: 1,
+    },
+    {
+      url: absolute('/mobile'),
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
+    {
+      url: absolute('/play/online'),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    // Legal/support pages: English-only for now, low change frequency.
+    ...(['/privacy', '/terms', '/support', '/delete-account'] as const).map((path) => ({
+      url: absolute(path),
+      changeFrequency: 'yearly' as const,
+      priority: 0.3,
+    })),
   ];
 
-  const staticEntries: MetadataRoute.Sitemap = staticPaths.map((path) => ({
-    url: absoluteUrl(path),
-    lastModified: now,
+  const gamesIndex = localizedFamily(gamesIndexPath, 0.7);
+  const rulesIndex = localizedFamily(rulesIndexPath, 0.7);
+
+  const gameRoutes = GAME_SLUGS.flatMap((slug: GameSlug) => [
+    {
+      url: absolute(defaultGamePath(slug)),
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    ...localizedFamily((locale) => localizedGamePath(locale, slug), 0.75),
+  ]);
+
+  const rulesRoutes = GAME_SLUGS.flatMap((slug: GameSlug) =>
+    localizedFamily((locale) => rulesPath(locale, slug), 0.8),
+  );
+
+  // Static single-player "play the computer" landings carry meaningful
+  // server-rendered content, so they are indexable (spec §11).
+  const computerRoutes: MetadataRoute.Sitemap = GAME_SLUGS.map((slug: GameSlug) => ({
+    url: absolute(`/play/${slug}/computer`),
+    changeFrequency: 'monthly',
+    priority: 0.6,
   }));
 
-  // Game overview + computer-play pages, in the default (unprefixed) locale plus
-  // each localized variant, cross-linked via hreflang alternates.
-  const gameEntries: MetadataRoute.Sitemap = GAME_SLUGS.flatMap((slug) => {
-    const languages = Object.fromEntries([
-      ...GAME_LOCALES.map((locale) => [locale, absoluteUrl(`/${locale}/games/${slug}`)]),
-      ['x-default', absoluteUrl(`/games/${slug}`)],
-    ]);
-
-    const overview: MetadataRoute.Sitemap = [
-      {
-        url: absoluteUrl(`/games/${slug}`),
-        lastModified: now,
-        alternates: { languages },
-      },
-      ...GAME_LOCALES.map((locale) => ({
-        url: absoluteUrl(`/${locale}/games/${slug}`),
-        lastModified: now,
-        alternates: { languages },
-      })),
-    ];
-
-    const computer: MetadataRoute.Sitemap = [
-      { url: absoluteUrl(`/play/${slug}/computer`), lastModified: now },
-    ];
-
-    return [...overview, ...computer];
-  });
-
-  return [...staticEntries, ...gameEntries];
+  return [
+    ...staticRoutes,
+    ...gamesIndex,
+    ...rulesIndex,
+    ...gameRoutes,
+    ...rulesRoutes,
+    ...computerRoutes,
+  ];
 }

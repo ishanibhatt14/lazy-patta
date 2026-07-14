@@ -17,24 +17,24 @@ export function LandingTopNav(): ReactElement {
 
   const links = [
     { href: '#games', label: t('landing.nav.games') },
+    { href: '/play/online', label: t('landing.nav.playOnline') },
     { href: '#how-to-play', label: t('landing.nav.howToPlay') },
   ];
 
   return (
-    <header className="relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-4 md:px-8">
+    <header className="relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-5 py-2 md:gap-4 md:px-8 md:py-2.5">
       <Link
         href="/"
-        className="flex min-h-12 items-center gap-3 rounded-md pr-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+        className="flex min-h-12 items-center rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
       >
         <Image
-          src="/images/lazy-patta-logo-transparent.png"
+          src="/images/lazy-patta-logo-256.png"
           alt={t('brand.logoAlt')}
-          width={48}
-          height={48}
+          width={256}
+          height={256}
           priority
-          className="h-12 w-12 object-contain"
+          className="landing-nav-logo h-16 w-16 object-contain md:h-[5.25rem] md:w-[5.25rem]"
         />
-        <span className="text-lg font-black text-action-primary">{t('app.name')}</span>
       </Link>
 
       <nav className="hidden items-center gap-2 md:flex" aria-label={t('landing.nav.label')}>
@@ -51,12 +51,6 @@ export function LandingTopNav(): ReactElement {
 
       <div className="flex items-center gap-2">
         <LandingLanguageMenu />
-        <Link
-          href="/play/online"
-          className="hidden min-h-12 items-center rounded-md bg-action-primary px-4 text-sm font-bold text-text-onBrand shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent md:inline-flex"
-        >
-          {t('action.joinRoom')}
-        </Link>
         <button
           type="button"
           className="inline-flex min-h-12 items-center rounded-md border border-action-primary/30 bg-surface-primary px-4 text-sm font-bold text-action-primary md:hidden"

@@ -16,7 +16,6 @@ import { LandingFooter } from './landing/LandingFooter';
 import { LandingShell } from './landing/LandingShell';
 import { PlayModeSection } from './landing/PlayModeSection';
 import { GadhaChorArtwork, LalSattiArtwork, RichGameCard } from './landing/RichGameCard';
-import { TrustStrip } from './landing/TrustStrip';
 
 type ActiveTutorial = 'gadha-chor' | 'lal-satti' | null;
 
@@ -28,14 +27,20 @@ export function GameLobby(): ReactElement {
   return (
     <LandingShell>
       <AnimatedHero locale={locale} />
-      <TrustStrip locale={locale} />
 
-      <section className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8" id="games">
+      <section
+        className="mx-auto w-full max-w-7xl px-5 pb-10 pt-8 md:px-8 md:pb-12 md:pt-12"
+        id="games"
+        aria-labelledby="landing-games-title"
+      >
         <div className="mb-6 flex flex-col gap-2">
           <p className="text-sm font-black uppercase tracking-[0.18em] text-brand-accent">
             {t('landing.games.eyebrow')}
           </p>
-          <h2 className="text-3xl font-black text-action-primary md:text-5xl">
+          <h2
+            id="landing-games-title"
+            className="text-3xl font-black text-action-primary md:text-5xl"
+          >
             {t('landing.games.title')}
           </h2>
           <p className="max-w-2xl text-base leading-7 text-text-primary">
@@ -57,7 +62,7 @@ export function GameLobby(): ReactElement {
             onlineHref="/play/online?game=gadha_chor"
             overviewHref="/games/gadha-chor"
             onHowToPlay={() => setActiveTutorial('gadha-chor')}
-            artwork={<GadhaChorArtwork />}
+            artwork={<GadhaChorArtwork locale={locale} />}
           />
           <RichGameCard
             locale={locale}
@@ -72,7 +77,7 @@ export function GameLobby(): ReactElement {
             onlineHref="/play/online?game=lal_satti"
             overviewHref="/games/lal-satti"
             onHowToPlay={() => setActiveTutorial('lal-satti')}
-            artwork={<LalSattiArtwork />}
+            artwork={<LalSattiArtwork locale={locale} />}
           />
         </div>
       </section>
