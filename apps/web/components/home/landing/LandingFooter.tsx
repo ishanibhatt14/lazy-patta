@@ -7,9 +7,9 @@ import { createTranslator } from '../../../lib/i18n';
 export function LandingFooter({ locale }: { readonly locale: Locale }): ReactElement {
   const { t } = createTranslator(locale);
   const policyItems = [
-    t('landing.footer.privacy'),
-    t('landing.footer.terms'),
-    t('landing.footer.support'),
+    { label: t('landing.footer.privacy'), href: '/privacy' },
+    { label: t('landing.footer.terms'), href: '/terms' },
+    { label: t('landing.footer.support'), href: '/support' },
   ];
 
   return (
@@ -33,13 +33,14 @@ export function LandingFooter({ locale }: { readonly locale: Locale }): ReactEle
         >
           {t('landing.footer.games')}
         </Link>
-        {policyItems.map((label) => (
-          <span
-            key={label}
-            className="inline-flex min-h-12 items-center rounded-md px-3 text-sm font-semibold text-text-primary"
+        {policyItems.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="inline-flex min-h-12 items-center rounded-md px-3 text-sm font-semibold text-text-primary hover:text-action-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
           >
-            {label}
-          </span>
+            {item.label}
+          </Link>
         ))}
       </nav>
     </footer>

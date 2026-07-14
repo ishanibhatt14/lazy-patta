@@ -44,6 +44,24 @@ Edge Functions) · shadcn/ui · Tailwind · Framer Motion · Vitest · Playwrigh
 Vercel · GitHub Actions. See
 [architecture](./docs/05-architecture/system-architecture.md).
 
+## Domains & SEO
+
+The canonical public domain is **https://lazypatta.com**. All alternate domains
+(`www`, `lazypatta.games`, the old `*.vercel.app` preview host) permanently
+redirect there. Absolute URLs are never hardcoded — they derive from
+`NEXT_PUBLIC_SITE_URL` via `apps/web/lib/site-config.ts`.
+
+Required env (see [`.env.example`](./.env.example)):
+
+```
+NEXT_PUBLIC_SITE_URL=https://lazypatta.com
+NEXT_PUBLIC_SUPPORT_EMAIL=support@lazypatta.com
+```
+
+Domain cutover, DNS, Search Console, Supabase callbacks, and future mobile
+deep-link activation are documented in
+[docs/domain-migration-checklist.md](./docs/domain-migration-checklist.md).
+
 ## License
 
 See [LICENSE](./LICENSE).

@@ -4,6 +4,7 @@ import type { Locale } from '@lazy-patta/localization';
 import { useEffect, useState, type ReactElement } from 'react';
 
 import { createTranslator } from '../../lib/i18n';
+import { buildRoomInviteUrl } from '../../lib/room-invite';
 import { Button } from '../Button';
 
 /**
@@ -11,8 +12,10 @@ import { Button } from '../Button';
  * surfacing the invite link and code immediately, so hosts can pull family in
  * without hunting for a way to share. Copy feedback is announced through a
  * polite live region; the WhatsApp deep link and native Web Share cover the two
- * channels families actually use. The absolute URL is resolved after mount so it
- * stays correct across preview/prod origins without leaking into SSR.
+ * channels families actually use. The invite URL is always the canonical
+ * `lazypatta.com/join/<code>` link (never `window.location.origin`) so a link
+ * copied from a preview deploy still resolves for family days later — and so it
+ * matches the path registered for mobile Universal Links / App Links.
  */
 
 export function RoomSharePanel({
@@ -23,24 +26,18 @@ export function RoomSharePanel({
   readonly locale: Locale;
 }): ReactElement {
   const { t, format } = createTranslator(locale);
-  const [shareUrl, setShareUrl] = useState('');
   const [copied, setCopied] = useState(false);
   const [canNativeShare, setCanNativeShare] = useState(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    setShareUrl(`${window.location.origin}/play/online/${code}`);
     setCanNativeShare(typeof navigator !== 'undefined' && typeof navigator.share === 'function');
-  }, [code]);
+  }, []);
 
-  const resolveUrl = (): string =>
-    shareUrl ||
-    (typeof window !== 'undefined'
-      ? `${window.location.origin}/play/online/${code}`
-      : `/play/online/${code}`);
+  const inviteUrl = buildRoomInviteUrl(code);
+  const resolveUrl = (): string => inviteUrl;
 
-  const displayUrl = shareUrl || `…/play/online/${code}`;
-  const inviteMessage = format('rooms.inviteMessage', { code, url: resolveUrl() });
+  const displayUrl = inviteUrl;
+  const inviteMessage = format('rooms.inviteMessage', { code, url: inviteUrl });
   const whatsappHref = `https://wa.me/?text=${encodeURIComponent(inviteMessage)}`;
 
   const onCopy = async (): Promise<void> => {
