@@ -85,9 +85,7 @@ export function ImmersiveGameShell({
     onChooseCard(positionToken);
   };
 
-  const podEmphasis = (
-    seat: ComputerGameSeat,
-  ): { drawSource: boolean; dimmed: boolean } => {
+  const podEmphasis = (seat: ComputerGameSeat): { drawSource: boolean; dimmed: boolean } => {
     if (!isHumanDrawTurn || seat.isSelf) return { drawSource: false, dimmed: false };
     const isSource = seat.id === drawSourceOwnerId;
     return { drawSource: isSource, dimmed: !isSource };

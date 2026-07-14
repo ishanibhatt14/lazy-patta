@@ -44,6 +44,7 @@ describe('GameLobby landing page', () => {
       'href',
       '/play/lal-satti/computer',
     );
+    expect(screen.getByRole('link', { name: /Mobile app/i })).toHaveAttribute('href', '/mobile');
     expect(screen.getByText(/Also known as Gulaam Chor/i)).toBeVisible();
     expect(screen.getByText(/Also known as Badam Saat/i)).toBeVisible();
   });
