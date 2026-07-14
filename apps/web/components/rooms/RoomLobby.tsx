@@ -45,7 +45,9 @@ function seatLabel(
 }
 
 function gameLabel(gameKey: string | undefined, t: ReturnType<typeof createTranslator>): string {
-  return gameKey === 'lal_satti' ? t.t('rooms.gameLalSatti') : t.t('rooms.gameGadhaChor');
+  if (gameKey === 'lal_satti') return t.t('rooms.gameLalSatti');
+  if (gameKey === 'jhabbu') return t.t('rooms.gameJhabbu');
+  return t.t('rooms.gameGadhaChor');
 }
 
 export function RoomLobby({ code }: { code: string }): ReactElement {

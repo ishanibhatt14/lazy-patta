@@ -9,10 +9,10 @@ describe('game discovery registry', () => {
     expect(GAME_DISCOVERY.jhabbu.playable).toBe(true);
   });
 
-  it('keeps online play gated: Jhabbu is computer-only until family mode ships', () => {
+  it('marks all three games online-playable now that Jhabbu has family rooms', () => {
     expect(GAME_DISCOVERY['gadha-chor'].onlinePlayable).toBe(true);
     expect(GAME_DISCOVERY['lal-satti'].onlinePlayable).toBe(true);
-    expect(GAME_DISCOVERY.jhabbu.onlinePlayable).toBe(false);
+    expect(GAME_DISCOVERY.jhabbu.onlinePlayable).toBe(true);
   });
 
   it('derives PLAYABLE_GAME_SLUGS from the playable flag', () => {

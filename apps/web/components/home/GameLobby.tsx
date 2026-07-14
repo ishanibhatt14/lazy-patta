@@ -94,7 +94,8 @@ export function GameLobby(): ReactElement {
             duration={t('landing.game.jhabbu.duration')}
             players={t('landing.game.jhabbu.players')}
             computerHref="/play/jhabbu/computer"
-            onlineDisabledLabel={t('landing.game.jhabbu.familySoon')}
+            onlineHref="/play/online?game=jhabbu"
+            overviewHref="/games/jhabbu"
             artwork={<JhabbuArtwork locale={locale} />}
           />
         </div>

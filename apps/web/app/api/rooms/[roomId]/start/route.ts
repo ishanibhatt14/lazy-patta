@@ -8,6 +8,12 @@ import {
   persistStart,
 } from '../../../../../lib/online-game/authority';
 import {
+  advanceJhabbuBots,
+  initialJhabbuState,
+  JHABBU_GUJARATI_FAMILY,
+  persistJhabbuStart,
+} from '../../../../../lib/online-game/jhabbu-authority';
+import {
   advanceLalSattiBots,
   initialLalSattiState,
   LAL_SATTI_CLASSIC,
@@ -66,14 +72,19 @@ export async function POST(request: Request, ctx: Context): Promise<Response> {
   if (seatErr) return NextResponse.json({ error: 'seat lookup failed' }, { status: 500 });
 
   const seats = seatRows ?? [];
-  const gameKey = room.game_key === 'lal_satti' ? 'lal_satti' : 'gadha_chor';
-  const minPlayers =
-    gameKey === 'lal_satti' ? LAL_SATTI_CLASSIC.minPlayers : CLASSIC_GULAM_CHOR.minPlayers;
-  const maxPlayers =
-    gameKey === 'lal_satti' ? LAL_SATTI_CLASSIC.maxPlayers : CLASSIC_GULAM_CHOR.maxPlayers;
+  const gameKey =
+    room.game_key === 'lal_satti' || room.game_key === 'jhabbu' ? room.game_key : 'gadha_chor';
+  const rules =
+    gameKey === 'lal_satti'
+      ? LAL_SATTI_CLASSIC
+      : gameKey === 'jhabbu'
+        ? JHABBU_GUJARATI_FAMILY
+        : CLASSIC_GULAM_CHOR;
+  const minPlayers = rules.minPlayers;
+  const maxPlayers = rules.maxPlayers;
 
   if (seats.length < minPlayers) {
-    return NextResponse.json({ error: 'need at least two players' }, { status: 409 });
+    return NextResponse.json({ error: 'need more players' }, { status: 409 });
   }
   if (seats.length > maxPlayers) {
     return NextResponse.json({ error: 'too many players' }, { status: 409 });
@@ -91,6 +102,13 @@ export async function POST(request: Request, ctx: Context): Promise<Response> {
       const opening = initialLalSattiState(playerIds);
       const gameId = await persistLalSattiStart(admin, roomId, opening);
       const finalState = await advanceLalSattiBots(admin, gameId, opening);
+      return NextResponse.json({ ok: true, gameId, stateVersion: finalState.stateVersion });
+    }
+
+    if (gameKey === 'jhabbu') {
+      const opening = initialJhabbuState(playerIds);
+      const gameId = await persistJhabbuStart(admin, roomId, opening);
+      const finalState = await advanceJhabbuBots(admin, gameId, opening);
       return NextResponse.json({ ok: true, gameId, stateVersion: finalState.stateVersion });
     }
 

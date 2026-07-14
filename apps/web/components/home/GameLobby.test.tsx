@@ -36,6 +36,10 @@ describe('GameLobby landing page', () => {
       'href',
       '/play/online?game=lal_satti',
     );
+    expect(screen.getAllByRole('link', { name: /Start family room/i })[2]).toHaveAttribute(
+      'href',
+      '/play/online?game=jhabbu',
+    );
     expect(screen.getAllByRole('link', { name: /Practice with bots/i })[0]).toHaveAttribute(
       'href',
       '/play/gadha-chor/computer',
@@ -52,9 +56,7 @@ describe('GameLobby landing page', () => {
     expect(screen.getByText(/Also known as Gulaam Chor/i)).toBeVisible();
     expect(screen.getByText(/Also known as Badam Saat/i)).toBeVisible();
     expect(screen.getByText(/Also known as Bhabho/i)).toBeVisible();
-    expect(
-      screen.getByText(/Family rooms for Jhabbu are coming after practice mode/i),
-    ).toBeVisible();
+    expect(screen.getAllByRole('link', { name: /Start family room/i })).toHaveLength(3);
   });
 
   it('keeps one trust group in the hero and moves playable games directly after it', () => {

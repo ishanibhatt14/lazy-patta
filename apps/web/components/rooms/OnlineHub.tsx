@@ -22,7 +22,15 @@ function messageFor(error: unknown, fallback: string): string {
 }
 
 function gameKeyFromSearch(value: string | null): OnlineGameKey {
-  return value === 'lal_satti' ? 'lal_satti' : 'gadha_chor';
+  if (value === 'lal_satti') return 'lal_satti';
+  if (value === 'jhabbu') return 'jhabbu';
+  return 'gadha_chor';
+}
+
+function gameKeyLabel(key: OnlineGameKey, t: ReturnType<typeof createTranslator>): string {
+  if (key === 'lal_satti') return t.t('rooms.gameLalSatti');
+  if (key === 'jhabbu') return t.t('rooms.gameJhabbu');
+  return t.t('rooms.gameGadhaChor');
 }
 
 export function OnlineHub(): ReactElement {
@@ -78,8 +86,8 @@ export function OnlineHub(): ReactElement {
       <div className="flex flex-col gap-3 rounded-lg bg-surface-primary p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-text-primary">{t.t('rooms.createTitle')}</h2>
         <p className="text-sm text-text-primary">{t.t('rooms.createDescription')}</p>
-        <div className="grid grid-cols-2 gap-2" aria-label={t.t('rooms.gameLabel')}>
-          {(['gadha_chor', 'lal_satti'] as const).map((candidate) => (
+        <div className="grid grid-cols-3 gap-2" aria-label={t.t('rooms.gameLabel')}>
+          {(['gadha_chor', 'lal_satti', 'jhabbu'] as const).map((candidate) => (
             <button
               key={candidate}
               type="button"
@@ -93,7 +101,7 @@ export function OnlineHub(): ReactElement {
                   : 'border-action-primary/30 bg-background-canvas text-text-primary',
               ].join(' ')}
             >
-              {candidate === 'lal_satti' ? t.t('rooms.gameLalSatti') : t.t('rooms.gameGadhaChor')}
+              {gameKeyLabel(candidate, t)}
             </button>
           ))}
         </div>

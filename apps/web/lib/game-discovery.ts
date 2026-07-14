@@ -120,11 +120,10 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
   },
   jhabbu: {
     slug: 'jhabbu',
-    // Computer (single-player) mode is live, so Jhabbu gets Play routes and a
-    // practice CTA. Online/family multiplayer is not built yet, so the online
-    // CTA renders as "coming soon" (see `onlinePlayable`).
+    // Both practice (single-player) and online/family multiplayer are live, so
+    // Jhabbu gets Play routes, a practice CTA, and a working "Play Online" CTA.
     playable: true,
-    onlinePlayable: false,
+    onlinePlayable: true,
     nameKey: 'games.jhabbu.name',
     pageHeadingKey: 'games.jhabbu.pageHeading',
     descriptionKey: 'games.jhabbu.description',
