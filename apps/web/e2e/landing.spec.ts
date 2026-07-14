@@ -156,7 +156,9 @@ test.describe('rich landing page', () => {
     );
   });
 
-  test('renders the family hero image and Gulam card art under reduced motion', async ({ page }) => {
+  test('renders the family hero image and Gulam card art under reduced motion', async ({
+    page,
+  }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
 

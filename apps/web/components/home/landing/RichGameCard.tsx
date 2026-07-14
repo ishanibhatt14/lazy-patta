@@ -79,7 +79,12 @@ function FaceDownCard({ className = '' }: { readonly className?: string }): Reac
 
 function GulamFaceCard({ label }: { readonly label: string }): ReactElement {
   return (
-    <svg viewBox="0 0 120 168" className="h-full w-full drop-shadow-lg" aria-hidden focusable="false">
+    <svg
+      viewBox="0 0 120 168"
+      className="h-full w-full drop-shadow-lg"
+      aria-hidden
+      focusable="false"
+    >
       <rect
         x="2.5"
         y="2.5"
@@ -125,7 +130,15 @@ function GulamFaceCard({ label }: { readonly label: string }): ReactElement {
         <path d="M-26 40 Q-26 6 0 4 Q26 6 26 40 Z" fill={ART.maroon} />
         <path d="M-26 40 Q-26 6 0 4 Q26 6 26 40" fill="none" stroke={ART.haldi} strokeWidth="1.6" />
         <path d="M-13 8 Q0 20 13 8 L10 22 Q0 30 -10 22 Z" fill={ART.haldiSoft} />
-        <ellipse cx="0" cy="-8" rx="15" ry="16.5" fill={ART.tan} stroke={ART.ink} strokeWidth="0.8" />
+        <ellipse
+          cx="0"
+          cy="-8"
+          rx="15"
+          ry="16.5"
+          fill={ART.tan}
+          stroke={ART.ink}
+          strokeWidth="0.8"
+        />
         {/* Turban */}
         <path d="M-17 -12 Q-20 -34 0 -35 Q20 -34 17 -12 Q0 -22 -17 -12 Z" fill={ART.haldi} />
         <path d="M-17 -12 Q0 -20 17 -12" fill="none" stroke={ART.peacock} strokeWidth="3" />
@@ -134,8 +147,20 @@ function GulamFaceCard({ label }: { readonly label: string }): ReactElement {
         {/* Face features */}
         <circle cx="-6" cy="-9" r="1.7" fill={ART.ink} />
         <circle cx="6" cy="-9" r="1.7" fill={ART.ink} />
-        <path d="M-8 -1 Q0 3 8 -1" fill="none" stroke={ART.ink} strokeWidth="1.4" strokeLinecap="round" />
-        <path d="M-9 2 Q-4 6 0 4 Q4 6 9 2" fill="none" stroke={ART.ink} strokeWidth="1.6" strokeLinecap="round" />
+        <path
+          d="M-8 -1 Q0 3 8 -1"
+          fill="none"
+          stroke={ART.ink}
+          strokeWidth="1.4"
+          strokeLinecap="round"
+        />
+        <path
+          d="M-9 2 Q-4 6 0 4 Q4 6 9 2"
+          fill="none"
+          stroke={ART.ink}
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
       </g>
 
       {/* Localized label ribbon */}
@@ -176,7 +201,13 @@ function GadhaMascot({ className = '' }: { readonly className?: string }): React
       {/* Nostrils + smile */}
       <ellipse cx="39" cy="62" rx="2.2" ry="3" fill={ART.ink} />
       <ellipse cx="51" cy="62" rx="2.2" ry="3" fill={ART.ink} />
-      <path d="M38 70 Q45 74 52 70" fill="none" stroke={ART.ink} strokeWidth="1.6" strokeLinecap="round" />
+      <path
+        d="M38 70 Q45 74 52 70"
+        fill="none"
+        stroke={ART.ink}
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
       {/* Forelock */}
       <path d="M45 24 Q40 30 44 34 Q48 30 45 24" fill="#8a847f" />
     </svg>
@@ -258,8 +289,7 @@ function HeartCard({
       [80, 130],
     ],
   };
-  const heart =
-    'M0 4 C-5 -4 -16 -3 -16 6 C-16 14 -6 19 0 25 C6 19 16 14 16 6 C16 -3 5 -4 0 4 Z';
+  const heart = 'M0 4 C-5 -4 -16 -3 -16 6 C-16 14 -6 19 0 25 C6 19 16 14 16 6 C16 -3 5 -4 0 4 Z';
   return (
     <svg viewBox="0 0 120 168" className={className} aria-hidden focusable="false">
       <rect
