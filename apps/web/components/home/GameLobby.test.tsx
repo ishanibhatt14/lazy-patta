@@ -48,6 +48,25 @@ describe('GameLobby landing page', () => {
     expect(screen.getByText(/Also known as Badam Saat/i)).toBeVisible();
   });
 
+  it('keeps one trust group in the hero and moves playable games directly after it', () => {
+    renderLobby();
+
+    expect(screen.getAllByLabelText(/Why families can play safely/i)).toHaveLength(1);
+    expect(screen.getByText('No cash or betting')).toBeVisible();
+    expect(screen.getByText('Guest play')).toBeVisible();
+    expect(screen.getByText('Private family rooms')).toBeVisible();
+    expect(screen.getByText('English, Gujarati and Hindi')).toBeVisible();
+
+    const hero = screen.getByRole('region', {
+      name: /Desi card games\. Family game night, anywhere\./i,
+    });
+    const games = screen.getByRole('region', {
+      name: /Two family-table classics, each with its own mood\./i,
+    });
+
+    expect(hero.nextElementSibling).toBe(games);
+  });
+
   it('opens both tutorial dialogs from rich game cards', async () => {
     renderLobby();
     const user = userEvent.setup();
@@ -94,7 +113,7 @@ describe('GameLobby landing page', () => {
     renderLobby();
     const user = userEvent.setup();
 
-    for (let index = 0; index < 4; index += 1) {
+    for (let index = 0; index < 5; index += 1) {
       await user.tab();
     }
 
