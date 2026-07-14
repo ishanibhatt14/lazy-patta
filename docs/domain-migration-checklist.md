@@ -178,7 +178,11 @@ Planned indexable URL model (game overview routes already localized in code):
 - [ ] Set `NEXT_PUBLIC_SITE_URL` / `NEXT_PUBLIC_SUPPORT_EMAIL` in Vercel.
 - [ ] Configure host redirects (www + `.games` + `play.lazytraveler.app`).
 - [ ] Update Supabase Site URL + allowed redirect URLs.
-- [ ] Set up `support@lazypatta.com` mailbox (MX records).
+- [ ] Set up `support@lazypatta.com` via **free Namecheap email forwarding**
+      (`support` → owner's real inbox; optionally a `*` catch-all). Namecheap adds
+      the MX records automatically. Optionally add "Send mail as" in Gmail so
+      replies come from `support@lazypatta.com`. (A full Zoho/Workspace mailbox is
+      a later upgrade, not required.)
 - [ ] Verify Google Search Console + submit sitemap.
 - [ ] Later: provide Apple Team ID, iOS bundle ID, Android package name, SHA-256
       fingerprint; set the deep-link env vars; validate `.well-known` files.
