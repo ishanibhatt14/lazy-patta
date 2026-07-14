@@ -38,6 +38,8 @@ const ART = {
   haldiSoft: '#f2c66b',
   ink: '#3a2416',
   tan: '#e7c49b',
+  indigo: '#25325f',
+  indigoDeep: '#141c3a',
 } as const;
 
 function FaceDownCard({ className = '' }: { readonly className?: string }): ReactElement {
@@ -399,6 +401,180 @@ export function LalSattiArtwork({ locale }: { readonly locale: Locale }): ReactE
         <HeartCard rank="6" className="art-slide-left art-lift h-[62%] w-auto" />
         <HeartCard rank="7" featured className="h-[80%] w-auto" />
         <HeartCard rank="8" className="art-slide-right art-lift h-[62%] w-auto" />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A single trick-pile card for the Jhabbu scene. `suit`/`suitColor` let the
+ * three led-suit cards share one shape while the sideways off-suit "Thulla"
+ * card is tinted differently so the odd card out reads at a glance — not by
+ * motion alone (WCAG: information is carried by colour *and* position/label).
+ */
+function TrickCard({
+  rank,
+  suit,
+  suitColor,
+  className = '',
+  featured = false,
+}: {
+  readonly rank: string;
+  readonly suit: string;
+  readonly suitColor: string;
+  readonly className?: string;
+  readonly featured?: boolean;
+}): ReactElement {
+  return (
+    <svg
+      viewBox="0 0 120 168"
+      width="120"
+      height="168"
+      className={className}
+      style={{ overflow: 'visible' }}
+      aria-hidden
+      focusable="false"
+    >
+      <defs>
+        <filter id={`lp-jhabbu-shadow-${rank}${suit}`} x="-40%" y="-40%" width="180%" height="180%">
+          <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="#0a1026" floodOpacity="0.5" />
+        </filter>
+      </defs>
+      <rect
+        x="2.5"
+        y="2.5"
+        width="115"
+        height="163"
+        rx="12"
+        fill={ART.cream}
+        stroke={featured ? ART.haldi : ART.maroon}
+        strokeWidth={featured ? '3.4' : '2.6'}
+        filter={`url(#lp-jhabbu-shadow-${rank}${suit})`}
+      />
+      <rect
+        x="8"
+        y="8"
+        width="104"
+        height="152"
+        rx="8"
+        fill="none"
+        stroke={ART.creamShade}
+        strokeWidth="1.2"
+      />
+      <g fill={suitColor}>
+        <text x="12" y="26" fontSize="18" fontWeight="800" fontFamily="Georgia, serif">
+          {rank}
+        </text>
+        <text x="13" y="42" fontSize="14">
+          {suit}
+        </text>
+        <text x="60" y="98" fontSize="46" textAnchor="middle">
+          {suit}
+        </text>
+        <g transform="rotate(180 60 84)">
+          <text x="12" y="26" fontSize="18" fontWeight="800" fontFamily="Georgia, serif">
+            {rank}
+          </text>
+          <text x="13" y="42" fontSize="14">
+            {suit}
+          </text>
+        </g>
+      </g>
+    </svg>
+  );
+}
+
+/**
+ * "Gujarati Monsoon Veranda": an indigo rainy-evening backdrop, a peacock-green
+ * table mat lit by a warm lantern, a central trick pile of led-suit cards, and
+ * one off-suit card landing sideways as a Thulla with a "THULLA!" callout — the
+ * moment that decides who picks up the pile. Shadows use SVG `feDropShadow`
+ * (never CSS `filter: drop-shadow()`, which mis-paints on WebKit). Hover /
+ * focus choreography lives in landing.css and is fully disabled under
+ * `prefers-reduced-motion`, where the Thulla still reads via its colour,
+ * sideways angle, and label.
+ */
+export function JhabbuArtwork({ locale }: { readonly locale: Locale }): ReactElement {
+  const { t } = createTranslator(locale);
+  return (
+    <div
+      className="relative aspect-[16/10] w-full overflow-hidden rounded-t-lg"
+      role="img"
+      aria-label={t('landing.game.jhabbu.artLabel')}
+    >
+      {/* Indigo rainy-evening veranda */}
+      <div
+        className="absolute inset-0"
+        aria-hidden
+        style={{
+          background: `radial-gradient(120% 120% at 78% 6%, ${ART.indigo} 0%, ${ART.indigoDeep} 58%, #0a1026 100%)`,
+        }}
+      />
+      {/* Falling monsoon rain (diagonal streaks) */}
+      <div
+        className="art-rain absolute inset-0 opacity-30"
+        aria-hidden
+        style={{
+          background: `repeating-linear-gradient(72deg, transparent 0 13px, ${ART.creamShade}44 13px 14px)`,
+        }}
+      />
+      {/* Warm lantern glow, upper-left */}
+      <div
+        className="art-lantern absolute left-[8%] top-[6%] h-[38%] w-[38%] rounded-full"
+        aria-hidden
+        style={{
+          background: `radial-gradient(circle, ${ART.haldiSoft}cc 0%, ${ART.haldi}55 40%, transparent 70%)`,
+        }}
+      />
+      {/* Peacock-green table mat */}
+      <div
+        className="absolute inset-x-[10%] bottom-[-14%] h-[52%] rounded-[50%]"
+        aria-hidden
+        style={{
+          background: `radial-gradient(60% 100% at 50% 0%, ${ART.peacock} 0%, ${ART.peacockDeep} 100%)`,
+          boxShadow: `0 -0.5rem 1.5rem ${ART.peacockDeep}aa`,
+        }}
+      />
+      {/* Central trick pile: two led-suit cards fanned under the featured one */}
+      <div className="absolute inset-x-0 bottom-6 top-8 flex items-end justify-center">
+        <div className="art-jhabbu-pile relative h-[74%] w-[42%]">
+          <TrickCard
+            rank="9"
+            suit="♠"
+            suitColor={ART.ink}
+            className="absolute bottom-0 left-[4%] h-[86%] w-auto -rotate-[10deg]"
+          />
+          <TrickCard
+            rank="K"
+            suit="♠"
+            suitColor={ART.ink}
+            className="absolute bottom-1 right-[4%] h-[86%] w-auto rotate-[8deg]"
+          />
+          <TrickCard
+            rank="A"
+            suit="♠"
+            suitColor={ART.ink}
+            featured
+            className="absolute bottom-2 left-1/2 h-[96%] w-auto -translate-x-1/2"
+          />
+        </div>
+      </div>
+      {/* The off-suit Thulla card, landing sideways over the pile */}
+      <div className="art-jhabbu-thulla absolute right-[12%] top-[30%] h-[46%] w-auto">
+        <TrickCard
+          rank="7"
+          suit="♥"
+          suitColor="#c0392b"
+          className="h-full w-auto rotate-[74deg]"
+        />
+      </div>
+      {/* "THULLA!" callout — reinforces the off-suit card without relying on motion */}
+      <div
+        className="art-jhabbu-shout absolute right-[6%] top-[12%] rounded-full px-3 py-1 text-xs font-black uppercase tracking-wide"
+        aria-hidden
+        style={{ background: ART.haldi, color: ART.maroonDeep }}
+      >
+        {t('landing.game.jhabbu.shout')}
       </div>
     </div>
   );

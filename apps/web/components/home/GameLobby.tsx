@@ -12,6 +12,7 @@ import { AnimatedHero } from './landing/AnimatedHero';
 import { ComingGamesRail } from './landing/ComingGamesRail';
 import { FamilyConnectionSection } from './landing/FamilyConnectionSection';
 import { FounderStorySection } from './landing/FounderStorySection';
+import { JhabbuTeaserSection } from './landing/JhabbuTeaserSection';
 import { LandingFooter } from './landing/LandingFooter';
 import { LandingShell } from './landing/LandingShell';
 import { PlayModeSection } from './landing/PlayModeSection';
@@ -83,6 +84,7 @@ export function GameLobby(): ReactElement {
       </section>
 
       <PlayModeSection locale={locale} />
+      <JhabbuTeaserSection locale={locale} />
       <FamilyConnectionSection locale={locale} />
       <FounderStorySection locale={locale} />
       <ComingGamesRail locale={locale} />

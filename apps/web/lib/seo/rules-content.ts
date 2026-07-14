@@ -22,7 +22,9 @@ export interface RulesContent {
   readonly faq: readonly RulesFaqItem[];
 }
 
-function sections(prefix: 'rules.gadhaChor' | 'rules.lalSatti'): readonly RulesSection[] {
+type RulesPrefix = 'rules.gadhaChor' | 'rules.lalSatti' | 'rules.jhabbu';
+
+function sections(prefix: RulesPrefix): readonly RulesSection[] {
   return [
     { headingKey: 'seo.rules.heading.players', bodyKey: `${prefix}.players` as MessageKey },
     { headingKey: 'seo.rules.heading.setup', bodyKey: `${prefix}.setup` as MessageKey },
@@ -35,7 +37,7 @@ function sections(prefix: 'rules.gadhaChor' | 'rules.lalSatti'): readonly RulesS
   ];
 }
 
-function faq(prefix: 'rules.gadhaChor' | 'rules.lalSatti'): readonly RulesFaqItem[] {
+function faq(prefix: RulesPrefix): readonly RulesFaqItem[] {
   return [1, 2, 3].map((n) => ({
     questionKey: `${prefix}.faq.q${n}` as MessageKey,
     answerKey: `${prefix}.faq.a${n}` as MessageKey,
@@ -60,5 +62,14 @@ export const RULES_CONTENT: Record<GameSlug, RulesContent> = {
     introKey: 'rules.lalSatti.intro',
     sections: sections('rules.lalSatti'),
     faq: faq('rules.lalSatti'),
+  },
+  jhabbu: {
+    slug: 'jhabbu',
+    metaTitleKey: 'rules.jhabbu.metaTitle',
+    metaDescriptionKey: 'rules.jhabbu.metaDescription',
+    headingKey: 'rules.jhabbu.heading',
+    introKey: 'rules.jhabbu.intro',
+    sections: sections('rules.jhabbu'),
+    faq: faq('rules.jhabbu'),
   },
 };

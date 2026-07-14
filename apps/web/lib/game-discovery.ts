@@ -1,10 +1,16 @@
 import { type Locale, type MessageKey } from '@lazy-patta/localization';
 import type { Metadata } from 'next';
 
-export type GameSlug = 'gadha-chor' | 'lal-satti';
+export type GameSlug = 'gadha-chor' | 'lal-satti' | 'jhabbu';
 
 export interface GameDiscoveryConfig {
   readonly slug: GameSlug;
+  /**
+   * `true` once the game has a real single-player (computer) experience.
+   * Coming-soon games still get crawlable overview + rules pages, but no
+   * Play buttons and no `/play/...` sitemap entries.
+   */
+  readonly playable: boolean;
   readonly nameKey: MessageKey;
   readonly pageHeadingKey: MessageKey;
   readonly descriptionKey: MessageKey;
@@ -31,6 +37,7 @@ export interface GameDiscoveryConfig {
 export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
   'gadha-chor': {
     slug: 'gadha-chor',
+    playable: true,
     nameKey: 'games.gadhaChor.name',
     pageHeadingKey: 'games.gadhaChor.pageHeading',
     descriptionKey: 'games.gadhaChor.description',
@@ -67,6 +74,7 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
   },
   'lal-satti': {
     slug: 'lal-satti',
+    playable: true,
     nameKey: 'games.lalSatti.name',
     pageHeadingKey: 'games.lalSatti.pageHeading',
     descriptionKey: 'games.lalSatti.description',
@@ -101,9 +109,56 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
     slugAliases: ['badam-saat', 'badam-satti', 'laal-satti', 'seven-of-hearts', 'sevens'],
     alternateNames: ['Badam Saat', 'Badam Satti', 'Laal Satti', 'Seven of Hearts', 'Sevens'],
   },
+  jhabbu: {
+    slug: 'jhabbu',
+    // Coming soon: overview + rules pages are crawlable, but there is no
+    // computer/online experience yet, so no Play buttons or play-route sitemap
+    // entries are emitted. Flip to `true` when Jhabbu computer mode ships.
+    playable: false,
+    nameKey: 'games.jhabbu.name',
+    pageHeadingKey: 'games.jhabbu.pageHeading',
+    descriptionKey: 'games.jhabbu.description',
+    aliasShortKey: 'games.jhabbu.aliasShort',
+    aliasesKey: 'games.jhabbu.aliases',
+    hindiNameKey: 'games.jhabbu.hindiName',
+    gujaratiNameKey: 'games.jhabbu.gujaratiName',
+    metaTitleKey: 'games.jhabbu.metaTitle',
+    metaDescriptionKey: 'games.jhabbu.metaDescription',
+    detailIntroKey: 'games.jhabbu.detailIntro',
+    otherNamesSummaryKey: 'games.jhabbu.otherNamesSummary',
+    sections: [
+      {
+        titleKey: 'games.jhabbu.howTitle',
+        bodyKey: 'games.jhabbu.howBody',
+      },
+      {
+        titleKey: 'games.jhabbu.thullaTitle',
+        bodyKey: 'games.jhabbu.thullaBody',
+      },
+      {
+        titleKey: 'games.jhabbu.getawayTitle',
+        bodyKey: 'games.jhabbu.getawayBody',
+      },
+      {
+        titleKey: 'games.jhabbu.familyTitle',
+        bodyKey: 'games.jhabbu.familyBody',
+      },
+    ],
+    // Intended future routes — never rendered or sitemapped while `playable`
+    // is false, but kept accurate so flipping the flag is the only change.
+    computerHref: '/play/jhabbu/computer',
+    onlineHref: '/play/online?game=jhabbu',
+    slugAliases: ['bhabho', 'bhabhi', 'laad', 'get-away', 'zabbu'],
+    alternateNames: ['Bhabho', 'Bhabhi', 'Laad', 'Get Away', 'Zabbu'],
+  },
 };
 
 export const GAME_SLUGS = Object.keys(GAME_DISCOVERY) as readonly GameSlug[];
+
+/** Games with a live computer experience — the only ones that get Play routes. */
+export const PLAYABLE_GAME_SLUGS = GAME_SLUGS.filter(
+  (slug) => GAME_DISCOVERY[slug].playable,
+) as readonly GameSlug[];
 export const GAME_LOCALES: readonly Locale[] = ['en', 'hi', 'gu'];
 
 export function localizedGamePath(locale: Locale, slug: GameSlug): string {

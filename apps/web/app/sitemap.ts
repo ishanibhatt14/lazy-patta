@@ -4,6 +4,7 @@ import type { MetadataRoute } from 'next';
 import {
   GAME_LOCALES,
   GAME_SLUGS,
+  PLAYABLE_GAME_SLUGS,
   defaultGamePath,
   localizedGamePath,
   type GameSlug,
@@ -79,8 +80,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   );
 
   // Static single-player "play the computer" landings carry meaningful
-  // server-rendered content, so they are indexable (spec §11).
-  const computerRoutes: MetadataRoute.Sitemap = GAME_SLUGS.map((slug: GameSlug) => ({
+  // server-rendered content, so they are indexable (spec §11). Only PLAYABLE
+  // games get these routes — coming-soon games (e.g. Jhabbu) have no computer
+  // experience yet, so emitting a play URL would 404 / mislead crawlers.
+  const computerRoutes: MetadataRoute.Sitemap = PLAYABLE_GAME_SLUGS.map((slug: GameSlug) => ({
     url: absolute(`/play/${slug}/computer`),
     changeFrequency: 'monthly',
     priority: 0.6,

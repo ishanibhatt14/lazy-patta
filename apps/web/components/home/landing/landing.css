@@ -140,6 +140,54 @@
   transform: translate(0.4rem, -0.35rem);
 }
 
+/* Jhabbu "Monsoon Veranda" card-art choreography */
+.art-rain {
+  background-position: 0 0;
+  animation: lp-jhabbu-rain 620ms linear infinite;
+}
+
+.art-lantern {
+  animation: lp-diya-flicker 2600ms ease-in-out infinite;
+}
+
+.art-jhabbu-pile,
+.art-jhabbu-thulla,
+.art-jhabbu-shout {
+  transition: transform 220ms ease;
+}
+
+.art-jhabbu-thulla {
+  transform-origin: bottom center;
+}
+
+.art-jhabbu-shout {
+  transform-origin: center;
+}
+
+.rich-game-card:hover .art-jhabbu-pile,
+.rich-game-card:focus-within .art-jhabbu-pile {
+  transform: translateY(-0.3rem);
+}
+
+.rich-game-card:hover .art-jhabbu-thulla,
+.rich-game-card:focus-within .art-jhabbu-thulla {
+  transform: translateY(-0.55rem) rotate(-4deg);
+}
+
+.rich-game-card:hover .art-jhabbu-shout,
+.rich-game-card:focus-within .art-jhabbu-shout {
+  transform: scale(1.08);
+}
+
+@keyframes lp-jhabbu-rain {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -14px 43px;
+  }
+}
+
 @keyframes lp-scene-in {
   from {
     opacity: 0;
@@ -277,7 +325,12 @@
   .rich-game-card .art-lift,
   .art-fan,
   .art-gulam,
-  .art-mascot {
+  .art-mascot,
+  .art-rain,
+  .art-lantern,
+  .art-jhabbu-pile,
+  .art-jhabbu-thulla,
+  .art-jhabbu-shout {
     animation: none;
     transition: none;
     transform: none;
@@ -286,5 +339,11 @@
   .landing-card-pair-left,
   .landing-card-pair-right {
     opacity: 0.35;
+  }
+
+  /* Keep the Thulla card readable at rest: its sideways angle and colour still
+     mark it as the off-suit card even without the hover choreography. */
+  .art-jhabbu-thulla {
+    transform: rotate(-2deg);
   }
 }
