@@ -16,6 +16,7 @@ export interface JhabbuSeatView {
   readonly isSelf: boolean;
   readonly isActive: boolean;
   readonly isFinished: boolean;
+  readonly finishPosition: number | null;
   readonly isPower: boolean;
   readonly cardCount: number;
   readonly penaltyPoints: number;

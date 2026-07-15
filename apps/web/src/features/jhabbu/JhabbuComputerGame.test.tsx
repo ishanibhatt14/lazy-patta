@@ -30,13 +30,14 @@ describe('JhabbuComputerGame', () => {
     renderGame();
     const user = userEvent.setup();
 
-    expect(screen.getByRole('heading', { name: /Jhabbu at the family table/i })).toBeVisible();
-    expect(screen.getByText(/Ace of spades starts/i)).toBeVisible();
+    expect(screen.getByRole('heading', { name: /Sit at the Jhabbu table/i })).toBeVisible();
+    expect(screen.getByText(/Ace of spades starts/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /Start quick game/i }));
+    await user.click(screen.getByRole('button', { name: /Start 4-player game/i }));
 
-    expect(screen.getByRole('heading', { name: /Jhabbu players/i })).toBeVisible();
-    expect(screen.getByRole('heading', { name: /Your cards/i })).toBeVisible();
+    expect(screen.getByLabelText(/Jhabbu computer game/i)).toBeVisible();
+    expect(screen.getByRole('button', { name: /History/i })).toBeVisible();
+    expect(screen.getByLabelText(/Your cards/i)).toBeVisible();
     expect(screen.getByText(/Jhabbu started/i)).toBeVisible();
   });
 });
