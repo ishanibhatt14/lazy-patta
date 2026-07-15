@@ -33,7 +33,13 @@ describe('web icon assets', () => {
   });
 
   it('declares PWA icons for any and maskable installs', () => {
-    expect(manifest().icons).toEqual([
+    const result = manifest();
+
+    expect(result.id).toBe('/');
+    expect(result.start_url).toBe('/play');
+    expect(result.scope).toBe('/');
+    expect(result.display).toBe('standalone');
+    expect(result.icons).toEqual([
       { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
       { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
       {
