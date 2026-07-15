@@ -53,7 +53,8 @@ export const siteConfig = {
   name: 'Lazy Patta',
   shortName: 'Lazy Patta',
   descriptor: 'Desi Indian Card Games',
-  description: 'Play Gadha Chor, Lal Satti, and traditional Indian family card games online.',
+  description:
+    'Play Gadha Chor, Lal Satti and Jhabbu — free desi Indian card games online. Family game night, no betting, in English, Hindi and Gujarati.',
   /** Permanent public origin, e.g. `https://lazypatta.com` (no trailing slash). */
   canonicalOrigin,
   supportEmail,
