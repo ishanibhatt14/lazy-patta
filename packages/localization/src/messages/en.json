@@ -76,7 +76,7 @@
   "landing.game.jhabbu.difficulty": "Fast",
   "landing.game.jhabbu.duration": "15-30 min",
   "landing.game.jhabbu.players": "3-6 players",
-  "landing.game.jhabbu.familySoon": "Family rooms for Jhabbu are coming after practice mode.",
+  "landing.game.jhabbu.familySoon": "Play Jhabbu against the computer or in private family rooms.",
   "landing.mode.eyebrow": "Play your way",
   "landing.mode.title": "Quick solo warmups or private family rooms.",
   "landing.mode.computer.title": "Against Computer",
@@ -630,8 +630,8 @@
   "computer.shareResultText": "We played Gadha Chor on Lazy Patta — {name} was today's Gadha Chor!",
   "computer.shareCopied": "Copied to clipboard",
   "games.jhabbu.metaTitle": "Play Jhabbu Online | Bhabho & Get Away Card Game | Lazy Patta",
-  "games.jhabbu.metaDescription": "Jhabbu is a fast Indian shedding card game, also known as Bhabho, Bhabhi, Laad and Get Away. Follow the led suit, survive the Thulla, and empty your hand first. Coming soon to Lazy Patta.",
-  "games.jhabbu.detailIntro": "Jhabbu is a fast Indian shedding card game, also known as Bhabho, Bhabhi, Laad and Get Away. Follow the led suit, avoid getting stuck with the pile, and empty your hand before everyone else. Computer play is coming soon — learn the rules now.",
+  "games.jhabbu.metaDescription": "Jhabbu is a fast Indian shedding card game, also known as Bhabho, Bhabhi, Laad and Get Away. Follow the led suit, survive the Thulla, and empty your hand first. Play free at Lazy Patta — against the computer or in private family rooms.",
+  "games.jhabbu.detailIntro": "Jhabbu is a fast Indian shedding card game, also known as Bhabho, Bhabhi, Laad and Get Away. Follow the led suit, avoid getting stuck with the pile, and empty your hand before everyone else. Play now against the computer or in private family rooms — or learn the rules first.",
   "games.jhabbu.otherNamesSummary": "Many families search for this game as Bhabho, Bhabhi, Laad, Get Away or Zabbu. It is a follow-the-suit shedding game, but household rules for the Thulla and who picks up the pile can differ.",
   "games.jhabbu.howTitle": "How to play Jhabbu",
   "games.jhabbu.howBody": "The player with the Ace of Spades leads. Everyone must follow the led suit if they can. When all cards follow, the pile clears; but if someone cannot follow and throws an off-suit Thulla, the highest led-suit card picks up the whole pile. Empty your hand to get away.",
@@ -640,7 +640,7 @@
   "games.jhabbu.getawayTitle": "How do players get away?",
   "games.jhabbu.getawayBody": "The moment your hand is empty you have got away and are safe for the round. Play continues until only one player is left holding cards — that player is the Bhabhi. Getting away early is the whole goal.",
   "games.jhabbu.familyTitle": "Play Jhabbu online with family",
-  "games.jhabbu.familyBody": "Jhabbu is coming to Lazy Patta as a private-room and computer game. For now you can learn the rules and family variations; Play buttons will appear the moment computer mode is ready.",
+  "games.jhabbu.familyBody": "Jhabbu is live on Lazy Patta as both a computer game and private family rooms. Play now, or learn the rules and family variations first.",
   "landing.game.jhabbu.shout": "Thulla!",
   "rules.jhabbu.metaTitle": "How to Play Jhabbu — Bhabho, Bhabhi & Get Away Rules | Lazy Patta",
   "rules.jhabbu.metaDescription": "Learn how to play Jhabbu, also known as Bhabho, Bhabhi, Laad or Get Away. The Ace of Spades opening, following suit, the Thulla, who picks up the pile, and how to get away.",
@@ -659,5 +659,5 @@
   "rules.jhabbu.faq.q2": "What is a Thulla in Jhabbu?",
   "rules.jhabbu.faq.a2": "A Thulla is an off-suit card played when you cannot follow the led suit. It forces the player who laid the highest card of the originally led suit to pick up the entire pile, changing who gets stuck.",
   "rules.jhabbu.faq.q3": "Can I play Jhabbu on Lazy Patta yet?",
-  "rules.jhabbu.faq.a3": "Not yet — Jhabbu is coming soon. You can learn the full rules now, and we will add computer practice and private family rooms as soon as the game mode is ready."
+  "rules.jhabbu.faq.a3": "Yes — Jhabbu is live. You can play against the computer or set up private family rooms now, and the full rules are here whenever you need them."
 }
