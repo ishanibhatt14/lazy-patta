@@ -172,8 +172,13 @@ jobs:
       - name: Install dependencies (frozen lockfile)
         run: pnpm install --frozen-lockfile
 
+      - name: Use current pnpm for npm audit API
+        run: corepack prepare pnpm@11.13.0 --activate
+
       - name: Dependency audit (production, high severity)
-        run: pnpm audit --prod --audit-level=high
+        env:
+          COREPACK_ENABLE_PROJECT_SPEC: '0'
+        run: corepack pnpm --pm-on-fail=ignore audit --prod --audit-level=high
 
   rls-integration:
     name: Supabase RLS behavioural tests
