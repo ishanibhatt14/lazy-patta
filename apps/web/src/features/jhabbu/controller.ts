@@ -282,6 +282,7 @@ function seatsFor(state: JhabbuControllerState): readonly JhabbuSeatView[] {
       isSelf: entry.id === JHABBU_HUMAN_ID,
       isActive: current === entry.id,
       isFinished: player?.status === 'got_away',
+      finishPosition: player?.finishPosition ?? null,
       isPower: state.game?.powerPlayerId === entry.id,
       cardCount: player?.hand.length ?? 0,
       penaltyPoints: player?.penaltyPoints ?? 0,
