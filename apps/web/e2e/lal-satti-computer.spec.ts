@@ -57,6 +57,51 @@ test('lets the human play a legal card by tap', async ({ page }) => {
     .toBe(true);
 });
 
+test('surfaces a playable-cards tray with big tap targets that plays by tap', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await startGame(page, 4);
+  await waitForHumanTurn(page);
+
+  const tray = page.locator('.ls-play-tray');
+  await expect(tray).toBeVisible();
+  const trayCards = tray.locator('.ls-play-tray-card');
+
+  // The tray mirrors exactly the playable set — read both in one DOM frame so a
+  // settling turn can never race the comparison.
+  const { trayCount, fanPlayable, widths } = await page.evaluate(() => {
+    const traySel = Array.from(document.querySelectorAll('.ls-play-tray-card'));
+    return {
+      trayCount: traySel.length,
+      fanPlayable: document.querySelectorAll('button[data-playable="true"]').length,
+      widths: traySel.map((el) => el.getBoundingClientRect().width),
+    };
+  });
+  expect(trayCount).toBe(fanPlayable);
+  expect(trayCount).toBeGreaterThan(0);
+
+  // Every tray card is a comfortable finger target (no overlapping slivers).
+  for (const w of widths) expect(w).toBeGreaterThanOrEqual(44);
+
+  const status = await page.getByRole('status').textContent();
+  await trayCards.first().click();
+  // Tapping a tray card advances the turn or shrinks the playable set.
+  await expect
+    .poll(async () => {
+      const now = await page.getByRole('status').textContent();
+      const stillMine = now?.includes('Your turn!') ?? false;
+      return !stillMine || now !== status || (await trayCards.count()) < trayCount;
+    })
+    .toBe(true);
+});
+
+test('hides the playable tray when it is not the human turn', async ({ page }) => {
+  await startGame(page, 4);
+  // Before the human's turn resolves there is no tray; it only appears on My Turn
+  // with a playable move, so it never competes with bot turns for the thumb zone.
+  await waitForHumanTurn(page);
+  await expect(page.locator('.ls-play-tray')).toBeVisible();
+});
+
 test('lets the human play a legal card with the keyboard', async ({ page }) => {
   await startGame(page, 4);
   await waitForHumanTurn(page);

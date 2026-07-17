@@ -325,6 +325,8 @@
   "lalSatti.tableau": "સૂટ સિક્વન્સ",
   "lalSatti.yourCards": "તમારા પત્તા",
   "lalSatti.playableNow": "ચાલી શકે તે પત્તા ઊંચા છે.",
+  "lalSatti.tapToPlay": "રમવા માટે પત્તા પર ટૅપ કરો",
+  "lalSatti.tapToPlayHint": "આ વારામાં તમે રમી શકો તે જ પત્તા.",
   "lalSatti.passTurn": "વારો પાસ કરો",
   "lalSatti.playCardLabel": "{card} રમો",
   "lalSatti.yourTurnInstruction": "એક ઊંચો પત્તો તેની સૂટની લાઇનમાં મૂકો.",

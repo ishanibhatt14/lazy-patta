@@ -325,6 +325,8 @@
   "lalSatti.tableau": "सूट श्रृंखलाएँ",
   "lalSatti.yourCards": "आपके कार्ड",
   "lalSatti.playableNow": "चलने वाले कार्ड ऊपर उठे हैं.",
+  "lalSatti.tapToPlay": "खेलने के लिए कार्ड टैप करें",
+  "lalSatti.tapToPlayHint": "इस बारी में केवल वही कार्ड जो आप खेल सकते हैं.",
   "lalSatti.passTurn": "बारी पास करें",
   "lalSatti.playCardLabel": "{card} खेलें",
   "lalSatti.yourTurnInstruction": "एक उठा हुआ कार्ड उसकी सूट पंक्ति में खेलें.",

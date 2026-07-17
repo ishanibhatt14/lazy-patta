@@ -14,6 +14,7 @@ import { GameHistoryDrawer } from './GameHistoryDrawer';
 import { LalSattiAccountSheet } from './LalSattiAccountSheet';
 import { LalSattiTopBar } from './LalSattiTopBar';
 import { PassPrompt } from './PassPrompt';
+import { PlayableTray } from './PlayableTray';
 import { PlayerHandFan } from './PlayerHandFan';
 import { PlayerPod } from './PlayerPod';
 import { RoundResultOverlay } from './RoundResultOverlay';
@@ -231,6 +232,14 @@ export function LalSattiGameShell({
               onPass={onPass}
             />
             <StrategyCoachPopover locale={locale} messageKey={coachMessageKey} />
+            <PlayableTray
+              locale={locale}
+              cards={view.ownHand}
+              playableCardIds={view.playableCardIds}
+              isHumanTurn={view.isHumanTurn}
+              onSelect={onSelectCard}
+              onFocusCard={setFocusedCard}
+            />
             <PlayerHandFan
               locale={locale}
               cards={view.ownHand}
