@@ -1,5 +1,6 @@
 'use client';
 
+import type { BotDifficulty } from '@lazy-patta/game-contracts';
 import Link from 'next/link';
 import type { ReactElement } from 'react';
 import { useEffect, useReducer, useRef } from 'react';
@@ -19,6 +20,12 @@ import { LalSattiGameShell } from './immersive/LalSattiGameShell';
 import type { LalSattiControllerState, LalSattiIntent, LalSattiRoundScore } from './types';
 
 const PLAYER_COUNTS = [3, 4, 5, 6] as const;
+const DIFFICULTIES: readonly BotDifficulty[] = ['easy', 'medium', 'hard'];
+const DIFFICULTY_LABEL_KEY: Record<BotDifficulty, 'computer.difficultyEasy' | 'computer.difficultyMedium' | 'computer.difficultyHard'> = {
+  easy: 'computer.difficultyEasy',
+  medium: 'computer.difficultyMedium',
+  hard: 'computer.difficultyHard',
+};
 const SESSION_STORAGE_KEY = 'lazy-patta:lal-satti-session:v1';
 
 interface StoredLalSattiSession {
@@ -79,7 +86,13 @@ export function LalSattiComputerGame(): ReactElement {
 
   if (controllerRef.current === null) {
     const rng = seededRng();
-    controllerRef.current = createLalSattiController(rng ?? createCryptoRng(), preferredLocale);
+    // Seeded runs (visual-regression) pin `hard` so bot play stays deterministic;
+    // real players default to `medium` and can change it on the setup screen.
+    controllerRef.current = createLalSattiController(
+      rng ?? createCryptoRng(),
+      preferredLocale,
+      rng ? 'hard' : 'medium',
+    );
   }
 
   const controller = controllerRef.current;
@@ -208,6 +221,37 @@ export function LalSattiComputerGame(): ReactElement {
                       </button>
                     ))}
                   </div>
+                </div>
+
+                <div className="mt-4">
+                  <h3 className="text-sm font-bold text-action-primary">
+                    {t.t('computer.difficultyLabel')}
+                  </h3>
+                  <div
+                    className="mt-3 flex flex-wrap gap-2"
+                    role="group"
+                    aria-label={t.t('computer.difficultyLabel')}
+                  >
+                    {DIFFICULTIES.map((level) => (
+                      <button
+                        key={level}
+                        type="button"
+                        aria-pressed={view.difficulty === level}
+                        className={[
+                          'min-h-12 rounded-md border px-4 py-2 font-semibold transition',
+                          view.difficulty === level
+                            ? 'border-action-primary bg-action-primary text-text-onBrand'
+                            : 'border-brand-accent bg-surface-primary text-text-primary',
+                        ].join(' ')}
+                        onClick={() => dispatch({ type: 'setDifficulty', difficulty: level })}
+                      >
+                        {t.t(DIFFICULTY_LABEL_KEY[level])}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-text-primary">
+                    {t.t('computer.difficultyHelp')}
+                  </p>
                 </div>
               </details>
             </section>

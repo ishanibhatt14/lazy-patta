@@ -1,4 +1,4 @@
-import type { Card } from '@lazy-patta/game-contracts';
+import type { BotDifficulty, Card } from '@lazy-patta/game-contracts';
 import type {
   LalSattiEvent,
   LalSattiState,
@@ -55,6 +55,7 @@ export interface LalSattiControllerState {
   readonly phase: LalSattiComputerPhase;
   readonly playerCount: number;
   readonly humanName: string;
+  readonly difficulty: BotDifficulty;
   readonly locale: Locale;
   readonly reducedMotion: boolean;
   readonly game: LalSattiState | null;
@@ -69,6 +70,7 @@ export interface LalSattiViewState {
   readonly phase: LalSattiComputerPhase;
   readonly playerCount: number;
   readonly humanName: string;
+  readonly difficulty: BotDifficulty;
   readonly canStart: boolean;
   readonly locale: Locale;
   readonly reducedMotion: boolean;
@@ -92,6 +94,7 @@ export interface LalSattiViewState {
 export type LalSattiIntent =
   | { readonly type: 'setPlayerCount'; readonly playerCount: number }
   | { readonly type: 'setHumanName'; readonly humanName: string }
+  | { readonly type: 'setDifficulty'; readonly difficulty: BotDifficulty }
   | { readonly type: 'setLocale'; readonly locale: Locale }
   | {
       readonly type: 'hydrateSession';

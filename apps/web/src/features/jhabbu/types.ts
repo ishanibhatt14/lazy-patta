@@ -1,4 +1,4 @@
-import type { Card } from '@lazy-patta/game-contracts';
+import type { BotDifficulty, Card } from '@lazy-patta/game-contracts';
 import type {
   JhabbuEvent,
   JhabbuResult,
@@ -32,6 +32,7 @@ export interface JhabbuControllerState {
   readonly phase: JhabbuComputerPhase;
   readonly playerCount: number;
   readonly humanName: string;
+  readonly difficulty: BotDifficulty;
   readonly locale: Locale;
   readonly reducedMotion: boolean;
   readonly game: JhabbuState | null;
@@ -44,6 +45,7 @@ export interface JhabbuViewState {
   readonly phase: JhabbuComputerPhase;
   readonly playerCount: number;
   readonly humanName: string;
+  readonly difficulty: BotDifficulty;
   readonly canStart: boolean;
   readonly locale: Locale;
   readonly reducedMotion: boolean;
@@ -70,6 +72,7 @@ export interface JhabbuViewState {
 export type JhabbuIntent =
   | { readonly type: 'setPlayerCount'; readonly playerCount: number }
   | { readonly type: 'setHumanName'; readonly humanName: string }
+  | { readonly type: 'setDifficulty'; readonly difficulty: BotDifficulty }
   | { readonly type: 'setLocale'; readonly locale: Locale }
   | { readonly type: 'toggleReducedMotion' }
   | { readonly type: 'start' }
