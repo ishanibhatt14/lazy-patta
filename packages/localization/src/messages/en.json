@@ -325,6 +325,8 @@
   "lalSatti.tableau": "Suit sequences",
   "lalSatti.yourCards": "Your cards",
   "lalSatti.playableNow": "Playable cards are lifted.",
+  "lalSatti.tapToPlay": "Tap a card to play",
+  "lalSatti.tapToPlayHint": "Only the cards you can play this turn.",
   "lalSatti.passTurn": "Pass turn",
   "lalSatti.playCardLabel": "Play {card}",
   "lalSatti.yourTurnInstruction": "Play one lifted card into its suit row.",

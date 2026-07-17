@@ -389,6 +389,63 @@
   animation: ls-invalid-shake 320ms ease-in-out both;
 }
 
+/* ---- Playable-cards tray ------------------------------------------ */
+/* A thumb-zone shortcut showing only the cards playable this turn as big,
+   fully-spaced tap targets, so choosing a move on a phone is never a hunt
+   through overlapping slivers. */
+.ls-play-tray {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  width: min(100%, calc(100vw - 1rem));
+  padding: 0.35rem 0.5rem 0.1rem;
+}
+
+.ls-play-tray-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--lp-action-primary);
+}
+
+.ls-play-tray-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.ls-play-tray-card {
+  /* Comfortable, non-overlapping finger target (card is 64x96 + padding). */
+  display: inline-flex;
+  padding: 0.25rem;
+  border-radius: 0.6rem;
+  background: color-mix(in srgb, var(--lp-surface-primary) 78%, transparent);
+  box-shadow: 0 0 0 0.08rem color-mix(in srgb, var(--lp-action-secondary), transparent 45%);
+  transition:
+    transform var(--ls-lift) ease-out,
+    box-shadow var(--ls-lift) ease-out;
+}
+
+.ls-play-tray-card:hover,
+.ls-play-tray-card:focus-visible {
+  transform: translateY(-0.2rem) scale(1.04);
+  box-shadow:
+    0 0.35rem 0.55rem rgba(0, 0, 0, 0.35),
+    0 0 0 0.1rem var(--lp-action-secondary);
+}
+
+.ls-play-tray-card:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* High-contrast option: ink ring around the tray cards too. */
+.ls-shell[data-high-contrast='true'] .ls-play-tray-card [role='img'] {
+  box-shadow: 0 0 0 0.14rem var(--lp-text-primary);
+}
+
 @keyframes ls-invalid-shake {
   0%,
   100% {
