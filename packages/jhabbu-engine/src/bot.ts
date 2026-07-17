@@ -1,4 +1,4 @@
-import type { PlayerId } from '@lazy-patta/game-contracts';
+import { type BotDifficulty, botMistakeRate, type PlayerId, type Rng } from '@lazy-patta/game-contracts';
 
 import { rankValue } from './cards';
 import { JhabbuEngine } from './engine';
@@ -9,6 +9,19 @@ export type JhabbuBotStrategy = 'careful' | 'shed-low' | 'shed-high';
 export interface JhabbuBotDecision {
   readonly strategy: JhabbuBotStrategy;
   readonly action: JhabbuAction;
+}
+
+export interface JhabbuBotOptions {
+  /** Which heuristic to favour when playing the "best" move. */
+  readonly strategy?: JhabbuBotStrategy;
+  /** Opponent skill. Defaults to `hard` (deterministic best play). */
+  readonly difficulty?: BotDifficulty;
+  /** Required for `easy`/`medium` to inject random mistakes; ignored on `hard`. */
+  readonly rng?: Rng;
+}
+
+function normalizeOptions(options: JhabbuBotOptions | JhabbuBotStrategy): JhabbuBotOptions {
+  return typeof options === 'string' ? { strategy: options } : options;
 }
 
 function actionCard(state: JhabbuState, action: JhabbuAction) {
@@ -27,8 +40,10 @@ function suitLength(state: JhabbuState, suit: string): number {
 export function chooseJhabbuBotAction(
   state: JhabbuState,
   actor: PlayerId,
-  strategy: JhabbuBotStrategy = 'careful',
+  options: JhabbuBotOptions | JhabbuBotStrategy = {},
 ): JhabbuBotDecision | null {
+  const { strategy = 'careful', difficulty = 'hard', rng } = normalizeOptions(options);
+
   if (state.phase === 'round_complete') return null;
 
   const current = state.players[state.currentPlayerIndex];
@@ -55,6 +70,12 @@ export function chooseJhabbuBotAction(
     if (rankDelta !== 0) return strategy === 'shed-high' ? -rankDelta : rankDelta;
     return aCard.suit.localeCompare(bCard.suit);
   });
+
+  const mistakeRate = botMistakeRate(difficulty);
+  if (rng && mistakeRate > 0 && actions.length > 1 && rng.next() < mistakeRate) {
+    const index = Math.min(actions.length - 1, Math.floor(rng.next() * actions.length));
+    return { strategy, action: actions[index]! };
+  }
 
   return { strategy, action: sorted[0]! };
 }

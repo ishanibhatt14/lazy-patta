@@ -1,4 +1,4 @@
-import { type Card, type Rng } from '@lazy-patta/game-contracts';
+import { type BotDifficulty, type Card, type Rng } from '@lazy-patta/game-contracts';
 import {
   chooseLalSattiBotAction,
   createEmptyTableau,
@@ -37,11 +37,16 @@ function clampPlayerCount(playerCount: number): number {
   return Math.min(MAX_PLAYERS, Math.max(MIN_PLAYERS, Math.round(playerCount)));
 }
 
-function setupState(locale: Locale, playerCount = 4): LalSattiControllerState {
+function setupState(
+  locale: Locale,
+  playerCount = 4,
+  difficulty: BotDifficulty = 'medium',
+): LalSattiControllerState {
   return {
     phase: 'setup',
     playerCount,
     humanName: '',
+    difficulty,
     locale,
     reducedMotion: false,
     game: null,
@@ -215,6 +220,9 @@ function dispatchWithRng(
     case 'setHumanName':
       if (state.phase !== 'setup') return state;
       return { ...state, humanName: intent.humanName.slice(0, 32) };
+    case 'setDifficulty':
+      if (state.phase !== 'setup') return state;
+      return { ...state, difficulty: intent.difficulty };
     case 'setLocale':
       return { ...state, locale: intent.locale };
     case 'hydrateSession':
@@ -249,14 +257,17 @@ function dispatchWithRng(
     case 'botStep': {
       const actor = currentPlayerId(state);
       if (!state.game || !actor || actor === LAL_SATTI_HUMAN_ID) return state;
-      const decision = chooseLalSattiBotAction(state.game, actor);
+      const decision = chooseLalSattiBotAction(state.game, actor, {
+        difficulty: state.difficulty,
+        rng,
+      });
       return decision ? reduceEngineAction(state, decision.action) : state;
     }
     case 'rematch':
       if (state.phase !== 'result') return state;
       return startGame(
         {
-          ...setupState(state.locale, state.playerCount),
+          ...setupState(state.locale, state.playerCount, state.difficulty),
           humanName: state.humanName,
           reducedMotion: state.reducedMotion,
           roundScores: state.roundScores,
@@ -354,6 +365,7 @@ export function selectLalSattiViewState(state: LalSattiControllerState): LalSatt
     phase: state.phase,
     playerCount: state.playerCount,
     humanName: state.humanName,
+    difficulty: state.difficulty,
     canStart: canStart(state),
     locale: state.locale,
     reducedMotion: state.reducedMotion,
@@ -394,9 +406,12 @@ export function selectLalSattiViewState(state: LalSattiControllerState): LalSatt
 export function createLalSattiController(
   rng: Rng = createCryptoRng(),
   locale: Locale = 'en',
+  // Defaults to `hard` so seeded/programmatic callers (tests, the online
+  // authority) stay deterministic; the interactive UI opts into `medium`.
+  difficulty: BotDifficulty = 'hard',
 ): LalSattiController {
   return {
-    initialState: setupState(locale),
+    initialState: setupState(locale, 4, difficulty),
     dispatch: (state, intent) => dispatchWithRng(rng, state, intent),
   };
 }
