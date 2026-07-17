@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@expo/metro-runtime': 57.0.3
+  '@expo/metro-runtime': 57.0.5
 
 importers:
 
@@ -1139,7 +1139,7 @@ packages:
   '@expo/router-server@57.0.3':
     resolution: {integrity: sha512-gkboMZUv+eAK4XSBGSIQ6at3dSa/QYARm+8PKj8pMEhGnt08vgcXpWAW5rYJMoLukaDD/bUDX/JU2Iz1Azwziw==}
     peerDependencies:
-      '@expo/metro-runtime': 57.0.3
+      '@expo/metro-runtime': 57.0.5
       expo: '*'
       expo-constants: ^57.0.5
       expo-font: ^57.0.1
@@ -3277,7 +3277,7 @@ packages:
     resolution: {integrity: sha512-lbLHrs9JRxUcI/UPkFmHoeZqkFeCvGf9ATC6eJOaiEwkS8wQXYUEfHF3nYXHWS601c9xwUFRf6J5PJhqepdRkA==}
     peerDependencies:
       '@expo/log-box': ^57.0.1
-      '@expo/metro-runtime': 57.0.3
+      '@expo/metro-runtime': 57.0.5
       '@testing-library/react-native': '>= 13.2.0'
       expo: '*'
       expo-constants: ^57.0.5
@@ -3334,7 +3334,7 @@ packages:
     hasBin: true
     peerDependencies:
       '@expo/dom-webview': '*'
-      '@expo/metro-runtime': 57.0.3
+      '@expo/metro-runtime': 57.0.5
       react: '*'
       react-dom: '*'
       react-native: '*'
