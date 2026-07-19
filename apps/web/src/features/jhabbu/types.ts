@@ -8,6 +8,35 @@ import type {
 import type { Locale, MessageKey, MessageValues } from '@lazy-patta/localization';
 
 export type JhabbuComputerPhase = 'setup' | 'playing' | 'result';
+export type JhabbuSavedScoreRule = 'thulla-v1';
+
+export const JHABBU_CURRENT_SCORE_RULE: JhabbuSavedScoreRule = 'thulla-v1';
+
+export interface JhabbuRoundStanding {
+  readonly playerId: string;
+  readonly playerName: string;
+  /** Position in the got-away order (1 = first out). `null` for the loser. */
+  readonly finishPosition: number | null;
+  readonly penaltyPoints: number;
+  readonly remainingCards: number;
+}
+
+export interface JhabbuRoundScore {
+  readonly id: string;
+  readonly roundNumber: number;
+  readonly scoreRule: JhabbuSavedScoreRule;
+  readonly loserId: string;
+  readonly loserName: string;
+  readonly finishOrderNames: readonly string[];
+  readonly standings: readonly JhabbuRoundStanding[];
+}
+
+export interface JhabbuRunningScore {
+  readonly playerId: string;
+  readonly playerName: string;
+  readonly totalPenaltyPoints: number;
+  readonly roundsLost: number;
+}
 
 export interface JhabbuSeatView {
   readonly id: string;
@@ -37,7 +66,9 @@ export interface JhabbuControllerState {
   readonly reducedMotion: boolean;
   readonly game: JhabbuState | null;
   readonly events: readonly JhabbuViewEvent[];
+  readonly roundScores: readonly JhabbuRoundScore[];
   readonly lastEngineEvents: readonly JhabbuEvent[];
+  readonly hasHydratedSession: boolean;
   readonly seq: number;
 }
 
@@ -67,6 +98,8 @@ export interface JhabbuViewState {
   readonly result: JhabbuResult | null;
   readonly finishOrderNames: readonly string[];
   readonly loserName: string;
+  readonly roundScores: readonly JhabbuRoundScore[];
+  readonly runningScores: readonly JhabbuRunningScore[];
 }
 
 export type JhabbuIntent =
@@ -74,6 +107,11 @@ export type JhabbuIntent =
   | { readonly type: 'setHumanName'; readonly humanName: string }
   | { readonly type: 'setDifficulty'; readonly difficulty: BotDifficulty }
   | { readonly type: 'setLocale'; readonly locale: Locale }
+  | {
+      readonly type: 'hydrateSession';
+      readonly humanName?: string;
+      readonly roundScores?: readonly JhabbuRoundScore[];
+    }
   | { readonly type: 'toggleReducedMotion' }
   | { readonly type: 'start' }
   | { readonly type: 'playCard'; readonly cardId: string }

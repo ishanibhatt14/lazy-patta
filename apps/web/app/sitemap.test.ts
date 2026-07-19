@@ -34,7 +34,7 @@ describe('sitemap', () => {
     expect(urls).toContain('https://lazypatta.com/hi/how-to-play/lal-satti');
   });
 
-  it('lists Jhabbu topic and rules pages even though it is coming soon', () => {
+  it('lists Jhabbu topic and rules pages now that it is live', () => {
     expect(urls).toContain('https://lazypatta.com/games/jhabbu');
     expect(urls).toContain('https://lazypatta.com/en/games/jhabbu');
     expect(urls).toContain('https://lazypatta.com/en/how-to-play/jhabbu');
