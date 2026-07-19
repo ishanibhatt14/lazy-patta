@@ -15,13 +15,17 @@ export interface RosterEntry {
   readonly position: SeatPosition;
 }
 
-/** Warm Gujarati family "table" — proper nouns, not translated copy. */
+/**
+ * Warm family "table" — proper nouns, not translated copy. Names stay Latin in
+ * every locale, so the avatar initial is the Latin first letter to match (a
+ * Gujarati-script glyph looked wrong next to the Latin name in en/hi mode).
+ */
 const BOT_ROSTER: readonly { id: string; name: string; avatarInitial: string }[] = [
-  { id: 'ba', name: 'Ba', avatarInitial: 'બ' },
-  { id: 'kaka', name: 'Kaka', avatarInitial: 'ક' },
-  { id: 'masi', name: 'Masi', avatarInitial: 'મ' },
-  { id: 'mama', name: 'Mama', avatarInitial: 'મા' },
-  { id: 'kaki', name: 'Kaki', avatarInitial: 'કા' },
+  { id: 'ba', name: 'Ba', avatarInitial: 'B' },
+  { id: 'kaka', name: 'Kaka', avatarInitial: 'K' },
+  { id: 'masi', name: 'Masi', avatarInitial: 'M' },
+  { id: 'mama', name: 'Mama', avatarInitial: 'M' },
+  { id: 'kaki', name: 'Kaki', avatarInitial: 'K' },
 ];
 
 /**

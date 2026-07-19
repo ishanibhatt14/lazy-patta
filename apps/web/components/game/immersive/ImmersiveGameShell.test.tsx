@@ -28,7 +28,7 @@ const HUMAN_SEAT: ComputerGameSeat = {
 const BOT_SEAT: ComputerGameSeat = {
   id: 'ba',
   name: 'Ba',
-  avatarInitial: 'બ',
+  avatarInitial: 'B',
   cardCount: 3,
   isSelf: false,
   isActive: false,
