@@ -7,6 +7,7 @@ import { createTranslator } from '../../lib/i18n';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import { GADHA_CHOR_TUTORIAL_STEPS, HowToPlayTutorial } from '../game/HowToPlayTutorial';
 import { JHABBU_TUTORIAL_STEPS } from '../game/jhabbu-tutorial-steps';
+import { KACHUFUL_TUTORIAL_STEPS } from '../game/kachuful-tutorial-steps';
 import { LAL_SATTI_TUTORIAL_STEPS } from '../game/lal-satti-tutorial-steps';
 
 import { AnimatedHero } from './landing/AnimatedHero';
@@ -19,11 +20,12 @@ import { PlayModeSection } from './landing/PlayModeSection';
 import {
   GadhaChorArtwork,
   JhabbuArtwork,
+  KachufulArtwork,
   LalSattiArtwork,
   RichGameCard,
 } from './landing/RichGameCard';
 
-type ActiveTutorial = 'gadha-chor' | 'lal-satti' | 'jhabbu' | null;
+type ActiveTutorial = 'gadha-chor' | 'lal-satti' | 'jhabbu' | 'kachuful' | null;
 
 export function GameLobby(): ReactElement {
   const { locale } = usePreferredLocale();
@@ -100,6 +102,21 @@ export function GameLobby(): ReactElement {
             onHowToPlay={() => setActiveTutorial('jhabbu')}
             artwork={<JhabbuArtwork locale={locale} />}
           />
+          <RichGameCard
+            locale={locale}
+            title={t('games.kachuful.name')}
+            alias={t('games.kachuful.aliasShort')}
+            description={t('landing.game.kachuful.description')}
+            status={t('games.status.available')}
+            difficulty={t('landing.game.kachuful.difficulty')}
+            duration={t('landing.game.kachuful.duration')}
+            players={t('landing.game.kachuful.players')}
+            computerHref="/play/kachuful/computer"
+            onlineHref="/play/online?game=kachuful"
+            overviewHref="/games/kachuful"
+            onHowToPlay={() => setActiveTutorial('kachuful')}
+            artwork={<KachufulArtwork locale={locale} />}
+          />
         </div>
       </section>
 
@@ -127,6 +144,13 @@ export function GameLobby(): ReactElement {
         <HowToPlayTutorial
           locale={locale}
           steps={JHABBU_TUTORIAL_STEPS}
+          onClose={() => setActiveTutorial(null)}
+        />
+      ) : null}
+      {activeTutorial === 'kachuful' ? (
+        <HowToPlayTutorial
+          locale={locale}
+          steps={KACHUFUL_TUTORIAL_STEPS}
           onClose={() => setActiveTutorial(null)}
         />
       ) : null}

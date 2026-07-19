@@ -6,6 +6,7 @@ import type { ReactElement } from 'react';
 import type { TutorialStep } from '../../../../components/game/HowToPlayTutorial';
 import { GADHA_CHOR_TUTORIAL_STEPS } from '../../../../components/game/HowToPlayTutorial';
 import { JHABBU_TUTORIAL_STEPS } from '../../../../components/game/jhabbu-tutorial-steps';
+import { KACHUFUL_TUTORIAL_STEPS } from '../../../../components/game/kachuful-tutorial-steps';
 import { LAL_SATTI_TUTORIAL_STEPS } from '../../../../components/game/lal-satti-tutorial-steps';
 import { GameOverview } from '../../../../components/home/GameOverview';
 import { Breadcrumbs } from '../../../../components/seo/Breadcrumbs';
@@ -33,6 +34,7 @@ const TUTORIAL_STEPS: Record<GameSlug, readonly TutorialStep[]> = {
   'gadha-chor': GADHA_CHOR_TUTORIAL_STEPS,
   'lal-satti': LAL_SATTI_TUTORIAL_STEPS,
   jhabbu: JHABBU_TUTORIAL_STEPS,
+  kachuful: KACHUFUL_TUTORIAL_STEPS,
 };
 
 function resolveParams(params: LocalizedGameParams): {

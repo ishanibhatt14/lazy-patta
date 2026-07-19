@@ -40,6 +40,10 @@ describe('GameLobby landing page', () => {
       'href',
       '/play/online?game=jhabbu',
     );
+    expect(screen.getAllByRole('link', { name: /Start family room/i })[3]).toHaveAttribute(
+      'href',
+      '/play/online?game=kachuful',
+    );
     expect(screen.getAllByRole('link', { name: /Practice with bots/i })[0]).toHaveAttribute(
       'href',
       '/play/gadha-chor/computer',
@@ -56,7 +60,7 @@ describe('GameLobby landing page', () => {
     expect(screen.getByText(/Also known as Gulaam Chor/i)).toBeVisible();
     expect(screen.getByText(/Also known as Badam Saat/i)).toBeVisible();
     expect(screen.getByText(/Also known as Bhabho/i)).toBeVisible();
-    expect(screen.getAllByRole('link', { name: /Start family room/i })).toHaveLength(3);
+    expect(screen.getAllByRole('link', { name: /Start family room/i })).toHaveLength(4);
   });
 
   it('keeps one trust group in the hero and moves playable games directly after it', () => {
@@ -72,7 +76,7 @@ describe('GameLobby landing page', () => {
       name: /Desi card games\. Family game night, anywhere\./i,
     });
     const games = screen.getByRole('region', {
-      name: /Three family-table classics, each with its own mood\./i,
+      name: /Four family-table classics, each with its own mood\./i,
     });
 
     expect(hero.nextElementSibling).toBe(games);
@@ -169,6 +173,17 @@ describe('GameLobby landing page', () => {
     renderLobby();
 
     expect(screen.getByRole('img', { name: /Jhabbu card art/i })).toBeInTheDocument();
+  });
+
+  it('renders a playable Kachuful card with its practice link and judgement artwork', () => {
+    renderLobby();
+
+    expect(screen.getByRole('img', { name: /Kachuful card art/i })).toBeInTheDocument();
+    expect(screen.getByText(/Also known as Judgement and Kachuful/i)).toBeVisible();
+    const practiceLinks = screen.getAllByRole('link', { name: /Practice/i });
+    expect(
+      practiceLinks.some((link) => link.getAttribute('href') === '/play/kachuful/computer'),
+    ).toBe(true);
   });
 
   it('mentions the founder only in the founder signature', () => {

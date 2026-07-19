@@ -5,10 +5,11 @@ import { createTranslator } from '../../../lib/i18n';
 
 export function ComingGamesRail({ locale }: { readonly locale: Locale }): ReactElement {
   const { t } = createTranslator(locale);
-  // Jhabbu has graduated to its own preview teaser and detail pages, so the
-  // "other coming games" rail is trimmed to the two further-out titles. Keeping
-  // it short stops the landing page feeling padded with distant releases.
-  const games = [t('landing.coming.judgement'), t('landing.coming.mendicot')];
+  // Jhabbu and Kachuful (Judgement) have graduated to their own preview teasers
+  // and detail pages, so the "other coming games" rail is trimmed to the titles
+  // that are still further out. Keeping it short stops the landing page feeling
+  // padded with distant releases.
+  const games = [t('landing.coming.mendicot'), t('landing.coming.threeTwoFive')];
 
   return (
     <section className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8">

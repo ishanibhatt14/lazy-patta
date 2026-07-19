@@ -24,12 +24,14 @@ function messageFor(error: unknown, fallback: string): string {
 function gameKeyFromSearch(value: string | null): OnlineGameKey {
   if (value === 'lal_satti') return 'lal_satti';
   if (value === 'jhabbu') return 'jhabbu';
+  if (value === 'kachuful') return 'kachuful';
   return 'gadha_chor';
 }
 
 function gameKeyLabel(key: OnlineGameKey, t: ReturnType<typeof createTranslator>): string {
   if (key === 'lal_satti') return t.t('rooms.gameLalSatti');
   if (key === 'jhabbu') return t.t('rooms.gameJhabbu');
+  if (key === 'kachuful') return t.t('rooms.gameKachuful');
   return t.t('rooms.gameGadhaChor');
 }
 
@@ -86,8 +88,8 @@ export function OnlineHub(): ReactElement {
       <div className="flex flex-col gap-3 rounded-lg bg-surface-primary p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-text-primary">{t.t('rooms.createTitle')}</h2>
         <p className="text-sm text-text-primary">{t.t('rooms.createDescription')}</p>
-        <div className="grid grid-cols-3 gap-2" aria-label={t.t('rooms.gameLabel')}>
-          {(['gadha_chor', 'lal_satti', 'jhabbu'] as const).map((candidate) => (
+        <div className="grid grid-cols-2 gap-2" aria-label={t.t('rooms.gameLabel')}>
+          {(['gadha_chor', 'lal_satti', 'jhabbu', 'kachuful'] as const).map((candidate) => (
             <button
               key={candidate}
               type="button"
