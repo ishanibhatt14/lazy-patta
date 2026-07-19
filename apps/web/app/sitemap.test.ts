@@ -46,6 +46,15 @@ describe('sitemap', () => {
     expect(urls).toContain('https://lazypatta.com/play/lal-satti/computer');
     // Jhabbu now has a live computer experience, so its play route is included.
     expect(urls).toContain('https://lazypatta.com/play/jhabbu/computer');
+    // Kachuful (Judgement) has a live computer experience too.
+    expect(urls).toContain('https://lazypatta.com/play/kachuful/computer');
+  });
+
+  it('lists Kachuful topic and rules pages now that it is live', () => {
+    expect(urls).toContain('https://lazypatta.com/games/kachuful');
+    expect(urls).toContain('https://lazypatta.com/en/games/kachuful');
+    expect(urls).toContain('https://lazypatta.com/en/how-to-play/kachuful');
+    expect(urls).toContain('https://lazypatta.com/gu/how-to-play/kachuful');
   });
 
   it('attaches a reciprocal hreflang set to each localized entry', () => {

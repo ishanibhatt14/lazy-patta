@@ -1,7 +1,7 @@
 import { type Locale, type MessageKey } from '@lazy-patta/localization';
 import type { Metadata } from 'next';
 
-export type GameSlug = 'gadha-chor' | 'lal-satti' | 'jhabbu';
+export type GameSlug = 'gadha-chor' | 'lal-satti' | 'jhabbu' | 'kachuful';
 
 export interface GameDiscoveryConfig {
   readonly slug: GameSlug;
@@ -159,6 +159,54 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
     onlineHref: '/play/online?game=jhabbu',
     slugAliases: ['bhabho', 'bhabhi', 'laad', 'get-away', 'zabbu'],
     alternateNames: ['Bhabho', 'Bhabhi', 'Laad', 'Get Away', 'Zabbu'],
+  },
+  kachuful: {
+    slug: 'kachuful',
+    // Both the single-player (computer) experience and server-authoritative
+    // online/family rooms are live, so Kachuful gets Play routes, a practice
+    // CTA, a computer-play sitemap entry, and an active "Start family room" CTA.
+    playable: true,
+    onlinePlayable: true,
+    nameKey: 'games.kachuful.name',
+    pageHeadingKey: 'games.kachuful.pageHeading',
+    descriptionKey: 'games.kachuful.description',
+    aliasShortKey: 'games.kachuful.aliasShort',
+    aliasesKey: 'games.kachuful.aliases',
+    hindiNameKey: 'games.kachuful.hindiName',
+    gujaratiNameKey: 'games.kachuful.gujaratiName',
+    metaTitleKey: 'games.kachuful.metaTitle',
+    metaDescriptionKey: 'games.kachuful.metaDescription',
+    detailIntroKey: 'games.kachuful.detailIntro',
+    otherNamesSummaryKey: 'games.kachuful.otherNamesSummary',
+    sections: [
+      {
+        titleKey: 'games.kachuful.howTitle',
+        bodyKey: 'games.kachuful.howBody',
+      },
+      {
+        titleKey: 'games.kachuful.biddingTitle',
+        bodyKey: 'games.kachuful.biddingBody',
+      },
+      {
+        titleKey: 'games.kachuful.scoringTitle',
+        bodyKey: 'games.kachuful.scoringBody',
+      },
+      {
+        titleKey: 'games.kachuful.familyTitle',
+        bodyKey: 'games.kachuful.familyBody',
+      },
+    ],
+    computerHref: '/play/kachuful/computer',
+    onlineHref: '/play/online?game=kachuful',
+    slugAliases: [
+      'kachufool',
+      'kachooful',
+      'kachaful',
+      'judgement',
+      'judgment',
+      'kachuful-judgement',
+    ],
+    alternateNames: ['Kachufool', 'Kachooful', 'Judgement', 'Judgment', 'Kachuful Judgement'],
   },
 };
 

@@ -6,11 +6,13 @@ import {
   type GameResult,
   type PublicPlayerView,
   type PublicSnapshot,
+  type Suit,
 } from '@lazy-patta/game-contracts';
 import { mintPositionToken } from '@lazy-patta/game-engine';
 import type { JhabbuResult } from '@lazy-patta/jhabbu-engine';
+import type { KachufulResult } from '@lazy-patta/kachuful-engine';
 import { playableCards, toTableauLanes, type LalSattiResult } from '@lazy-patta/lal-satti-engine';
-import type { Locale } from '@lazy-patta/localization';
+import type { Locale, MessageKey } from '@lazy-patta/localization';
 import {
   useCallback,
   useEffect,
@@ -27,6 +29,7 @@ import {
   fetchLatestGame,
   fetchMyHand,
   submitJhabbuAction,
+  submitKachufulAction,
   submitLalSattiAction,
   type GameRow,
 } from '../../lib/online-game/games-client';
@@ -34,6 +37,10 @@ import type {
   JhabbuClientAction,
   JhabbuPublicSnapshot,
 } from '../../lib/online-game/jhabbu-authority';
+import type {
+  KachufulClientAction,
+  KachufulPublicSnapshot,
+} from '../../lib/online-game/kachuful-authority';
 import type { LalSattiPublicSnapshot } from '../../lib/online-game/lal-satti-authority';
 import type { RoomSeat } from '../../lib/rooms/rooms-client';
 import { getSupabaseBrowserClient } from '../../lib/supabase/browser-client';
@@ -266,7 +273,9 @@ export function GameBoard({
         avatarInitial: initialFor(name),
         isSelf,
         isActive: Boolean(isActive) && currentId === player.id,
-        isFinished: player.status === 'finished',
+        // Kachuful's public player view has no `status`; only the finish-tracking
+        // games (Gadha Chor, Jhabbu) mark a seat finished.
+        isFinished: 'status' in player && player.status === 'finished',
         cardCount: player.handCount,
       };
     });
@@ -307,7 +316,9 @@ export function GameBoard({
       ? t.t('rooms.gameLalSatti')
       : game.game_key === 'jhabbu'
         ? t.t('rooms.gameJhabbu')
-        : t.t('rooms.gameGadhaChor');
+        : game.game_key === 'kachuful'
+          ? t.t('rooms.gameKachuful')
+          : t.t('rooms.gameGadhaChor');
   const leaveLabel = t.t('rooms.leave');
 
   if (game.game_key === 'jhabbu') {
@@ -342,6 +353,29 @@ export function GameBoard({
         userId={userId}
         locale={locale}
         seats={positioned}
+        reducedMotion={reducedMotion}
+        busy={busy}
+        setBusy={setBusy}
+        setError={setError}
+        error={error}
+        refresh={refresh}
+        nameFor={nameFor}
+        gameLabel={gameLabel}
+        leaveLabel={leaveLabel}
+        code={code}
+        onLeave={onLeave}
+      />
+    );
+  }
+
+  if (game.game_key === 'kachuful') {
+    return (
+      <KachufulOnlineBoard
+        game={game}
+        snapshot={snapshot as KachufulPublicSnapshot}
+        hand={hand}
+        userId={userId}
+        locale={locale}
         reducedMotion={reducedMotion}
         busy={busy}
         setBusy={setBusy}
@@ -681,6 +715,13 @@ const JHABBU_SUIT_GLYPH: Record<string, string> = {
   spades: '♠',
 };
 
+const SUIT_GLYPH: Record<Suit, string> = {
+  clubs: '♣',
+  diamonds: '♦',
+  hearts: '♥',
+  spades: '♠',
+};
+
 function jhabbuCardLabel(card: Card): string {
   return `${card.rank} of ${card.suit}`;
 }
@@ -986,6 +1027,403 @@ function JhabbuOnlineBoard({
                 </ol>
               </div>
             ) : null}
+            {onLeave ? (
+              <button
+                type="button"
+                onClick={onLeave}
+                className="mt-2 rounded-md border border-action-primary px-4 py-2 text-sm font-bold text-action-primary transition hover:bg-background-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent"
+              >
+                {leaveLabel}
+              </button>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+interface KachufulOnlineBoardProps {
+  readonly game: GameRow;
+  readonly snapshot: KachufulPublicSnapshot;
+  readonly hand: readonly Card[];
+  readonly userId: string;
+  readonly locale: Locale;
+  readonly reducedMotion: boolean;
+  readonly busy: boolean;
+  readonly setBusy: (value: boolean) => void;
+  readonly setError: (value: string | undefined) => void;
+  readonly error: string | undefined;
+  readonly refresh: () => Promise<void>;
+  readonly nameFor: (playerId: string) => string;
+  readonly gameLabel: string;
+  readonly leaveLabel: string;
+  readonly code?: string;
+  readonly onLeave?: () => void;
+}
+
+/**
+ * Live Kachuful (Judgement) surface. Mirrors the solo Kachuful table: a running
+ * scoreboard (bid vs tricks vs total), the trump/round banner, the current
+ * trick, a bid keypad during the bidding phase, and the viewer's hand with
+ * legal-card highlighting. All truth is server-side — this reads the
+ * authoritative public snapshot plus the viewer's own hand (via RLS) and POSTs
+ * bids/plays/next-round to the authority route, which re-derives and
+ * re-validates every move. Legal bids and playable cards are recomputed here as
+ * a UI convenience only; a stale or forged highlight cannot cheat the server.
+ * The `round_scored` pause shows a "next round" button any player can press.
+ */
+function KachufulOnlineBoard({
+  game,
+  snapshot,
+  hand,
+  userId,
+  locale,
+  reducedMotion,
+  busy,
+  setBusy,
+  setError,
+  error,
+  refresh,
+  nameFor,
+  gameLabel,
+  leaveLabel,
+  code,
+  onLeave,
+}: KachufulOnlineBoardProps): ReactElement {
+  const t = useMemo(() => createTranslator(locale), [locale]);
+  const isActive = game.status === 'active';
+  const isMyTurn = Boolean(isActive && snapshot.currentPlayerId === userId);
+
+  const cardLabel = useCallback(
+    (card: Card): string =>
+      t.format('card.accessibleFace', {
+        rank: t.t(`rank.${card.rank}` as MessageKey),
+        suit: t.t(`suit.${card.suit}` as MessageKey),
+      }),
+    [t],
+  );
+
+  const trumpText =
+    snapshot.trump === 'no-trump'
+      ? t.t('kachuful.noTrump')
+      : (SUIT_GLYPH[snapshot.trump] ?? snapshot.trump);
+
+  // Legal bids mirror the engine's hook rule: 0..handSize, minus the value that
+  // would make the dealer's table total equal the trick count. The server is the
+  // real authority; this only greys out the forbidden key.
+  const { legalBids, forbiddenBid } = useMemo<{
+    legalBids: readonly number[];
+    forbiddenBid: number | null;
+  }>(() => {
+    const all = Array.from({ length: snapshot.handSize + 1 }, (_, bid) => bid);
+    if (snapshot.phase !== 'bidding' || snapshot.currentPlayerId !== userId) {
+      return { legalBids: all, forbiddenBid: null };
+    }
+    const yetToBid = snapshot.players.filter((player) => player.bid === null);
+    const isFinalBidder = yetToBid.length === 1 && yetToBid[0]!.id === userId;
+    if (!isFinalBidder) return { legalBids: all, forbiddenBid: null };
+    const others = snapshot.players.reduce(
+      (total, player) => (player.id === userId ? total : total + (player.bid ?? 0)),
+      0,
+    );
+    const forbidden = snapshot.handSize - others;
+    return { legalBids: all.filter((bid) => bid !== forbidden), forbiddenBid: forbidden };
+  }, [snapshot.handSize, snapshot.phase, snapshot.currentPlayerId, snapshot.players, userId]);
+
+  const playableIds = useMemo<readonly string[]>(() => {
+    if (!isMyTurn || snapshot.phase !== 'playing') return [];
+    const led = snapshot.ledSuit;
+    if (!led) return hand.map((card) => card.id);
+    const hasLed = hand.some((card) => card.suit === led);
+    const legal = hasLed ? hand.filter((card) => card.suit === led) : hand;
+    return legal.map((card) => card.id);
+  }, [hand, isMyTurn, snapshot.phase, snapshot.ledSuit]);
+  const playable = useMemo(() => new Set(playableIds), [playableIds]);
+
+  const submit = useCallback(
+    async (action: KachufulClientAction): Promise<void> => {
+      if (busy) return;
+      setBusy(true);
+      setError(undefined);
+      try {
+        await submitKachufulAction(getSupabaseBrowserClient(), game.id, {
+          clientActionId: newActionId(),
+          action,
+          expectedVersion: game.state_version,
+        });
+      } catch (caught) {
+        setError(messageFor(caught, t.t('rooms.errorGeneric')));
+      } finally {
+        await refresh();
+        setBusy(false);
+      }
+    },
+    [busy, game.id, game.state_version, refresh, setBusy, setError, t],
+  );
+
+  const result = game.result as KachufulResult | null;
+  const winnerNames = result ? result.winnerIds.map(nameFor) : [];
+  const isSelfWinner = Boolean(result && result.winnerIds.includes(userId));
+
+  const instruction = !isActive
+    ? t.t('rooms.waitingToStart')
+    : snapshot.phase === 'round_scored'
+      ? t.t('kachuful.roundComplete')
+      : isMyTurn
+        ? snapshot.phase === 'bidding'
+          ? t.t('kachuful.yourTurnBid')
+          : t.t('kachuful.yourTurnPlay')
+        : t.format('rooms.turnWaiting', { name: nameFor(snapshot.currentPlayerId ?? '') });
+
+  const scoreboard = [...snapshot.players].sort((a, b) => b.totalScore - a.totalScore);
+
+  return (
+    <div
+      className="fixed inset-0 z-40 overflow-y-auto bg-background-canvas"
+      data-reduced-motion={reducedMotion ? 'true' : 'false'}
+    >
+      <main className="min-h-screen px-3 py-4 text-text-primary sm:px-4 sm:py-6">
+        <section className="mx-auto flex max-w-5xl flex-col gap-4">
+          <header className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-surface-primary/95 p-3 shadow-md">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-accent">
+                {gameLabel}
+              </p>
+              <p className="mt-1 flex flex-wrap items-center gap-2 text-sm font-bold text-text-primary">
+                <span className="rounded-full bg-background-canvas px-3 py-1">
+                  {t.format('kachuful.roundLabel', {
+                    round: snapshot.roundNumber,
+                    total: snapshot.totalRounds,
+                  })}
+                </span>
+                <span className="rounded-full bg-game-table px-3 py-1 text-text-onBrand">
+                  {t.format('kachuful.trumpLabel', { trump: trumpText })}
+                </span>
+                {code ? <span className="tracking-[0.25em] text-text-primary">{code}</span> : null}
+              </p>
+            </div>
+            {onLeave ? (
+              <button
+                type="button"
+                onClick={onLeave}
+                className="rounded-md border border-action-primary px-3 py-1.5 text-sm font-bold text-action-primary transition hover:bg-background-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent"
+              >
+                {leaveLabel}
+              </button>
+            ) : null}
+          </header>
+
+          <p role="status" aria-live="polite" className="text-base font-semibold text-text-primary">
+            {instruction}
+          </p>
+
+          <section
+            aria-label={t.t('kachuful.scoreboardHeading')}
+            className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4"
+          >
+            {snapshot.players.map((player) => {
+              const name = nameFor(player.id);
+              const active = isActive && snapshot.currentPlayerId === player.id;
+              return (
+                <div
+                  key={player.id}
+                  data-active={active}
+                  className={[
+                    'rounded-lg border p-3 shadow-sm transition',
+                    active
+                      ? 'border-action-primary bg-action-primary/10'
+                      : 'border-brand-accent/40 bg-surface-primary',
+                  ].join(' ')}
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      aria-hidden
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-game-table text-sm font-bold text-text-onBrand"
+                    >
+                      {initialFor(name)}
+                    </span>
+                    <span className="truncate text-sm font-bold">{name}</span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1 text-xs">
+                    {player.isDealer ? (
+                      <span className="rounded bg-brand-accent/30 px-1.5 py-0.5 font-semibold">
+                        {t.t('kachuful.dealerBadge')}
+                      </span>
+                    ) : null}
+                    <span className="rounded bg-background-canvas px-1.5 py-0.5 font-semibold">
+                      {t.format('kachuful.bidTricksSeat', {
+                        bid: player.bid ?? '—',
+                        won: player.tricksWon,
+                      })}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs font-bold text-action-primary">
+                    {t.format('kachuful.totalScore', { count: player.totalScore })}
+                  </p>
+                </div>
+              );
+            })}
+          </section>
+
+          {snapshot.currentTrick.length > 0 ? (
+            <section
+              aria-label={t.t('kachuful.trickHeading')}
+              className="rounded-lg bg-game-table/90 p-3 shadow-md"
+            >
+              <p className="mb-2 text-xs font-semibold uppercase text-text-onBrand">
+                {t.t('kachuful.trickHeading')}
+              </p>
+              <div className="flex flex-wrap items-end gap-3">
+                {snapshot.currentTrick.map((entry) => (
+                  <div key={entry.playerId} className="flex flex-col items-center gap-1">
+                    <PlayingCard card={entry.card} size="sm" label={cardLabel(entry.card)} />
+                    <span className="text-xs font-semibold text-text-onBrand">
+                      {nameFor(entry.playerId)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {snapshot.phase === 'bidding' && isMyTurn ? (
+            <section
+              aria-label={t.t('kachuful.bidPrompt')}
+              className="rounded-lg border border-action-primary/30 bg-surface-primary p-4 shadow-md"
+            >
+              <p className="text-sm font-bold text-action-primary">{t.t('kachuful.bidPrompt')}</p>
+              <div
+                className="mt-3 flex flex-wrap gap-2"
+                role="group"
+                aria-label={t.t('kachuful.bidPrompt')}
+              >
+                {Array.from({ length: snapshot.handSize + 1 }, (_, bid) => bid).map((bid) => {
+                  const disabled = busy || !legalBids.includes(bid);
+                  return (
+                    <button
+                      key={bid}
+                      type="button"
+                      disabled={disabled}
+                      aria-label={t.format('kachuful.placeBid', { count: bid })}
+                      className={[
+                        'min-h-12 min-w-12 rounded-md border px-3 py-2 text-base font-bold transition',
+                        disabled
+                          ? 'cursor-not-allowed border-brand-accent/30 bg-background-canvas text-text-primary/40'
+                          : 'border-action-primary bg-surface-primary text-action-primary hover:bg-action-primary hover:text-text-onBrand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent',
+                      ].join(' ')}
+                      onClick={() => void submit({ type: 'PLACE_BID', bid })}
+                    >
+                      {bid}
+                    </button>
+                  );
+                })}
+              </div>
+              {forbiddenBid !== null ? (
+                <p className="mt-2 text-xs leading-5 text-text-primary">
+                  {t.format('kachuful.hookHint', { count: forbiddenBid })}
+                </p>
+              ) : null}
+            </section>
+          ) : null}
+
+          <section
+            aria-label={t.t('kachuful.yourHand')}
+            className="rounded-lg bg-surface-primary p-3 shadow-md"
+          >
+            <p className="mb-2 text-xs font-semibold uppercase text-action-primary">
+              {t.t('kachuful.yourHand')}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {hand.map((card) => {
+                const canPlay = snapshot.phase === 'playing' && isMyTurn && playable.has(card.id);
+                const label = cardLabel(card);
+                if (canPlay) {
+                  return (
+                    <button
+                      key={card.id}
+                      type="button"
+                      disabled={busy}
+                      aria-label={t.format('kachuful.playCardLabel', { card: label })}
+                      className="rounded-lg ring-2 ring-action-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent disabled:opacity-60"
+                      onClick={() => void submit({ type: 'PLAY_CARD', cardId: card.id })}
+                    >
+                      <PlayingCard card={card} size="md" label={label} />
+                    </button>
+                  );
+                }
+                return (
+                  <div
+                    key={card.id}
+                    className={snapshot.phase === 'playing' && isMyTurn ? 'opacity-45' : undefined}
+                  >
+                    <PlayingCard card={card} size="md" label={label} />
+                  </div>
+                );
+              })}
+              {hand.length === 0 ? (
+                <p className="text-sm text-text-primary">{t.t('kachuful.handEmpty')}</p>
+              ) : null}
+            </div>
+          </section>
+
+          {snapshot.phase === 'round_scored' ? (
+            <section className="rounded-lg border border-action-primary/40 bg-surface-primary p-4 shadow-md">
+              <h2 className="text-lg font-bold text-action-primary">
+                {t.t('kachuful.roundComplete')}
+              </h2>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void submit({ type: 'START_NEXT_ROUND' })}
+                className="mt-4 min-h-12 w-full rounded-md bg-action-primary px-4 py-2 text-sm font-bold text-text-onBrand transition hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent disabled:pointer-events-none disabled:opacity-60"
+              >
+                {t.t('kachuful.nextRound')}
+              </button>
+            </section>
+          ) : null}
+
+          {error ? (
+            <p className="rounded-md bg-status-error/95 px-3 py-1.5 text-center text-sm font-semibold text-text-onBrand shadow-md">
+              {error}
+            </p>
+          ) : null}
+        </section>
+      </main>
+
+      {game.status === 'complete' && result ? (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="flex max-w-sm flex-col items-center gap-2 rounded-lg bg-surface-primary px-5 py-4 text-center shadow-md">
+            <span className="text-sm font-semibold uppercase text-action-primary">
+              {t.t('kachuful.matchComplete')}
+            </span>
+            <span className="text-lg font-bold text-text-primary">
+              {isSelfWinner
+                ? t.t('kachuful.youWin')
+                : winnerNames.length > 1
+                  ? t.format('kachuful.winnersAnnounce', { names: winnerNames.join(', ') })
+                  : t.format('kachuful.winnerAnnounce', { name: winnerNames[0] ?? '' })}
+            </span>
+            <ol className="mt-1 w-full space-y-1">
+              {scoreboard.map((player, index) => (
+                <li
+                  key={player.id}
+                  className={[
+                    'flex items-center justify-between rounded-md px-3 py-2 text-sm',
+                    player.id === userId
+                      ? 'bg-action-primary/10 font-bold'
+                      : 'bg-background-canvas',
+                  ].join(' ')}
+                >
+                  <span>
+                    {index + 1}. {nameFor(player.id)}
+                  </span>
+                  <span className="font-bold text-action-primary">
+                    {t.format('kachuful.totalScore', { count: player.totalScore })}
+                  </span>
+                </li>
+              ))}
+            </ol>
             {onLeave ? (
               <button
                 type="button"

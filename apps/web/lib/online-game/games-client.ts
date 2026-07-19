@@ -1,9 +1,11 @@
 import type { Card, GameResult, PublicSnapshot } from '@lazy-patta/game-contracts';
 import type { JhabbuResult } from '@lazy-patta/jhabbu-engine';
+import type { KachufulResult } from '@lazy-patta/kachuful-engine';
 import type { LalSattiResult } from '@lazy-patta/lal-satti-engine';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import type { JhabbuClientAction, JhabbuPublicSnapshot } from './jhabbu-authority';
+import type { KachufulClientAction, KachufulPublicSnapshot } from './kachuful-authority';
 import type { LalSattiClientAction, LalSattiPublicSnapshot } from './lal-satti-authority';
 
 /**
@@ -16,11 +18,12 @@ import type { LalSattiClientAction, LalSattiPublicSnapshot } from './lal-satti-a
 
 export interface GameRow {
   readonly id: string;
-  readonly game_key: 'gadha_chor' | 'lal_satti' | 'jhabbu';
+  readonly game_key: 'gadha_chor' | 'lal_satti' | 'jhabbu' | 'kachuful';
   readonly status: 'active' | 'complete' | 'abandoned';
   readonly state_version: number;
-  readonly public_snapshot: PublicSnapshot | LalSattiPublicSnapshot | JhabbuPublicSnapshot;
-  readonly result: GameResult | LalSattiResult | JhabbuResult | null;
+  readonly public_snapshot:
+    PublicSnapshot | LalSattiPublicSnapshot | JhabbuPublicSnapshot | KachufulPublicSnapshot;
+  readonly result: GameResult | LalSattiResult | JhabbuResult | KachufulResult | null;
   readonly created_at?: string;
 }
 
@@ -39,6 +42,12 @@ export interface LalSattiActionInput {
 export interface JhabbuActionInput {
   readonly clientActionId: string;
   readonly action: JhabbuClientAction;
+  readonly expectedVersion: number;
+}
+
+export interface KachufulActionInput {
+  readonly clientActionId: string;
+  readonly action: KachufulClientAction;
   readonly expectedVersion: number;
 }
 
@@ -97,6 +106,16 @@ export async function submitJhabbuAction(
   client: SupabaseClient,
   gameId: string,
   input: JhabbuActionInput,
+): Promise<{ stateVersion: number }> {
+  const json = await authedPost(client, `/api/games/${gameId}/action`, input);
+  return { stateVersion: Number(json.stateVersion) };
+}
+
+/** Submit a Kachuful bid/play/next-round through the authority route. */
+export async function submitKachufulAction(
+  client: SupabaseClient,
+  gameId: string,
+  input: KachufulActionInput,
 ): Promise<{ stateVersion: number }> {
   const json = await authedPost(client, `/api/games/${gameId}/action`, input);
   return { stateVersion: Number(json.stateVersion) };

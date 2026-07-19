@@ -1,0 +1,9 @@
+{
+  "extends": "@lazy-patta/typescript-config/base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "noEmit": true,
+    "types": ["vitest/globals"]
+  },
+  "include": ["src"]
+}

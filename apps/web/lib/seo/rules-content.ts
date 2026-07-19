@@ -22,7 +22,7 @@ export interface RulesContent {
   readonly faq: readonly RulesFaqItem[];
 }
 
-type RulesPrefix = 'rules.gadhaChor' | 'rules.lalSatti' | 'rules.jhabbu';
+type RulesPrefix = 'rules.gadhaChor' | 'rules.lalSatti' | 'rules.jhabbu' | 'rules.kachuful';
 
 function sections(prefix: RulesPrefix): readonly RulesSection[] {
   return [
@@ -71,5 +71,14 @@ export const RULES_CONTENT: Record<GameSlug, RulesContent> = {
     introKey: 'rules.jhabbu.intro',
     sections: sections('rules.jhabbu'),
     faq: faq('rules.jhabbu'),
+  },
+  kachuful: {
+    slug: 'kachuful',
+    metaTitleKey: 'rules.kachuful.metaTitle',
+    metaDescriptionKey: 'rules.kachuful.metaDescription',
+    headingKey: 'rules.kachuful.heading',
+    introKey: 'rules.kachuful.intro',
+    sections: sections('rules.kachuful'),
+    faq: faq('rules.kachuful'),
   },
 };

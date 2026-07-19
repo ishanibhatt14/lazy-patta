@@ -168,6 +168,11 @@ export function MobileAppLanding(): ReactElement {
       title: t('mobile.games.jhabbu'),
       description: t('landing.game.jhabbu.description'),
     },
+    {
+      href: '/play/kachuful/computer',
+      title: t('mobile.games.kachuful'),
+      description: t('landing.game.kachuful.description'),
+    },
   ];
 
   return (
@@ -261,7 +266,7 @@ export function MobileAppLanding(): ReactElement {
           </h2>
           <p className="mt-4 text-base leading-7 text-text-primary">{t('mobile.games.body')}</p>
         </div>
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
           {mobileGames.map((game) => (
             <Link
               key={game.href}

@@ -14,6 +14,12 @@ import {
   persistJhabbuStart,
 } from '../../../../../lib/online-game/jhabbu-authority';
 import {
+  advanceKachufulBots,
+  initialKachufulState,
+  KACHUFUL_FAMILY_DESCENDING,
+  persistKachufulStart,
+} from '../../../../../lib/online-game/kachuful-authority';
+import {
   advanceLalSattiBots,
   initialLalSattiState,
   LAL_SATTI_CLASSIC,
@@ -73,13 +79,17 @@ export async function POST(request: Request, ctx: Context): Promise<Response> {
 
   const seats = seatRows ?? [];
   const gameKey =
-    room.game_key === 'lal_satti' || room.game_key === 'jhabbu' ? room.game_key : 'gadha_chor';
+    room.game_key === 'lal_satti' || room.game_key === 'jhabbu' || room.game_key === 'kachuful'
+      ? room.game_key
+      : 'gadha_chor';
   const rules =
     gameKey === 'lal_satti'
       ? LAL_SATTI_CLASSIC
       : gameKey === 'jhabbu'
         ? JHABBU_GUJARATI_FAMILY
-        : CLASSIC_GULAM_CHOR;
+        : gameKey === 'kachuful'
+          ? KACHUFUL_FAMILY_DESCENDING
+          : CLASSIC_GULAM_CHOR;
   const minPlayers = rules.minPlayers;
   const maxPlayers = rules.maxPlayers;
 
@@ -109,6 +119,13 @@ export async function POST(request: Request, ctx: Context): Promise<Response> {
       const opening = initialJhabbuState(playerIds);
       const gameId = await persistJhabbuStart(admin, roomId, opening);
       const finalState = await advanceJhabbuBots(admin, gameId, opening);
+      return NextResponse.json({ ok: true, gameId, stateVersion: finalState.stateVersion });
+    }
+
+    if (gameKey === 'kachuful') {
+      const opening = initialKachufulState(playerIds);
+      const gameId = await persistKachufulStart(admin, roomId, opening);
+      const finalState = await advanceKachufulBots(admin, gameId, opening);
       return NextResponse.json({ ok: true, gameId, stateVersion: finalState.stateVersion });
     }
 

@@ -10,7 +10,7 @@ import { type SupabaseClient } from '@supabase/supabase-js';
 export type RoomStatus = 'lobby' | 'in_progress' | 'complete' | 'abandoned';
 export type SeatOccupant = 'human' | 'bot' | 'empty';
 export type RoomLocale = 'en' | 'gu' | 'hi';
-export type OnlineGameKey = 'gadha_chor' | 'lal_satti' | 'jhabbu';
+export type OnlineGameKey = 'gadha_chor' | 'lal_satti' | 'jhabbu' | 'kachuful';
 
 export interface Room {
   readonly id: string;

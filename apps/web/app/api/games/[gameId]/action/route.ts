@@ -1,5 +1,6 @@
 import type { GameState } from '@lazy-patta/game-contracts';
 import type { JhabbuState } from '@lazy-patta/jhabbu-engine';
+import type { KachufulState } from '@lazy-patta/kachuful-engine';
 import type { LalSattiState } from '@lazy-patta/lal-satti-engine';
 import { NextResponse } from 'next/server';
 
@@ -15,6 +16,12 @@ import {
   currentJhabbuActor,
   type JhabbuClientAction,
 } from '../../../../../lib/online-game/jhabbu-authority';
+import {
+  advanceKachufulBots,
+  applyHumanKachufulAction,
+  currentKachufulActor,
+  type KachufulClientAction,
+} from '../../../../../lib/online-game/kachuful-authority';
 import {
   advanceLalSattiBots,
   applyHumanLalSattiAction,
@@ -66,6 +73,20 @@ function parseLalSattiAction(
 function parseJhabbuAction(value: Record<string, unknown> | undefined): JhabbuClientAction | null {
   if (!value) return null;
   if (value.type === 'DRAW_FROM_WASTE') return { type: 'DRAW_FROM_WASTE' };
+  if (value.type === 'PLAY_CARD' && typeof value.cardId === 'string') {
+    return { type: 'PLAY_CARD', cardId: value.cardId };
+  }
+  return null;
+}
+
+function parseKachufulAction(
+  value: Record<string, unknown> | undefined,
+): KachufulClientAction | null {
+  if (!value) return null;
+  if (value.type === 'START_NEXT_ROUND') return { type: 'START_NEXT_ROUND' };
+  if (value.type === 'PLACE_BID' && typeof value.bid === 'number') {
+    return { type: 'PLACE_BID', bid: value.bid };
+  }
   if (value.type === 'PLAY_CARD' && typeof value.cardId === 'string') {
     return { type: 'PLAY_CARD', cardId: value.cardId };
   }
@@ -202,6 +223,51 @@ export async function POST(request: Request, ctx: Context): Promise<Response> {
         return NextResponse.json({ error: 'version conflict' }, { status: 409 });
       }
       if (caught instanceof Error && caught.message === 'INVALID_JHABBU_ACTION') {
+        return NextResponse.json({ error: 'invalid or stale move' }, { status: 400 });
+      }
+      return NextResponse.json({ error: 'could not apply the action' }, { status: 500 });
+    }
+  }
+
+  if (game.game_key === 'kachuful') {
+    const action = parseKachufulAction(body.action);
+    if (!action) {
+      return NextResponse.json({ error: 'invalid action for this game' }, { status: 400 });
+    }
+
+    const state = authRow.state as KachufulState;
+    if (!state.players.some((player) => player.id === userId)) {
+      return NextResponse.json({ error: 'not a player in this game' }, { status: 403 });
+    }
+    if (body.expectedVersion !== state.stateVersion) {
+      return NextResponse.json(
+        { error: 'version conflict', stateVersion: state.stateVersion },
+        { status: 409 },
+      );
+    }
+    // `START_NEXT_ROUND` is a between-rounds action any seated player may fire —
+    // there is no single "current" seat during `round_scored`. Every other move
+    // (a bid or a card) must come from the player on turn.
+    if (action.type !== 'START_NEXT_ROUND' && currentKachufulActor(state) !== userId) {
+      return NextResponse.json({ error: 'not your turn' }, { status: 409 });
+    }
+
+    try {
+      const afterHuman = await applyHumanKachufulAction(
+        admin,
+        gameId,
+        state,
+        userId,
+        action,
+        body.clientActionId,
+      );
+      const finalState = await advanceKachufulBots(admin, gameId, afterHuman);
+      return NextResponse.json({ ok: true, stateVersion: finalState.stateVersion });
+    } catch (caught) {
+      if (caught instanceof VersionConflictError) {
+        return NextResponse.json({ error: 'version conflict' }, { status: 409 });
+      }
+      if (caught instanceof Error && caught.message === 'INVALID_KACHUFUL_ACTION') {
         return NextResponse.json({ error: 'invalid or stale move' }, { status: 400 });
       }
       return NextResponse.json({ error: 'could not apply the action' }, { status: 500 });

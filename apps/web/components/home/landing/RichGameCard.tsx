@@ -22,6 +22,8 @@ interface RichGameCardProps {
   readonly overviewHref?: string;
   readonly onHowToPlay?: () => void;
   readonly artwork: ReactNode;
+  /** Flags the newest game with a "New" ribbon on the card. */
+  readonly isNew?: boolean;
 }
 
 /**
@@ -576,6 +578,189 @@ export function JhabbuArtwork({ locale }: { readonly locale: Locale }): ReactEle
   );
 }
 
+/**
+ * A single suited card for the Kachuful "judgement table" scene. `suit` and
+ * `suitColor` let the fanned bidding hand share one shape while the featured
+ * trump card (the spade) is tinted and haloed so the trump reads at a glance —
+ * by colour, size, and the "TRUMP" label, never by motion alone.
+ */
+function BidCard({
+  rank,
+  suit,
+  suitColor,
+  className = '',
+  featured = false,
+}: {
+  readonly rank: string;
+  readonly suit: string;
+  readonly suitColor: string;
+  readonly className?: string;
+  readonly featured?: boolean;
+}): ReactElement {
+  return (
+    <svg
+      viewBox="0 0 120 168"
+      width="120"
+      height="168"
+      className={className}
+      style={{ overflow: 'visible' }}
+      aria-hidden
+      focusable="false"
+    >
+      <defs>
+        <filter
+          id={`lp-kachuful-shadow-${rank}${suit}`}
+          x="-40%"
+          y="-40%"
+          width="180%"
+          height="180%"
+        >
+          <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="#0a1026" floodOpacity="0.5" />
+        </filter>
+      </defs>
+      <rect
+        x="2.5"
+        y="2.5"
+        width="115"
+        height="163"
+        rx="12"
+        fill={ART.cream}
+        stroke={featured ? ART.haldi : ART.maroon}
+        strokeWidth={featured ? '3.4' : '2.6'}
+        filter={`url(#lp-kachuful-shadow-${rank}${suit})`}
+      />
+      <rect
+        x="8"
+        y="8"
+        width="104"
+        height="152"
+        rx="8"
+        fill="none"
+        stroke={ART.creamShade}
+        strokeWidth="1.2"
+      />
+      <g fill={suitColor}>
+        <text x="12" y="26" fontSize="18" fontWeight="800" fontFamily="Georgia, serif">
+          {rank}
+        </text>
+        <text x="13" y="42" fontSize="14">
+          {suit}
+        </text>
+        <text x="60" y="98" fontSize="46" textAnchor="middle">
+          {suit}
+        </text>
+        <g transform="rotate(180 60 84)">
+          <text x="12" y="26" fontSize="18" fontWeight="800" fontFamily="Georgia, serif">
+            {rank}
+          </text>
+          <text x="13" y="42" fontSize="14">
+            {suit}
+          </text>
+        </g>
+      </g>
+    </svg>
+  );
+}
+
+/**
+ * "Judgement table": a warm haldi-lit felt with a fanned bidding hand and a
+ * featured spade trump card haloed at the centre, plus a small "bid" chip — the
+ * moment in Kachuful where each player judges exactly how many tricks they will
+ * win. Shadows use SVG `feDropShadow`; any hover/focus motion lives in
+ * landing.css and is disabled under `prefers-reduced-motion`, where the trump
+ * still reads via colour, size, and its label.
+ */
+export function KachufulArtwork({ locale }: { readonly locale: Locale }): ReactElement {
+  const { t } = createTranslator(locale);
+  return (
+    <div
+      className="relative aspect-[16/10] w-full overflow-hidden rounded-t-lg"
+      role="img"
+      aria-label={t('landing.game.kachuful.artLabel')}
+    >
+      {/* Warm haldi-and-maroon judgement felt */}
+      <div
+        className="absolute inset-0"
+        aria-hidden
+        style={{
+          background: `radial-gradient(120% 120% at 50% 8%, ${ART.haldiSoft} 0%, ${ART.haldi} 30%, ${ART.maroonDeep} 100%)`,
+        }}
+      />
+      <div
+        className="absolute inset-0 opacity-20"
+        aria-hidden
+        style={{
+          background: `radial-gradient(circle, ${ART.cream} 0 1px, transparent 2px) 0 0 / 20px 20px`,
+        }}
+      />
+      {/* Trump halo behind the featured spade */}
+      <div
+        className="absolute left-1/2 top-[26%] h-[52%] w-[52%] -translate-x-1/2 rounded-full"
+        aria-hidden
+        style={{
+          background: `radial-gradient(circle, ${ART.haldiSoft}cc 0%, ${ART.haldi}55 45%, transparent 72%)`,
+        }}
+      />
+      {/* Fanned bidding hand with the spade trump featured at the centre */}
+      <div className="absolute inset-x-0 bottom-5 top-8 flex items-end justify-center">
+        <div className="relative h-[74%] w-[54%]">
+          <BidCard
+            rank="Q"
+            suit="♥"
+            suitColor="#c0392b"
+            className="absolute bottom-1 left-[2%] h-[82%] w-auto -rotate-[16deg]"
+          />
+          <BidCard
+            rank="10"
+            suit="♦"
+            suitColor="#c0392b"
+            className="absolute bottom-2 left-[20%] h-[86%] w-auto -rotate-[7deg]"
+          />
+          <BidCard
+            rank="A"
+            suit="♠"
+            suitColor={ART.ink}
+            featured
+            className="absolute bottom-3 left-1/2 h-[96%] w-auto -translate-x-1/2"
+          />
+          <BidCard
+            rank="K"
+            suit="♣"
+            suitColor={ART.ink}
+            className="absolute bottom-2 right-[20%] h-[86%] w-auto rotate-[7deg]"
+          />
+          <BidCard
+            rank="J"
+            suit="♥"
+            suitColor="#c0392b"
+            className="absolute bottom-1 right-[2%] h-[82%] w-auto rotate-[16deg]"
+          />
+        </div>
+      </div>
+      {/* "TRUMP" callout — reinforces the featured spade without relying on motion */}
+      <div
+        className="absolute left-[8%] top-[12%] rounded-full px-3 py-1 text-xs font-black uppercase tracking-wide"
+        aria-hidden
+        style={{ background: ART.peacock, color: ART.cream }}
+      >
+        {t('landing.game.kachuful.trumpLabel')}
+      </div>
+      {/* Bid chip — the number each player judges they will win */}
+      <div
+        className="absolute right-[10%] top-[16%] grid h-9 w-9 place-items-center rounded-full text-sm font-black"
+        aria-hidden
+        style={{
+          background: ART.haldi,
+          color: ART.maroonDeep,
+          boxShadow: `0 0 0 3px ${ART.cream}`,
+        }}
+      >
+        3
+      </div>
+    </div>
+  );
+}
+
 export function RichGameCard({
   locale,
   title,
@@ -591,12 +776,18 @@ export function RichGameCard({
   overviewHref,
   onHowToPlay,
   artwork,
+  isNew = false,
 }: RichGameCardProps): ReactElement {
   const { t } = createTranslator(locale);
   const meta = [difficulty, duration, players];
 
   return (
-    <article className="rich-game-card flex min-h-full flex-col overflow-hidden rounded-lg border border-action-primary/15 bg-surface-primary shadow-md">
+    <article className="rich-game-card relative flex min-h-full flex-col overflow-hidden rounded-lg border border-action-primary/15 bg-surface-primary shadow-md">
+      {isNew ? (
+        <span className="absolute right-3 top-3 z-10 rounded-full bg-brand-accent px-3 py-1 text-xs font-black uppercase tracking-wide text-text-onBrand shadow-md">
+          {t('landing.game.newBadge')}
+        </span>
+      ) : null}
       {artwork}
       <div className="flex flex-1 flex-col gap-4 p-5">
         <div className="flex items-start justify-between gap-4">

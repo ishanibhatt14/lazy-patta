@@ -114,6 +114,9 @@ importers:
       '@lazy-patta/jhabbu-engine':
         specifier: workspace:*
         version: link:../../packages/jhabbu-engine
+      '@lazy-patta/kachuful-engine':
+        specifier: workspace:*
+        version: link:../../packages/kachuful-engine
       '@lazy-patta/lal-satti-engine':
         specifier: workspace:*
         version: link:../../packages/lal-satti-engine
@@ -295,6 +298,34 @@ importers:
         version: 2.1.9(@types/node@20.19.43)(jsdom@25.0.1)(lightningcss@1.32.0)(terser@5.49.0)
 
   packages/jhabbu-engine:
+    dependencies:
+      '@lazy-patta/game-contracts':
+        specifier: workspace:*
+        version: link:../game-contracts
+    devDependencies:
+      '@lazy-patta/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@lazy-patta/test-fixtures':
+        specifier: workspace:*
+        version: link:../test-fixtures
+      '@lazy-patta/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^20.17.10
+        version: 20.19.43
+      eslint:
+        specifier: ^8.57.0
+        version: 8.57.1
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@20.19.43)(jsdom@25.0.1)(lightningcss@1.32.0)(terser@5.49.0)
+
+  packages/kachuful-engine:
     dependencies:
       '@lazy-patta/game-contracts':
         specifier: workspace:*
@@ -7365,7 +7396,9 @@ snapshots:
       metro-runtime: 0.84.4
     transitivePeerDependencies:
       - '@babel/core'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-colors@0.86.0': {}
 
