@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default function JhabbuOverviewPage(): ReactElement {
-  // Jhabbu is coming soon: GameOverview renders the rules-first card with no
-  // Play buttons while `status` is `comingSoon`.
-  return <GameOverview game={game} status="comingSoon" tutorialSteps={JHABBU_TUTORIAL_STEPS} />;
+  // Jhabbu is live: GameOverview renders the Play Computer / Play Online CTAs
+  // (registry `computerHref` → /play/jhabbu/computer) alongside the rules.
+  return <GameOverview game={game} status="available" tutorialSteps={JHABBU_TUTORIAL_STEPS} />;
 }

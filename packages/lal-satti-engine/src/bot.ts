@@ -1,4 +1,9 @@
-import { type BotDifficulty, botMistakeRate, type PlayerId, type Rng } from '@lazy-patta/game-contracts';
+import {
+  type BotDifficulty,
+  botMistakeRate,
+  type PlayerId,
+  type Rng,
+} from '@lazy-patta/game-contracts';
 
 import { rankIndex } from './cards';
 import { LalSattiEngine } from './engine';

@@ -14,12 +14,56 @@ import { fanCardStyle, useHandLayout } from '../../../lib/hand-layout';
 import { createTranslator } from '../../../lib/i18n';
 import { usePreferredLocale } from '../../../lib/locale/preferred-locale-context';
 
+import { JhabbuAccountSheet } from './JhabbuAccountSheet';
+import { JhabbuScoreDrawer } from './JhabbuScoreDrawer';
 import { createJhabbuController, selectJhabbuViewState, type JhabbuController } from './controller';
-import type { JhabbuControllerState, JhabbuIntent, JhabbuSeatView, JhabbuViewState } from './types';
+import type {
+  JhabbuControllerState,
+  JhabbuIntent,
+  JhabbuRoundScore,
+  JhabbuSeatView,
+  JhabbuViewState,
+} from './types';
 
 const PLAYER_COUNTS = [3, 4, 5, 6] as const;
+const SESSION_STORAGE_KEY = 'lazy-patta:jhabbu-session:v1';
+
+interface StoredJhabbuSession {
+  readonly humanName?: string;
+  readonly roundScores?: readonly JhabbuRoundScore[];
+}
+
+function readStoredSession(): StoredJhabbuSession {
+  if (typeof window === 'undefined') return {};
+  const raw = window.localStorage.getItem(SESSION_STORAGE_KEY);
+  if (!raw) return {};
+
+  try {
+    const parsed = JSON.parse(raw) as StoredJhabbuSession;
+    return {
+      humanName: typeof parsed.humanName === 'string' ? parsed.humanName : undefined,
+      roundScores: Array.isArray(parsed.roundScores) ? parsed.roundScores : undefined,
+    };
+  } catch {
+    return {};
+  }
+}
+
+function writeStoredSession(state: JhabbuControllerState): void {
+  if (typeof window === 'undefined' || !state.hasHydratedSession) return;
+  window.localStorage.setItem(
+    SESSION_STORAGE_KEY,
+    JSON.stringify({
+      humanName: state.humanName,
+      roundScores: state.roundScores,
+    }),
+  );
+}
 const DIFFICULTIES: readonly BotDifficulty[] = ['easy', 'medium', 'hard'];
-const DIFFICULTY_LABEL_KEY: Record<BotDifficulty, 'computer.difficultyEasy' | 'computer.difficultyMedium' | 'computer.difficultyHard'> = {
+const DIFFICULTY_LABEL_KEY: Record<
+  BotDifficulty,
+  'computer.difficultyEasy' | 'computer.difficultyMedium' | 'computer.difficultyHard'
+> = {
   easy: 'computer.difficultyEasy',
   medium: 'computer.difficultyMedium',
   hard: 'computer.difficultyHard',
@@ -570,9 +614,13 @@ function PlayerHandFan({
 function ResultOverlay({
   view,
   onRematch,
+  onViewScores,
+  onOpenAccount,
 }: {
   readonly view: JhabbuViewState;
   readonly onRematch: () => void;
+  readonly onViewScores: () => void;
+  readonly onOpenAccount: () => void;
 }): ReactElement | null {
   const { t, format } = createTranslator(view.locale);
   if (view.phase !== 'result') return null;
@@ -617,6 +665,12 @@ function ResultOverlay({
           <Button size="lg" onClick={onRematch}>
             {t('jhabbu.playAgain')}
           </Button>
+          <Button size="lg" variant="ghost" onClick={onViewScores}>
+            {t('jhabbu.scoresButton')}
+          </Button>
+          <Button size="lg" variant="ghost" onClick={onOpenAccount}>
+            {t('jhabbu.saveScores')}
+          </Button>
           <Link
             href="/"
             className="inline-flex min-h-14 items-center justify-center rounded-md border border-action-primary px-7 text-lg font-semibold text-action-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
@@ -641,9 +695,13 @@ function PlayingScreen({
   const { t, format } = createTranslator(view.locale);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [scoreOpen, setScoreOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const [largeCards, setLargeCards] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
   const latestEvent = view.events[0];
+  const leaderName =
+    view.roundScores.length > 0 ? (view.runningScores[0]?.playerName ?? null) : null;
 
   return (
     <main
@@ -669,6 +727,12 @@ function PlayingScreen({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button type="button" className="jh-icon-button" onClick={() => setScoreOpen(true)}>
+            {t('jhabbu.scoresButton')}
+          </button>
+          <button type="button" className="jh-icon-button" onClick={() => setAccountOpen(true)}>
+            {t('jhabbu.accountButton')}
+          </button>
           <button type="button" className="jh-icon-button" onClick={() => setHistoryOpen(true)}>
             {t('jhabbu.historyButton')}
           </button>
@@ -710,7 +774,27 @@ function PlayingScreen({
         onToggleHighContrast={() => setHighContrast((value) => !value)}
       />
       <HistoryDrawer open={historyOpen} view={view} onClose={() => setHistoryOpen(false)} />
-      <ResultOverlay view={view} onRematch={() => dispatch({ type: 'rematch' })} />
+      <JhabbuScoreDrawer
+        open={scoreOpen}
+        view={view}
+        locale={view.locale}
+        leaderName={leaderName}
+        onClose={() => setScoreOpen(false)}
+      />
+      <JhabbuAccountSheet
+        open={accountOpen}
+        locale={view.locale}
+        humanName={view.humanName}
+        playerCount={view.playerCount}
+        roundScores={view.roundScores}
+        onClose={() => setAccountOpen(false)}
+      />
+      <ResultOverlay
+        view={view}
+        onRematch={() => dispatch({ type: 'rematch' })}
+        onViewScores={() => setScoreOpen(true)}
+        onOpenAccount={() => setAccountOpen(true)}
+      />
     </main>
   );
 }
@@ -739,6 +823,14 @@ export function JhabbuComputerGame(): ReactElement {
     },
   );
   const view = selectJhabbuViewState(state);
+
+  useEffect(() => {
+    dispatch({ type: 'hydrateSession', ...readStoredSession() });
+  }, []);
+
+  useEffect(() => {
+    writeStoredSession(state);
+  }, [state]);
 
   useEffect(() => {
     if (view.phase !== 'playing' || view.isHumanTurn) return;

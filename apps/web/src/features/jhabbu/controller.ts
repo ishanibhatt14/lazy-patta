@@ -6,9 +6,12 @@ import { createCryptoRng } from '../../../lib/computer-game/rng';
 import { createTranslator } from '../../../lib/i18n';
 
 import { buildJhabbuRoster, JHABBU_HUMAN_ID } from './players';
+import { JHABBU_CURRENT_SCORE_RULE } from './types';
 import type {
   JhabbuControllerState,
   JhabbuIntent,
+  JhabbuRoundScore,
+  JhabbuRunningScore,
   JhabbuSeatView,
   JhabbuViewEvent,
   JhabbuViewState,
@@ -41,7 +44,9 @@ function setupState(
     reducedMotion: false,
     game: null,
     events: [],
+    roundScores: [],
     lastEngineEvents: [],
+    hasHydratedSession: false,
     seq: 0,
   };
 }
@@ -186,14 +191,89 @@ function reduceEngineAction(
     }
   });
 
+  const completedRound =
+    nextGame.phase === 'round_complete' ? roundScoreFor(state, nextGame) : null;
+
   return {
     ...state,
     phase: nextGame.phase === 'round_complete' ? 'result' : 'playing',
     game: nextGame,
     lastEngineEvents: engineEvents,
+    roundScores: completedRound ? [...state.roundScores, completedRound] : state.roundScores,
     seq,
     events: viewEvents,
   };
+}
+
+function roundScoreFor(
+  state: JhabbuControllerState,
+  completedGame: NonNullable<JhabbuControllerState['game']>,
+): JhabbuRoundScore | null {
+  const result = engine.result(completedGame);
+  if (!result) return null;
+
+  const finishPositionById = new Map(
+    result.finishOrder.map((playerId, index) => [playerId, index + 1]),
+  );
+
+  return {
+    id: `jhabbu-round-${state.roundScores.length + 1}`,
+    roundNumber: state.roundScores.length + 1,
+    scoreRule: JHABBU_CURRENT_SCORE_RULE,
+    loserId: result.loserId,
+    loserName: playerDisplayName(state, result.loserId),
+    finishOrderNames: result.finishOrder.map((id) => playerDisplayName(state, id)),
+    standings: completedGame.players.map((player) => ({
+      playerId: player.id,
+      playerName: playerDisplayName(state, player.id),
+      finishPosition:
+        player.id === result.loserId ? null : (finishPositionById.get(player.id) ?? null),
+      penaltyPoints: result.penaltyPoints[player.id] ?? 0,
+      remainingCards: result.remainingCards[player.id] ?? 0,
+    })),
+  };
+}
+
+function normalizeHydratedRoundScores(
+  rounds: readonly JhabbuRoundScore[],
+): readonly JhabbuRoundScore[] {
+  return rounds.map((round) => ({
+    ...round,
+    scoreRule: round.scoreRule ?? JHABBU_CURRENT_SCORE_RULE,
+    finishOrderNames: round.finishOrderNames ?? [],
+    standings: (round.standings ?? []).map((standing) => ({
+      ...standing,
+      penaltyPoints: standing.penaltyPoints ?? 0,
+      remainingCards: standing.remainingCards ?? 0,
+    })),
+  }));
+}
+
+function runningScoresFor(state: JhabbuControllerState): readonly JhabbuRunningScore[] {
+  return buildJhabbuRoster(state.playerCount)
+    .map((entry, seatOrder) => {
+      const standings = state.roundScores.flatMap((round) =>
+        round.standings.filter((standing) => standing.playerId === entry.id),
+      );
+      const roundsLost = state.roundScores.filter((round) => round.loserId === entry.id).length;
+      return {
+        playerId: entry.id,
+        playerName: playerDisplayName(state, entry.id),
+        totalPenaltyPoints: standings.reduce(
+          (total, standing) => total + standing.penaltyPoints,
+          0,
+        ),
+        roundsLost,
+        seatOrder,
+      };
+    })
+    .sort(
+      (a, b) =>
+        a.totalPenaltyPoints - b.totalPenaltyPoints ||
+        a.roundsLost - b.roundsLost ||
+        a.seatOrder - b.seatOrder,
+    )
+    .map(({ seatOrder: _seatOrder, ...score }) => score);
 }
 
 function dispatchWithRng(
@@ -213,6 +293,16 @@ function dispatchWithRng(
       return { ...state, difficulty: intent.difficulty };
     case 'setLocale':
       return { ...state, locale: intent.locale };
+    case 'hydrateSession':
+      if (state.hasHydratedSession) return state;
+      return {
+        ...state,
+        humanName: intent.humanName?.slice(0, 32) ?? state.humanName,
+        roundScores: intent.roundScores
+          ? normalizeHydratedRoundScores(intent.roundScores)
+          : state.roundScores,
+        hasHydratedSession: true,
+      };
     case 'toggleReducedMotion':
       return { ...state, reducedMotion: !state.reducedMotion };
     case 'start':
@@ -248,6 +338,8 @@ function dispatchWithRng(
           ...setupState(state.locale, state.playerCount, state.difficulty),
           humanName: state.humanName,
           reducedMotion: state.reducedMotion,
+          roundScores: state.roundScores,
+          hasHydratedSession: state.hasHydratedSession,
         },
         rng,
       );
@@ -375,6 +467,8 @@ export function selectJhabbuViewState(state: JhabbuControllerState): JhabbuViewS
     result,
     finishOrderNames: result?.finishOrder.map((id) => playerDisplayName(state, id)) ?? [],
     loserName: result?.loserId ? playerDisplayName(state, result.loserId) : '',
+    roundScores: state.roundScores,
+    runningScores: runningScoresFor(state),
   };
 }
 
