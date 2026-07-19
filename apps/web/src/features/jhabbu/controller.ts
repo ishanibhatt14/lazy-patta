@@ -191,7 +191,8 @@ function reduceEngineAction(
     }
   });
 
-  const completedRound = nextGame.phase === 'round_complete' ? roundScoreFor(state, nextGame) : null;
+  const completedRound =
+    nextGame.phase === 'round_complete' ? roundScoreFor(state, nextGame) : null;
 
   return {
     ...state,
@@ -225,7 +226,8 @@ function roundScoreFor(
     standings: completedGame.players.map((player) => ({
       playerId: player.id,
       playerName: playerDisplayName(state, player.id),
-      finishPosition: player.id === result.loserId ? null : (finishPositionById.get(player.id) ?? null),
+      finishPosition:
+        player.id === result.loserId ? null : (finishPositionById.get(player.id) ?? null),
       penaltyPoints: result.penaltyPoints[player.id] ?? 0,
       remainingCards: result.remainingCards[player.id] ?? 0,
     })),
@@ -257,7 +259,10 @@ function runningScoresFor(state: JhabbuControllerState): readonly JhabbuRunningS
       return {
         playerId: entry.id,
         playerName: playerDisplayName(state, entry.id),
-        totalPenaltyPoints: standings.reduce((total, standing) => total + standing.penaltyPoints, 0),
+        totalPenaltyPoints: standings.reduce(
+          (total, standing) => total + standing.penaltyPoints,
+          0,
+        ),
         roundsLost,
         seatOrder,
       };

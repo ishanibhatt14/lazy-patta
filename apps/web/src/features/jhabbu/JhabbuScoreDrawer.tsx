@@ -55,7 +55,12 @@ export function JhabbuScoreDrawer({
         aria-label={t('action.close')}
         onClick={onClose}
       />
-      <section className="jh-sheet" role="dialog" aria-modal="true" aria-labelledby="jh-score-title">
+      <section
+        className="jh-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="jh-score-title"
+      >
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 id="jh-score-title" className="text-lg font-black text-action-primary">

@@ -60,7 +60,10 @@ function writeStoredSession(state: JhabbuControllerState): void {
   );
 }
 const DIFFICULTIES: readonly BotDifficulty[] = ['easy', 'medium', 'hard'];
-const DIFFICULTY_LABEL_KEY: Record<BotDifficulty, 'computer.difficultyEasy' | 'computer.difficultyMedium' | 'computer.difficultyHard'> = {
+const DIFFICULTY_LABEL_KEY: Record<
+  BotDifficulty,
+  'computer.difficultyEasy' | 'computer.difficultyMedium' | 'computer.difficultyHard'
+> = {
   easy: 'computer.difficultyEasy',
   medium: 'computer.difficultyMedium',
   hard: 'computer.difficultyHard',
@@ -697,7 +700,8 @@ function PlayingScreen({
   const [largeCards, setLargeCards] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
   const latestEvent = view.events[0];
-  const leaderName = view.roundScores.length > 0 ? (view.runningScores[0]?.playerName ?? null) : null;
+  const leaderName =
+    view.roundScores.length > 0 ? (view.runningScores[0]?.playerName ?? null) : null;
 
   return (
     <main
