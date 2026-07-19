@@ -44,6 +44,10 @@ describe('MobileAppLanding', () => {
       'href',
       '/play/jhabbu/computer',
     );
+    expect(screen.getByRole('link', { name: /Play Kachuful on mobile/i })).toHaveAttribute(
+      'href',
+      '/play/kachuful/computer',
+    );
     expect(screen.getByText(/Open lazypatta\.com on your phone/i)).toBeVisible();
     expect(
       screen.getByText(/Native iOS and Android app store releases are planned/i),
