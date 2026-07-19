@@ -56,7 +56,7 @@ export function GameLobby(): ReactElement {
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           <RichGameCard
             locale={locale}
             title={t('games.gadhaChor.name')}
@@ -114,6 +114,7 @@ export function GameLobby(): ReactElement {
             computerHref="/play/kachuful/computer"
             onlineHref="/play/online?game=kachuful"
             overviewHref="/games/kachuful"
+            isNew
             onHowToPlay={() => setActiveTutorial('kachuful')}
             artwork={<KachufulArtwork locale={locale} />}
           />

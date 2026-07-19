@@ -22,6 +22,8 @@ interface RichGameCardProps {
   readonly overviewHref?: string;
   readonly onHowToPlay?: () => void;
   readonly artwork: ReactNode;
+  /** Flags the newest game with a "New" ribbon on the card. */
+  readonly isNew?: boolean;
 }
 
 /**
@@ -774,12 +776,18 @@ export function RichGameCard({
   overviewHref,
   onHowToPlay,
   artwork,
+  isNew = false,
 }: RichGameCardProps): ReactElement {
   const { t } = createTranslator(locale);
   const meta = [difficulty, duration, players];
 
   return (
-    <article className="rich-game-card flex min-h-full flex-col overflow-hidden rounded-lg border border-action-primary/15 bg-surface-primary shadow-md">
+    <article className="rich-game-card relative flex min-h-full flex-col overflow-hidden rounded-lg border border-action-primary/15 bg-surface-primary shadow-md">
+      {isNew ? (
+        <span className="absolute right-3 top-3 z-10 rounded-full bg-brand-accent px-3 py-1 text-xs font-black uppercase tracking-wide text-text-onBrand shadow-md">
+          {t('landing.game.newBadge')}
+        </span>
+      ) : null}
       {artwork}
       <div className="flex flex-1 flex-col gap-4 p-5">
         <div className="flex items-start justify-between gap-4">
