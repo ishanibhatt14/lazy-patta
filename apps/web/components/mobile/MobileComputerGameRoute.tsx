@@ -7,12 +7,28 @@ import { createTranslator } from '../../lib/i18n';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import { clearActiveSession, rememberActiveSession } from '../../lib/mobile/active-session';
 import { computerGameSessions, type ComputerGameSession } from '../../lib/mobile/computer-session';
-import { findGameDefinition } from '../../lib/mobile/game-registry';
+import { hasSeenFirstGame, markFirstGameSeen } from '../../lib/mobile/first-game';
+import { findGameDefinition, type GameSlug } from '../../lib/mobile/game-registry';
 import { JhabbuComputerGame } from '../../src/features/jhabbu/JhabbuComputerGame';
 import { KachufulComputerGame } from '../../src/features/kachuful/KachufulComputerGame';
 import { LalSattiComputerGame } from '../../src/features/lal-satti/LalSattiComputerGame';
 import { Button } from '../Button';
 import { ComputerGameExperience } from '../game/ComputerGameExperience';
+import {
+  GADHA_CHOR_TUTORIAL_STEPS,
+  HowToPlayTutorial,
+  type TutorialStep,
+} from '../game/HowToPlayTutorial';
+import { JHABBU_TUTORIAL_STEPS } from '../game/jhabbu-tutorial-steps';
+import { KACHUFUL_TUTORIAL_STEPS } from '../game/kachuful-tutorial-steps';
+import { LAL_SATTI_TUTORIAL_STEPS } from '../game/lal-satti-tutorial-steps';
+
+const TUTORIAL_STEPS: Record<GameSlug, readonly TutorialStep[]> = {
+  'gadha-chor': GADHA_CHOR_TUTORIAL_STEPS,
+  'lal-satti': LAL_SATTI_TUTORIAL_STEPS,
+  jhabbu: JHABBU_TUTORIAL_STEPS,
+  kachuful: KACHUFUL_TUTORIAL_STEPS,
+};
 
 export function MobileComputerGameRoute({
   gameSlug,
@@ -24,6 +40,7 @@ export function MobileComputerGameRoute({
   const { locale } = usePreferredLocale();
   const t = createTranslator(locale);
   const [session, setSession] = useState<ComputerGameSession | null | undefined>(undefined);
+  const [showTutorial, setShowTutorial] = useState(false);
   const game = findGameDefinition(gameSlug);
 
   useEffect(() => {
@@ -56,6 +73,12 @@ export function MobileComputerGameRoute({
     return () => window.removeEventListener('beforeunload', warn);
   }, [inProgress]);
 
+  // The first time a player opens a given game, walk them through it once.
+  const liveSlug = inProgress && session ? session.gameSlug : null;
+  useEffect(() => {
+    if (liveSlug && !hasSeenFirstGame(liveSlug)) setShowTutorial(true);
+  }, [liveSlug]);
+
   if (!game || (session && session.gameSlug !== game.slug)) {
     return <RecoveryState message={t.t('mobile.restore.failed')} />;
   }
@@ -75,10 +98,33 @@ export function MobileComputerGameRoute({
   }
 
   const props = { initialConfig: session.config, autoStart: true };
-  if (session.gameSlug === 'gadha-chor') return <ComputerGameExperience {...props} />;
-  if (session.gameSlug === 'lal-satti') return <LalSattiComputerGame {...props} />;
-  if (session.gameSlug === 'jhabbu') return <JhabbuComputerGame {...props} />;
-  return <KachufulComputerGame {...props} />;
+  const liveGameSlug = session.gameSlug;
+  const gameNode =
+    liveGameSlug === 'gadha-chor' ? (
+      <ComputerGameExperience {...props} />
+    ) : liveGameSlug === 'lal-satti' ? (
+      <LalSattiComputerGame {...props} />
+    ) : liveGameSlug === 'jhabbu' ? (
+      <JhabbuComputerGame {...props} />
+    ) : (
+      <KachufulComputerGame {...props} />
+    );
+
+  return (
+    <>
+      {gameNode}
+      {showTutorial ? (
+        <HowToPlayTutorial
+          locale={locale}
+          steps={TUTORIAL_STEPS[liveGameSlug]}
+          onClose={() => {
+            markFirstGameSeen(liveGameSlug);
+            setShowTutorial(false);
+          }}
+        />
+      ) : null}
+    </>
+  );
 }
 
 function RecoveryState({ message }: { readonly message: string }): ReactElement {
