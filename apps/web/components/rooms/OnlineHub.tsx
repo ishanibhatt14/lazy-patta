@@ -10,6 +10,7 @@ import { trackGrowthEvent } from '../../lib/growth/analytics';
 import { createTranslator } from '../../lib/i18n';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import { fetchRoomServiceHealth } from '../../lib/rooms/health-client';
+import { classifyRoomError } from '../../lib/rooms/room-error';
 import { createRoom, joinRoomByCode, type OnlineGameKey } from '../../lib/rooms/rooms-client';
 import { getSupabaseBrowserClient } from '../../lib/supabase/browser-client';
 import { Button } from '../Button';
@@ -20,10 +21,6 @@ import { LoginPanel } from '../auth/LoginPanel';
  * Both actions resolve to a room code and route into its lobby. Live realtime
  * play is a deferred follow-up; this slice covers auth + create/join lifecycle.
  */
-
-function messageFor(error: unknown, fallback: string): string {
-  return error instanceof Error && error.message ? error.message : fallback;
-}
 
 function gameKeyFromSearch(value: string | null): OnlineGameKey {
   if (value === 'lal_satti') return 'lal_satti';
@@ -156,8 +153,9 @@ export function OnlineHub(): ReactElement {
       router.push(lobbyPath(room.code));
     } catch (caught) {
       if (runId !== actionRunId.current) return;
-      setError(messageFor(caught, t.t('rooms.errorGeneric')));
-      setActionState({ status: 'error', code: 'create_room_failed', recoverable: true });
+      const classified = classifyRoomError(caught);
+      setError(t.t(classified.bodyKey));
+      setActionState({ status: 'error', code: classified.code, recoverable: classified.retryable });
       setBusy(undefined);
     }
   };
@@ -179,8 +177,9 @@ export function OnlineHub(): ReactElement {
       router.push(lobbyPath(room.code));
     } catch (caught) {
       if (runId !== actionRunId.current) return;
-      setError(messageFor(caught, t.t('rooms.errorGeneric')));
-      setActionState({ status: 'error', code: 'join_room_failed', recoverable: true });
+      const classified = classifyRoomError(caught);
+      setError(t.t(classified.bodyKey));
+      setActionState({ status: 'error', code: classified.code, recoverable: classified.retryable });
       setBusy(undefined);
     }
   };

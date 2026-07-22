@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 
 import { timeoutState, type AsyncViewState } from '../../lib/async-view-state';
 import { useAuth } from '../../lib/auth/auth-context';
@@ -10,6 +10,7 @@ import { createTranslator } from '../../lib/i18n';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import { startGame } from '../../lib/online-game/games-client';
 import { rememberRecentRoom } from '../../lib/rooms/recent-rooms';
+import { classifyRoomError, type ClassifiedRoomError } from '../../lib/rooms/room-error';
 import {
   addBotSeat,
   fetchRoomByCode,
@@ -73,22 +74,33 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
     status: 'loading',
     startedAt: Date.now(),
   });
+  const [initError, setInitError] = useState<ClassifiedRoomError | null>(null);
   const [slowInit, setSlowInit] = useState(false);
+  // LP-113: ignore late responses. Every refresh takes a monotonic id; a slow
+  // in-flight fetch that resolves after a newer one (or after unmount) is
+  // discarded so it can never overwrite fresher state or a resolved error.
+  const refreshRunId = useRef(0);
+  useEffect(() => () => void (refreshRunId.current += 1), []);
 
   const userId = state.status === 'signed-in' ? state.session.user.userId : undefined;
   const displayName = state.status === 'signed-in' ? state.session.user.displayName : undefined;
 
   const refresh = useCallback(async (): Promise<void> => {
+    const runId = (refreshRunId.current += 1);
     try {
       const next = await fetchRoomByCode(getSupabaseBrowserClient(), code);
+      if (runId !== refreshRunId.current) return;
       setData(next);
       if (next) {
         rememberRecentRoom({ roomCode: code, gameSlug: gameSlug(next.room.game_key) });
         setInitState({ status: 'success', data: next });
       } else setInitState({ status: 'empty' });
     } catch (caught) {
-      setError(messageFor(caught, t.t('rooms.errorGeneric')));
-      setInitState({ status: 'error', code: 'room_fetch_failed', recoverable: true });
+      if (runId !== refreshRunId.current) return;
+      const classified = classifyRoomError(caught);
+      setInitError(classified);
+      setError(t.t(classified.bodyKey));
+      setInitState({ status: 'error', code: classified.code, recoverable: classified.retryable });
     }
   }, [code, t]);
 
@@ -108,8 +120,10 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
         }
       } catch (caught) {
         if (!cancelled) {
-          setError(messageFor(caught, t.t('rooms.errorGeneric')));
-          setInitState({ status: 'error', code: 'room_join_failed', recoverable: true });
+          const classified = classifyRoomError(caught);
+          setInitError(classified);
+          setError(t.t(classified.bodyKey));
+          setInitState({ status: 'error', code: classified.code, recoverable: classified.retryable });
         }
       }
     })();
@@ -198,23 +212,32 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
   }
 
   if (initState.status === 'error' && !room) {
+    const isTimeout = initState.code === 'room_initialization_timeout';
+    const titleKey = isTimeout
+      ? 'rooms.timeoutTitle'
+      : (initError?.titleKey ?? 'rooms.unavailableTitle');
+    const bodyKey = isTimeout
+      ? 'rooms.timeoutBody'
+      : (initError?.bodyKey ?? 'rooms.errorGeneric');
+    // Non-retryable reasons (full, expired, missing) must not offer a
+    // meaningless "Try Again" — only a fresh path forward.
+    const canRetry = isTimeout || (initError?.retryable ?? true);
     return (
       <div className="flex w-full max-w-sm flex-col gap-3 rounded-lg bg-surface-primary p-6 text-center shadow-sm">
-        <h2 className="text-lg font-semibold text-text-primary">
-          {initState.code === 'room_initialization_timeout'
-            ? t.t('rooms.timeoutTitle')
-            : t.t('rooms.unavailableTitle')}
-        </h2>
-        <p className="text-sm text-text-primary">{t.t('rooms.timeoutBody')}</p>
-        <Button
-          onClick={() => {
-            setError(undefined);
-            setJoined(false);
-            setInitState({ status: 'loading', startedAt: Date.now() });
-          }}
-        >
-          {t.t('action.tryAgain')}
-        </Button>
+        <h2 className="text-lg font-semibold text-text-primary">{t.t(titleKey)}</h2>
+        <p className="text-sm text-text-primary">{t.t(bodyKey)}</p>
+        {canRetry ? (
+          <Button
+            onClick={() => {
+              setError(undefined);
+              setInitError(null);
+              setJoined(false);
+              setInitState({ status: 'loading', startedAt: Date.now() });
+            }}
+          >
+            {t.t('action.tryAgain')}
+          </Button>
+        ) : null}
         <Button
           variant="secondary"
           onClick={() => router.push('/mobile/game/gadha-chor/setup?mode=computer')}
