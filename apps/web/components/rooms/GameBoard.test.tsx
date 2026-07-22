@@ -195,6 +195,13 @@ describe('GameBoard (online, Kachuful table)', () => {
     expect(screen.getByText(/you must follow suit/i)).toBeVisible();
     // Detailed standings are tucked into a collapsible summary, not always-on.
     expect(screen.getByText('Players and scores').tagName).toBe('SUMMARY');
+
+    // Scores only lock at round end, so the board explains why the running total
+    // sits still and shows a live "if it ended now" projection. Kaka (bid 0, won
+    // 0) has met their bid so far, so they are on track for the flat 10 points —
+    // rendered on their felt pod, not only in the collapsed scoreboard.
+    expect(screen.getByText(/only when the round ends/i)).toBeInTheDocument();
+    expect(screen.getByText('→ +10')).toBeVisible();
   });
 
   it('keeps the trick area visible while waiting for the lead', async () => {

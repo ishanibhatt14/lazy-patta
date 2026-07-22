@@ -10,7 +10,12 @@ import {
 } from '@lazy-patta/game-contracts';
 import { mintPositionToken } from '@lazy-patta/game-engine';
 import type { JhabbuResult } from '@lazy-patta/jhabbu-engine';
-import { trickWinner, type KachufulResult } from '@lazy-patta/kachuful-engine';
+import {
+  KACHUFUL_FAMILY_DESCENDING,
+  kachufulRoundScore,
+  trickWinner,
+  type KachufulResult,
+} from '@lazy-patta/kachuful-engine';
 import { playableCards, toTableauLanes, type LalSattiResult } from '@lazy-patta/lal-satti-engine';
 import type { Locale, MessageKey } from '@lazy-patta/localization';
 import {
@@ -1163,6 +1168,17 @@ function KachufulOnlineBoard({
     snapshot.ledSuit !== null &&
     hand.some((card) => card.suit === snapshot.ledSuit);
 
+  // Scores only lock in when the whole round finishes, so mid-round the running
+  // total sits still. To make that legible we show a live "if the round ended
+  // now" projection using the exact engine rule, and only once cards are in play
+  // (during bidding the numbers would be noise). `null` means "no bid yet".
+  const showRoundProjection = snapshot.phase !== 'bidding';
+  const projectedRoundScore = useCallback(
+    (bid: number | null, tricksWon: number): number | null =>
+      bid === null ? null : kachufulRoundScore(KACHUFUL_FAMILY_DESCENDING, bid, tricksWon),
+    [],
+  );
+
   // Presentation seats around the felt: self anchors the bottom, opponents wrap
   // the rim (parent already positioned them). Counts/turn come from the snapshot.
   const selfSeat = seats.find((seat) => seat.position === 'bottom');
@@ -1211,6 +1227,22 @@ function KachufulOnlineBoard({
           <span className="rounded bg-surface-primary/20 px-1.5 py-0.5">
             {t.format('kachuful.cardsLeftSeat', { count: seat.cardCount })}
           </span>
+          {showRoundProjection && player && player.bid !== null
+            ? (() => {
+                const projected = projectedRoundScore(player.bid, player.tricksWon);
+                const onTrack = player.bid === player.tricksWon;
+                return (
+                  <span
+                    className={[
+                      'rounded px-1.5 py-0.5',
+                      onTrack ? 'bg-brand-accent/40' : 'bg-surface-primary/20 opacity-80',
+                    ].join(' ')}
+                  >
+                    {t.format('kachuful.roundScoreSeat', { count: projected ?? 0 })}
+                  </span>
+                );
+              })()
+            : null}
         </div>
       </div>
     );
@@ -1372,6 +1404,9 @@ function KachufulOnlineBoard({
             <summary className="cursor-pointer text-sm font-bold text-action-primary">
               {t.t('kachuful.scoreboardHeading')}
             </summary>
+            {showRoundProjection ? (
+              <p className="mt-2 text-xs text-text-secondary">{t.t('kachuful.roundScoreHint')}</p>
+            ) : null}
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
               {snapshot.players.map((player) => {
                 const name = nameFor(player.id);
@@ -1409,6 +1444,20 @@ function KachufulOnlineBoard({
                         })}
                       </span>
                     </div>
+                    {showRoundProjection && player.bid !== null ? (
+                      <p
+                        className={[
+                          'mt-1 text-xs font-semibold',
+                          player.bid === player.tricksWon
+                            ? 'text-action-primary'
+                            : 'text-text-secondary',
+                        ].join(' ')}
+                      >
+                        {t.format('kachuful.roundScoreProjected', {
+                          count: projectedRoundScore(player.bid, player.tricksWon) ?? 0,
+                        })}
+                      </p>
+                    ) : null}
                     <p className="mt-1 text-xs font-bold text-action-primary">
                       {t.format('kachuful.totalScore', { count: player.totalScore })}
                     </p>

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactElement } from 'react';
 
-import { MobileAppLanding } from '../../components/home/MobileAppLanding';
+import { MobileHome } from '../../components/mobile/MobileHome';
 import { createTranslator } from '../../lib/i18n';
 
 const { t } = createTranslator('en');
@@ -21,5 +21,5 @@ export const metadata: Metadata = {
 };
 
 export default function MobilePage(): ReactElement {
-  return <MobileAppLanding />;
+  return <MobileHome />;
 }

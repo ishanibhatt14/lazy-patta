@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * The mobile "reduce motion" preference (Settings) sets this attribute on the
+ * document element. Honour it app-wide by stilling animations and transitions,
+ * mirroring the OS `prefers-reduced-motion` behaviour but as an explicit opt-in.
+ */
+html[data-reduced-motion='true'] *,
+html[data-reduced-motion='true'] *::before,
+html[data-reduced-motion='true'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
