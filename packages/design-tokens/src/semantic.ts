@@ -36,3 +36,22 @@ export const semanticColorTokens = {
 } as const satisfies Record<string, ColorPrimitive>;
 
 export type SemanticColorToken = keyof typeof semanticColorTokens;
+
+/**
+ * Dark-theme role overrides (tier-2). Theming = remapping semantic roles to
+ * different primitives (ADR-0007); the dark theme changes only the roles listed
+ * here and inherits every other role from the light map above. Note the deliberate
+ * flip of `action.primary` to saffron and `text.onBrand` to ink: on a plum-black
+ * canvas the primary role must read both as heading text on dark surfaces AND as a
+ * filled button with legible text on top, which a warm saffron + ink pairing gives.
+ */
+export const darkThemeOverrides = {
+  'background.canvas': 'plumBlack',
+  'surface.primary': 'plumRaised',
+  'text.primary': 'ivory',
+  'text.onBrand': 'ink',
+  'action.primary': 'saffron',
+  'action.secondary': 'gold',
+  'brand.accent': 'tealLight',
+  'status.error': 'coralLight',
+} as const satisfies Partial<Record<SemanticColorToken, ColorPrimitive>>;

@@ -4,17 +4,21 @@ import { describe, expect, it } from 'vitest';
 
 import { PreferredLocaleProvider } from '../../lib/locale/preferred-locale-context';
 import { MobilePreferencesProvider } from '../../lib/mobile/preferences';
+import { ThemeProvider } from '../../lib/mobile/theme';
 
 import { MobileSettings } from './MobileSettings';
 
 function renderSettings(): void {
   window.localStorage.clear();
   document.documentElement.removeAttribute('data-reduced-motion');
+  document.documentElement.removeAttribute('data-theme');
   render(
     <PreferredLocaleProvider initialLocale="en">
-      <MobilePreferencesProvider>
-        <MobileSettings />
-      </MobilePreferencesProvider>
+      <ThemeProvider>
+        <MobilePreferencesProvider>
+          <MobileSettings />
+        </MobilePreferencesProvider>
+      </ThemeProvider>
     </PreferredLocaleProvider>,
   );
 }
@@ -43,5 +47,23 @@ describe('MobileSettings', () => {
     expect(toggle).toHaveAttribute('aria-checked', 'true');
     expect(document.documentElement.dataset.reducedMotion).toBe('true');
     expect(window.localStorage.getItem('lazy-patta:mobile-reduced-motion')).toBe('true');
+  });
+
+  it('applies the Dark appearance choice to the document and persists it', async () => {
+    renderSettings();
+    const user = userEvent.setup();
+
+    const dark = screen.getByRole('radio', { name: /Dark/i });
+    expect(dark).toHaveAttribute('aria-checked', 'false');
+
+    await user.click(dark);
+
+    expect(dark).toHaveAttribute('aria-checked', 'true');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    expect(window.localStorage.getItem('lazy-patta:mobile-theme')).toBe('dark');
+
+    await user.click(screen.getByRole('radio', { name: /Light/i }));
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+    expect(window.localStorage.getItem('lazy-patta:mobile-theme')).toBe('light');
   });
 });

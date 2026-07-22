@@ -44,7 +44,12 @@ export function MobilePreferencesProvider({
 }: {
   readonly children: ReactNode;
 }): ReactElement {
-  const [reducedMotion, setReducedMotionState] = useState<boolean>(readStored);
+  // Start `false` so the server and first client render agree (localStorage is
+  // client-only); adopt the stored value in an effect after mount to avoid a
+  // hydration mismatch on the toggle's state.
+  const [reducedMotion, setReducedMotionState] = useState<boolean>(false);
+
+  useEffect(() => setReducedMotionState(readStored()), []);
 
   useEffect(() => {
     if (typeof document === 'undefined') return;

@@ -21,6 +21,15 @@ export const primitives = {
     woodDark: '#432B18',
     duskTop: '#2E2340',
     duskBottom: '#7A4A38',
+    // Dark-theme primitives (evening "game night" palette). Additive: the light
+    // theme never references these; the dark theme remaps semantic roles onto
+    // them (see darkThemeOverrides in semantic.ts).
+    plumBlack: '#140D14',
+    plumRaised: '#21121F',
+    ivory: '#FFF8E9',
+    gold: '#DCA93D',
+    tealLight: '#3BB6A6',
+    coralLight: '#E5695B',
   },
   space: {
     xs: 4,

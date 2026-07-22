@@ -1,12 +1,13 @@
 'use client';
 
-import { LOCALES } from '@lazy-patta/localization';
+import { LOCALES, type MessageKey } from '@lazy-patta/localization';
 import type { ReactElement } from 'react';
 
 import { createTranslator } from '../../lib/i18n';
 import { LOCALE_DISPLAY } from '../../lib/locale/preference';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import { useMobilePreferences } from '../../lib/mobile/preferences';
+import { type ThemeChoice, useTheme } from '../../lib/mobile/theme';
 
 /**
  * Settings surface. Every control here has a real, persisted effect — language
@@ -14,9 +15,16 @@ import { useMobilePreferences } from '../../lib/mobile/preferences';
  * (device-stored, applied app-wide). We deliberately do not render switches for
  * preferences nothing consumes yet, so nothing on this screen is a placeholder.
  */
+const THEME_CHOICES: readonly { readonly value: ThemeChoice; readonly labelKey: MessageKey }[] = [
+  { value: 'system', labelKey: 'mobile.settings.theme.system' },
+  { value: 'light', labelKey: 'mobile.settings.theme.light' },
+  { value: 'dark', labelKey: 'mobile.settings.theme.dark' },
+];
+
 export function MobileSettings(): ReactElement {
   const { locale, setLocale } = usePreferredLocale();
   const { reducedMotion, setReducedMotion } = useMobilePreferences();
+  const { choice: themeChoice, setChoice: setThemeChoice } = useTheme();
   const t = createTranslator(locale);
 
   return (
@@ -64,6 +72,35 @@ export function MobileSettings(): ReactElement {
       <section aria-labelledby="settings-appearance" className="flex flex-col gap-3">
         <h2 id="settings-appearance" className="text-sm font-black uppercase tracking-wide text-brand-accent">
           {t.t('mobile.settings.appearanceSection')}
+        </h2>
+        <div role="radiogroup" aria-labelledby="settings-appearance" className="grid grid-cols-3 gap-2">
+          {THEME_CHOICES.map(({ value, labelKey }) => {
+            const selected = value === themeChoice;
+            return (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                onClick={() => setThemeChoice(value)}
+                className={[
+                  'flex min-h-14 items-center justify-center rounded-xl border px-2 text-sm font-black transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent',
+                  selected
+                    ? 'border-action-primary bg-action-primary text-text-onBrand'
+                    : 'border-action-primary/20 bg-surface-primary text-text-primary',
+                ].join(' ')}
+              >
+                {t.t(labelKey)}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-xs text-text-primary/80">{t.t('mobile.settings.appearanceHint')}</p>
+      </section>
+
+      <section aria-labelledby="settings-motion" className="flex flex-col gap-3">
+        <h2 id="settings-motion" className="text-sm font-black uppercase tracking-wide text-brand-accent">
+          {t.t('mobile.settings.motionSection')}
         </h2>
         <button
           type="button"

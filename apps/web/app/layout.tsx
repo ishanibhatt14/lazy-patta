@@ -6,6 +6,7 @@ import type { ReactElement, ReactNode } from 'react';
 
 import { PREFERRED_LOCALE_COOKIE, resolveLocale } from '../lib/locale/preference';
 import { PreferredLocaleProvider } from '../lib/locale/preferred-locale-context';
+import { THEME_BOOT_SCRIPT } from '../lib/mobile/theme';
 import { siteConfig } from '../lib/site-config';
 
 import './globals.css';
@@ -80,10 +81,14 @@ export default async function RootLayout({
   const initialLocale = resolveLocale(cookieStore.get(PREFERRED_LOCALE_COOKIE)?.value);
 
   return (
-    <html lang={initialLocale}>
+    // The boot script sets `data-theme` before hydration; suppress the expected
+    // server/client attribute mismatch on this element only.
+    <html lang={initialLocale} suppressHydrationWarning>
       <head>
         {/* Single source of truth for theme colors: the design-tokens CSS block. */}
         <style dangerouslySetInnerHTML={{ __html: toCssVariables() }} />
+        {/* Apply the saved appearance before first paint to avoid a theme flash. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
       </head>
       <body className="bg-background-canvas text-text-primary">
         <PreferredLocaleProvider initialLocale={initialLocale}>{children}</PreferredLocaleProvider>

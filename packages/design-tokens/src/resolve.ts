@@ -1,11 +1,20 @@
 import { primitives } from './primitives';
-import { type SemanticColorToken, semanticColorTokens } from './semantic';
+import { darkThemeOverrides, type SemanticColorToken, semanticColorTokens } from './semantic';
 
-/** Resolve every semantic color token to its concrete hex value. */
-export function resolveColors(): Record<SemanticColorToken, string> {
+export type ThemeName = 'light' | 'dark';
+
+/**
+ * Resolve every semantic color token to its concrete hex value for a theme.
+ * Defaults to `light` so existing callers are unaffected; `dark` layers
+ * {@link darkThemeOverrides} on top of the light role map.
+ */
+export function resolveColors(theme: ThemeName = 'light'): Record<SemanticColorToken, string> {
+  const overrides: Partial<Record<SemanticColorToken, keyof typeof primitives.color>> =
+    theme === 'dark' ? darkThemeOverrides : {};
   const out = {} as Record<SemanticColorToken, string>;
   for (const token of Object.keys(semanticColorTokens) as SemanticColorToken[]) {
-    out[token] = primitives.color[semanticColorTokens[token]];
+    const primitiveKey = overrides[token] ?? semanticColorTokens[token];
+    out[token] = primitives.color[primitiveKey];
   }
   return out;
 }
