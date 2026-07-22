@@ -933,7 +933,10 @@ export function JhabbuComputerGame({
     const delay = view.reducedMotion ? 220 : 650;
     const timer = window.setTimeout(() => dispatch({ type: 'botStep' }), delay);
     return () => window.clearTimeout(timer);
-  }, [view.phase, view.isHumanTurn, view.currentPlayerName, view.reducedMotion]);
+    // Keyed on `state.game` (a fresh object every engine step), not the actor's
+    // name: when the same bot acts on consecutive turns (e.g. picks up a trick
+    // and leads again) a name-keyed effect would never re-fire and freeze play.
+  }, [view.phase, view.isHumanTurn, state.game, view.reducedMotion]);
 
   const onLocaleChange = (next: JhabbuViewState['locale']): void => {
     setPreferredLocale(next);

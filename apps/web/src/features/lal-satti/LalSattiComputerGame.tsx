@@ -175,7 +175,10 @@ export function LalSattiComputerGame({
     const delay = view.reducedMotion ? 250 : 700;
     const timer = window.setTimeout(() => dispatch({ type: 'botStep' }), delay);
     return () => window.clearTimeout(timer);
-  }, [view.phase, view.isHumanTurn, view.currentPlayerName, view.reducedMotion]);
+    // Keyed on `state.game` (a fresh object every engine step), not the actor's
+    // name: when the same bot acts on consecutive turns a name-keyed effect
+    // would never re-fire and freeze the table.
+  }, [view.phase, view.isHumanTurn, state.game, view.reducedMotion]);
 
   if (view.phase === 'setup') {
     // Launched from the shared mobile setup shell, we auto-start into play; show

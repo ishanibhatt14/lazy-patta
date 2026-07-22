@@ -481,7 +481,9 @@ function TrickFelt({ view }: { readonly view: KachufulViewState }): ReactElement
           ))}
         </div>
       ) : (
-        <p className="imm-zone-hint">{t('kachuful.trickWaiting')}</p>
+        <p className="imm-zone-hint">
+          {format('kachuful.trickWaiting', { name: view.currentPlayerName })}
+        </p>
       )}
     </div>
   );
@@ -937,7 +939,10 @@ export function KachufulComputerGame({
     const delay = view.reducedMotion ? 220 : 620;
     const timer = window.setTimeout(() => dispatch({ type: 'botStep' }), delay);
     return () => window.clearTimeout(timer);
-  }, [view.phase, view.isHumanTurn, view.currentPlayerName, view.reducedMotion]);
+    // Keyed on `state.game` (a fresh object every engine step), not the actor's
+    // name: when a bot wins a trick and leads the next one, the name is unchanged
+    // and a name-keyed effect would never re-fire, freezing the table.
+  }, [view.phase, view.isHumanTurn, state.game, view.reducedMotion]);
 
   const onLocaleChange = (next: KachufulViewState['locale']): void => {
     setPreferredLocale(next);
