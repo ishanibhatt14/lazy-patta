@@ -30,6 +30,14 @@ export const primitives = {
     gold: '#DCA93D',
     tealLight: '#3BB6A6',
     coralLight: '#E5695B',
+    // Game-identity accents (theme-stable). Each playable game owns a saturated,
+    // deep colour that reads with light ivory text on BOTH the cream and plum
+    // canvases, so a game's tile keeps the same identity whichever theme is on.
+    // These are never remapped by a theme (that is the point — identity, not role).
+    gadhaCrimson: '#9B2D3F',
+    lalEmerald: '#1E7D55',
+    jhabbuSapphire: '#31508F',
+    kachufulPlum: '#5E2D72',
   },
   space: {
     xs: 4,

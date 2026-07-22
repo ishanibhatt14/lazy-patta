@@ -33,6 +33,16 @@ export const semanticColorTokens = {
   'scene.feltDeep': 'peacockDeep',
   'accent.indigo': 'indigo',
   'accent.kumkum': 'kumkum',
+  // Always-light ink for text/artwork sitting on a saturated game-identity tile
+  // or on the felt table. Stays ivory in both themes (never remapped), because a
+  // crimson/emerald/plum surface needs light text regardless of light/dark mode.
+  'text.onAccent': 'ivory',
+  // Per-game identity fills (theme-stable). A game's tile, mode-sheet header and
+  // in-game chrome adopt its accent so the whole flow feels like one product.
+  'game.gadha': 'gadhaCrimson',
+  'game.lalSatti': 'lalEmerald',
+  'game.jhabbu': 'jhabbuSapphire',
+  'game.kachuful': 'kachufulPlum',
 } as const satisfies Record<string, ColorPrimitive>;
 
 export type SemanticColorToken = keyof typeof semanticColorTokens;

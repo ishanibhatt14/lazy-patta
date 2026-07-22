@@ -6,12 +6,17 @@ import type { Translator } from '../../lib/i18n';
 import type { MobileCatalogItem } from '../../lib/mobile-catalog';
 
 import { ACCENT_CLASSES } from './accent';
+import { GameTileArtwork } from './artwork/GameTileArtwork';
+import { PatternBackground } from './artwork/PatternBackground';
 
 /**
- * A game in the catalog grid, rendered as one fully-tappable button (not a card
- * with a nested link) so the whole surface is a single large touch target. The
- * accent stripe and metadata come entirely from the catalog item, so tiles stay
- * consistent and a new game needs no bespoke styling.
+ * A game in the catalog grid: one fully-tappable tile (not a card with a nested
+ * link) so the whole surface is a single large touch target. The upper "art"
+ * band carries the game's identity accent, a faint suit texture and its own card
+ * fan; the lower strip holds the name, alternate name and table facts. Everything
+ * — accent, artwork, metadata — is driven by the catalog item, so a new game
+ * needs no bespoke styling. Coming-soon games dim the art and show an honest
+ * badge, and still open an info sheet (never a broken route).
  */
 export function GameTile({
   item,
@@ -29,35 +34,38 @@ export function GameTile({
     <button
       type="button"
       onClick={() => onSelect(item)}
-      className="flex min-h-[7.5rem] flex-col justify-between gap-3 rounded-2xl border border-action-primary/12 bg-surface-primary p-4 text-left shadow-sm transition active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-action-secondary/30 bg-surface-primary text-left shadow-lg transition active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
     >
-      <div className="flex items-start justify-between gap-2">
-        <span
-          className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-black ${accent.fill} ${accent.text}`}
-          aria-hidden
-        >
-          {t.t(item.nameKey).trim().charAt(0)}
+      <div className={`relative flex h-[5.5rem] items-center justify-center ${accent.fill}`}>
+        <PatternBackground className="text-text-onAccent" opacity={0.14} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-white/10" />
+        <GameTileArtwork
+          gameId={item.id}
+          size="sm"
+          className={`relative z-10 drop-shadow-lg ${comingSoon ? 'opacity-70' : ''}`}
+        />
+        <span className="absolute right-2 top-2 z-10">
+          {comingSoon ? (
+            <span className="rounded-full bg-black/45 px-2 py-0.5 text-[0.6rem] font-black uppercase tracking-wide text-text-onAccent backdrop-blur">
+              {t.t('mobile.game.comingSoonBadge')}
+            </span>
+          ) : (
+            <span className="rounded-full bg-black/35 px-2 py-0.5 text-[0.6rem] font-black uppercase tracking-wide text-text-onAccent backdrop-blur">
+              {t.t(item.difficultyKey)}
+            </span>
+          )}
         </span>
-        {comingSoon ? (
-          <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-[0.65rem] font-black uppercase tracking-wide text-action-primary">
-            {t.t('mobile.game.comingSoonBadge')}
-          </span>
-        ) : (
-          <span className="rounded-full bg-brand-accent/12 px-2 py-0.5 text-[0.65rem] font-black uppercase tracking-wide text-brand-accent">
-            {t.t(item.difficultyKey)}
-          </span>
-        )}
       </div>
 
-      <div>
-        <h3 className="text-lg font-black leading-tight text-action-primary">
+      <div className="flex flex-1 flex-col gap-0.5 px-3 pb-3 pt-2">
+        <h3 className="text-base font-black leading-tight text-action-primary">
           {t.t(item.nameKey)}
         </h3>
-        <p className="mt-1 text-xs font-semibold text-text-primary/80">
-          {t.format('mobile.game.playersRange', {
-            min: item.minPlayers,
-            max: item.maxPlayers,
-          })}
+        <p className="truncate text-[0.7rem] font-semibold text-text-primary/60">
+          {t.t(item.alternateNamesKey)}
+        </p>
+        <p className="mt-1 text-[0.7rem] font-bold text-text-primary/80">
+          {t.format('mobile.game.playersRange', { min: item.minPlayers, max: item.maxPlayers })}
           {' · '}
           {t.format('mobile.game.durationRange', {
             min: item.durationMinutes.min,

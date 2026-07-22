@@ -19,8 +19,8 @@ import type { OnlineGameKey } from './rooms/rooms-client';
 export type GameAvailability = 'available' | 'coming-soon';
 export type GameDifficulty = 'easy' | 'strategy' | 'fast';
 
-/** Warm palette roles a tile may adopt — all resolve to existing theme tokens. */
-export type GameAccent = 'maroon' | 'teal' | 'saffron' | 'indigo';
+/** Per-game identity accents — each resolves to a theme-stable `game.*` token. */
+export type GameAccent = 'gadha' | 'lalSatti' | 'jhabbu' | 'kachuful';
 
 export interface MobileCatalogItem {
   readonly id: string;
@@ -65,28 +65,28 @@ const PLAYABLE_SHAPES: readonly PlayableShape[] = [
     difficulty: 'easy',
     durationMinutes: { min: 5, max: 10 },
     taglineKey: 'games.gadhaChor.description',
-    accent: 'maroon',
+    accent: 'gadha',
   },
   {
     slug: 'lal-satti',
     difficulty: 'strategy',
     durationMinutes: { min: 10, max: 20 },
     taglineKey: 'games.lalSatti.description',
-    accent: 'teal',
+    accent: 'lalSatti',
   },
   {
     slug: 'jhabbu',
     difficulty: 'fast',
     durationMinutes: { min: 15, max: 30 },
     taglineKey: 'games.jhabbu.description',
-    accent: 'saffron',
+    accent: 'jhabbu',
   },
   {
     slug: 'kachuful',
     difficulty: 'strategy',
     durationMinutes: { min: 20, max: 40 },
     taglineKey: 'games.kachuful.description',
-    accent: 'indigo',
+    accent: 'kachuful',
   },
 ];
 
@@ -125,7 +125,7 @@ const COMING_SOON: readonly MobileCatalogItem[] = [
     durationMinutes: { min: 20, max: 40 },
     minPlayers: 4,
     maxPlayers: 4,
-    accent: 'teal',
+    accent: 'lalSatti',
   },
   {
     id: 'three-two-five',
@@ -139,7 +139,7 @@ const COMING_SOON: readonly MobileCatalogItem[] = [
     difficultyKey: DIFFICULTY_KEY.strategy,
     minPlayers: 3,
     maxPlayers: 3,
-    accent: 'saffron',
+    accent: 'jhabbu',
   },
 ];
 

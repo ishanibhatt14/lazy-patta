@@ -56,7 +56,7 @@ export function GadhaReveal({ locale, view, onRematch }: GadhaRevealProps): Reac
 
   return (
     <div className="gc-reveal-backdrop absolute inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="flex max-w-md flex-col items-center gap-4 rounded-lg bg-surface-primary p-6 text-center shadow-md">
+      <div className="flex max-w-md flex-col items-center gap-4 rounded-3xl border border-action-secondary/30 bg-surface-primary p-6 text-center shadow-2xl">
         <p className="text-sm font-bold uppercase tracking-widest text-brand-accent">
           {t('computer.todaysGadhaChor')}
         </p>

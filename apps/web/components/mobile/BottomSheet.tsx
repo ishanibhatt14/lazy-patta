@@ -61,9 +61,9 @@ export function BottomSheet({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="relative z-10 max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-t-2xl border border-action-primary/15 bg-surface-primary p-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] shadow-2xl focus:outline-none"
+        className="relative z-10 max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-t-3xl border-x border-t border-action-secondary/30 bg-surface-primary p-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] shadow-2xl focus:outline-none"
       >
-        <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-action-primary/20" aria-hidden />
+        <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-action-secondary/40" aria-hidden />
         <h2 id={titleId} className="text-xl font-black text-action-primary">
           {title}
         </h2>
