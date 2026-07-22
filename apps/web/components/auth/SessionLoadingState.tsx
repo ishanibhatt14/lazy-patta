@@ -43,10 +43,16 @@ export function SessionLoadingState(): ReactElement {
           <p className="text-sm text-status-error">{t.t('auth.loadingSlow')}</p>
           <Button onClick={() => window.location.reload()}>{t.t('action.tryAgain')}</Button>
           <Link
-            href="/#games"
+            href="/mobile/games"
             className="inline-flex min-h-12 items-center justify-center rounded-md border border-action-primary px-5 font-semibold text-action-primary transition hover:bg-action-primary hover:text-text-onBrand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
           >
-            {t.t('action.backToGames')}
+            {t.t('action.playComputer')}
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex min-h-12 items-center justify-center rounded-md px-5 font-semibold text-action-primary underline transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+          >
+            {t.t('action.returnHome')}
           </Link>
         </div>
       ) : null}

@@ -15,7 +15,7 @@ function renderGrid(): void {
 }
 
 describe('GameCatalogGrid', () => {
-  it('opens a setup sheet with real practice and room links for a playable game', async () => {
+  it('opens a setup sheet with a real practice link and no room link (rooms not live)', async () => {
     renderGrid();
     const user = userEvent.setup();
 
@@ -26,10 +26,8 @@ describe('GameCatalogGrid', () => {
       'href',
       '/mobile/game/gadha-chor/setup?mode=computer',
     );
-    expect(within(dialog).getByRole('link', { name: /Create room/i })).toHaveAttribute(
-      'href',
-      '/mobile/rooms?game=gadha_chor',
-    );
+    // Family rooms are not reliably live yet, so the sheet offers no room link.
+    expect(within(dialog).queryByRole('link', { name: /Create room/i })).not.toBeInTheDocument();
     expect(within(dialog).getByRole('link', { name: /How to play/i })).toHaveAttribute(
       'href',
       '/games/gadha-chor',

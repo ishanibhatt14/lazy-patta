@@ -9,11 +9,11 @@ describe('game discovery registry', () => {
     expect(GAME_DISCOVERY.jhabbu.playable).toBe(true);
   });
 
-  it('marks all four games online-playable now that Kachuful has family rooms', () => {
-    expect(GAME_DISCOVERY['gadha-chor'].onlinePlayable).toBe(true);
-    expect(GAME_DISCOVERY['lal-satti'].onlinePlayable).toBe(true);
-    expect(GAME_DISCOVERY.jhabbu.onlinePlayable).toBe(true);
-    expect(GAME_DISCOVERY.kachuful.onlinePlayable).toBe(true);
+  it('marks every game online-unavailable (family rooms are not reliably live)', () => {
+    expect(GAME_DISCOVERY['gadha-chor'].onlinePlayable).toBe(false);
+    expect(GAME_DISCOVERY['lal-satti'].onlinePlayable).toBe(false);
+    expect(GAME_DISCOVERY.jhabbu.onlinePlayable).toBe(false);
+    expect(GAME_DISCOVERY.kachuful.onlinePlayable).toBe(false);
   });
 
   it('derives PLAYABLE_GAME_SLUGS from the playable flag', () => {
@@ -40,8 +40,8 @@ describe('game discovery registry', () => {
     expect(GAME_SLUGS).toContain('kachuful');
     expect(GAME_DISCOVERY.kachuful.playable).toBe(true);
     expect(PLAYABLE_GAME_SLUGS).toContain('kachuful');
-    // Online/family rooms are live now that migration 0012 is applied.
-    expect(GAME_DISCOVERY.kachuful.onlinePlayable).toBe(true);
+    // Online/family rooms are not reliably live yet, so the CTA is coming-soon.
+    expect(GAME_DISCOVERY.kachuful.onlinePlayable).toBe(false);
     expect(GAME_DISCOVERY.kachuful.slugAliases).toContain('judgement');
     expect(GAME_DISCOVERY.kachuful.computerHref).toBe('/play/kachuful/computer');
   });

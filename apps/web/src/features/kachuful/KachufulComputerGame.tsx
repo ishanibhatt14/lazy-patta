@@ -3,12 +3,16 @@
 import type { BotDifficulty, Card } from '@lazy-patta/game-contracts';
 import type { MessageKey } from '@lazy-patta/localization';
 import Link from 'next/link';
-import type { ReactElement } from 'react';
-import { useEffect, useReducer, useRef } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 
 import { Button } from '../../../components/Button';
 import { PlayingCard } from '../../../components/PlayingCard';
+import { ComputerGameStarting } from '../../../components/game/ComputerGameStarting';
 import { LocaleSwitcher } from '../../../components/game/LocaleSwitcher';
+import { ImmersivePod } from '../../../components/game/immersive/ImmersivePod';
+import { ImmersiveResultOverlay } from '../../../components/game/immersive/ImmersiveResultOverlay';
+import { ImmersiveScene } from '../../../components/game/immersive/ImmersiveScene';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
 import { createTranslator } from '../../../lib/i18n';
 import { usePreferredLocale } from '../../../lib/locale/preferred-locale-context';
@@ -76,6 +80,654 @@ function cardFaceLabel(view: KachufulViewState, card: Card): string {
   });
 }
 
+function seatDisplayName(
+  view: KachufulViewState,
+  seat: KachufulViewState['seats'][number],
+): string {
+  return seat.isSelf ? createTranslator(view.locale).t('computer.youName') : seat.name;
+}
+
+function SetupScreen({
+  view,
+  dispatch,
+  onLocaleChange,
+}: {
+  readonly view: KachufulViewState;
+  readonly dispatch: (intent: KachufulIntent) => void;
+  readonly onLocaleChange: (locale: KachufulViewState['locale']) => void;
+}): ReactElement {
+  const { t, format } = createTranslator(view.locale);
+
+  return (
+    <main className="min-h-screen bg-background-canvas px-4 py-6 text-text-primary">
+      <section className="mx-auto flex max-w-5xl flex-col gap-6">
+        <div className="flex items-center justify-between gap-4">
+          <Link
+            href="/"
+            className="text-sm font-bold text-action-primary underline decoration-action-secondary decoration-2 underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+          >
+            ← {t('lobby.backToGames')}
+          </Link>
+          <LocaleSwitcher locale={view.locale} onLocaleChange={onLocaleChange} />
+        </div>
+
+        <div className="rounded-lg bg-game-table p-5 text-text-onBrand shadow-md">
+          <p className="text-sm font-semibold uppercase">{t('kachuful.modeLabel')}</p>
+          <h1 className="mt-2 text-3xl font-bold">{t('kachuful.setupTitle')}</h1>
+          <p className="mt-3 max-w-2xl text-base leading-7">{t('kachuful.setupDescription')}</p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
+          <section className="rounded-lg bg-surface-primary p-4 shadow-md">
+            <h2 className="text-lg font-bold text-action-primary">
+              {t('kachuful.quickRulesTitle')}
+            </h2>
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6">
+              <li>{t('kachuful.quickRuleTrump')}</li>
+              <li>{t('kachuful.quickRuleBid')}</li>
+              <li>{t('kachuful.quickRuleHook')}</li>
+              <li>{t('kachuful.quickRuleScoring')}</li>
+            </ul>
+          </section>
+
+          <section className="rounded-lg bg-surface-primary p-4 shadow-md">
+            <h2 className="text-lg font-bold text-action-primary">
+              {t('kachuful.quickGameTitle')}
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-text-primary">
+              {format('kachuful.quickGameSummary', {
+                name: view.humanName.trim() || t('computer.youName'),
+                count: view.playerCount,
+              })}
+            </p>
+            <Button
+              size="lg"
+              className="mt-4 w-full min-h-12"
+              onClick={() => dispatch({ type: 'start' })}
+            >
+              {t('kachuful.startQuickGame')}
+            </Button>
+
+            <details className="mt-4 rounded-md border border-action-primary/20 bg-background-canvas p-3">
+              <summary className="cursor-pointer text-sm font-bold text-action-primary">
+                {t('computer.customizeTable')}
+              </summary>
+
+              <label className="mt-4 flex flex-col gap-2 text-sm font-semibold text-text-primary">
+                {t('kachuful.nameLabel')}
+                <input
+                  className="min-h-12 rounded-md border border-brand-accent bg-surface-primary px-3 py-2"
+                  value={view.humanName}
+                  maxLength={32}
+                  placeholder={t('computer.youName')}
+                  onChange={(event) =>
+                    dispatch({ type: 'setHumanName', humanName: event.target.value })
+                  }
+                />
+              </label>
+
+              <div className="mt-4">
+                <h3 className="text-sm font-bold text-action-primary">{t('kachuful.tableSize')}</h3>
+                <div className="mt-3 flex flex-wrap gap-2" aria-label={t('kachuful.tableSize')}>
+                  {PLAYER_COUNTS.map((count) => (
+                    <button
+                      key={count}
+                      type="button"
+                      aria-pressed={view.playerCount === count}
+                      className={[
+                        'min-h-12 rounded-md border px-4 py-2 font-semibold transition',
+                        view.playerCount === count
+                          ? 'border-action-primary bg-action-primary text-text-onBrand'
+                          : 'border-brand-accent bg-surface-primary text-text-primary',
+                      ].join(' ')}
+                      onClick={() => dispatch({ type: 'setPlayerCount', playerCount: count })}
+                    >
+                      {format('lobby.playerCount', { count })}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <h3 className="text-sm font-bold text-action-primary">
+                  {t('computer.difficultyLabel')}
+                </h3>
+                <div
+                  className="mt-3 flex flex-wrap gap-2"
+                  role="group"
+                  aria-label={t('computer.difficultyLabel')}
+                >
+                  {DIFFICULTIES.map((level) => (
+                    <button
+                      key={level}
+                      type="button"
+                      aria-pressed={view.difficulty === level}
+                      className={[
+                        'min-h-12 rounded-md border px-4 py-2 font-semibold transition',
+                        view.difficulty === level
+                          ? 'border-action-primary bg-action-primary text-text-onBrand'
+                          : 'border-brand-accent bg-surface-primary text-text-primary',
+                      ].join(' ')}
+                      onClick={() => dispatch({ type: 'setDifficulty', difficulty: level })}
+                    >
+                      {t(DIFFICULTY_LABEL_KEY[level])}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs leading-5 text-text-primary">
+                  {t('computer.difficultyHelp')}
+                </p>
+              </div>
+            </details>
+          </section>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <Button
+            variant="ghost"
+            onClick={() => dispatch({ type: 'toggleReducedMotion' })}
+            aria-pressed={view.reducedMotion}
+          >
+            {t('settings.reducedMotion')}
+          </Button>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+/** Lightweight bottom-sheet scaffold shared by the settings and log drawers. */
+function TableSheet({
+  view,
+  titleId,
+  title,
+  onClose,
+  children,
+}: {
+  readonly view: KachufulViewState;
+  readonly titleId: string;
+  readonly title: string;
+  readonly onClose: () => void;
+  readonly children: ReactNode;
+}): ReactElement {
+  const { t } = createTranslator(view.locale);
+  return (
+    <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center">
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/60"
+        aria-label={t('action.close')}
+        onClick={onClose}
+      />
+      <section
+        className="relative z-10 max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-surface-primary p-5 shadow-md sm:rounded-2xl"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <h2 id={titleId} className="text-lg font-black text-action-primary">
+            {title}
+          </h2>
+          <button
+            type="button"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-background-canvas text-lg font-bold text-action-primary"
+            onClick={onClose}
+            aria-label={t('action.close')}
+          >
+            <span aria-hidden>×</span>
+          </button>
+        </div>
+        <div className="mt-4">{children}</div>
+      </section>
+    </div>
+  );
+}
+
+function SettingsSheet({
+  open,
+  view,
+  largeCards,
+  highContrast,
+  onClose,
+  onLocaleChange,
+  onToggleReducedMotion,
+  onToggleLargeCards,
+  onToggleHighContrast,
+  onOpenLog,
+}: {
+  readonly open: boolean;
+  readonly view: KachufulViewState;
+  readonly largeCards: boolean;
+  readonly highContrast: boolean;
+  readonly onClose: () => void;
+  readonly onLocaleChange: (locale: KachufulViewState['locale']) => void;
+  readonly onToggleReducedMotion: () => void;
+  readonly onToggleLargeCards: () => void;
+  readonly onToggleHighContrast: () => void;
+  readonly onOpenLog: () => void;
+}): ReactElement | null {
+  const { t } = createTranslator(view.locale);
+  if (!open) return null;
+
+  const rowClass =
+    'flex min-h-12 items-center justify-between rounded-md border border-action-secondary/25 bg-background-canvas px-3 py-2 text-sm font-semibold text-text-primary';
+
+  return (
+    <TableSheet
+      view={view}
+      titleId="kachuful-settings-title"
+      title={t('action.settings')}
+      onClose={onClose}
+    >
+      <div className="mb-4">
+        <LocaleSwitcher locale={view.locale} onLocaleChange={onLocaleChange} />
+      </div>
+      <div className="grid gap-2">
+        <button
+          type="button"
+          className={rowClass}
+          onClick={onToggleReducedMotion}
+          aria-pressed={view.reducedMotion}
+        >
+          <span>{t('settings.reducedMotion')}</span>
+          <span>{view.reducedMotion ? t('settings.on') : t('settings.off')}</span>
+        </button>
+        <button
+          type="button"
+          className={rowClass}
+          onClick={onToggleLargeCards}
+          aria-pressed={largeCards}
+        >
+          <span>{t('settings.largeCards')}</span>
+          <span>{largeCards ? t('settings.on') : t('settings.off')}</span>
+        </button>
+        <button
+          type="button"
+          className={rowClass}
+          onClick={onToggleHighContrast}
+          aria-pressed={highContrast}
+        >
+          <span>{t('settings.highContrastCards')}</span>
+          <span>{highContrast ? t('settings.on') : t('settings.off')}</span>
+        </button>
+      </div>
+      <div className="mt-4">
+        <Button variant="secondary" className="w-full" onClick={onOpenLog}>
+          {t('kachuful.logHeading')}
+        </Button>
+      </div>
+    </TableSheet>
+  );
+}
+
+function LogDrawer({
+  open,
+  view,
+  onClose,
+}: {
+  readonly open: boolean;
+  readonly view: KachufulViewState;
+  readonly onClose: () => void;
+}): ReactElement | null {
+  const { t, format } = createTranslator(view.locale);
+  if (!open) return null;
+
+  return (
+    <TableSheet
+      view={view}
+      titleId="kachuful-log-title"
+      title={t('kachuful.logHeading')}
+      onClose={onClose}
+    >
+      {view.events.length === 0 ? (
+        <p className="rounded-md bg-background-canvas p-3 text-sm font-semibold text-text-primary">
+          {t('kachuful.trickWaiting')}
+        </p>
+      ) : (
+        <ul className="space-y-1 text-sm leading-6 text-text-primary">
+          {view.events.map((event) => (
+            <li key={event.id} className="rounded-md bg-background-canvas px-3 py-2">
+              {event.values ? format(event.messageKey, event.values) : t(event.messageKey)}
+            </li>
+          ))}
+        </ul>
+      )}
+    </TableSheet>
+  );
+}
+
+/** The centre of the felt: round / trump chips and the current trick. */
+function TrickFelt({ view }: { readonly view: KachufulViewState }): ReactElement {
+  const { t, format } = createTranslator(view.locale);
+  const trumpLabel = t(view.trumpLabelKey);
+
+  return (
+    <div className="flex w-full max-w-xl flex-col items-center gap-3">
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <span className="imm-pod-badge">
+          {format('kachuful.roundLabel', { round: view.roundNumber, total: view.totalRounds })}
+        </span>
+        <span className="imm-pod-badge" data-tone="accent">
+          {format('kachuful.trumpLabel', { trump: trumpLabel })}
+        </span>
+      </div>
+
+      {view.currentTrick.length > 0 ? (
+        <div className="imm-play-zone" aria-label={t('kachuful.trickHeading')}>
+          {view.currentTrick.map((entry) => (
+            <figure key={entry.playerId} className="imm-trick-card">
+              <PlayingCard card={entry.card} size="sm" label={cardFaceLabel(view, entry.card)} />
+              <figcaption>
+                {entry.playerId === 'you' ? t('computer.youName') : entry.playerName}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      ) : (
+        <p className="imm-zone-hint">{t('kachuful.trickWaiting')}</p>
+      )}
+    </div>
+  );
+}
+
+function BidPanel({
+  view,
+  onPlaceBid,
+}: {
+  readonly view: KachufulViewState;
+  readonly onPlaceBid: (bid: number) => void;
+}): ReactElement {
+  const { t, format } = createTranslator(view.locale);
+
+  return (
+    <section
+      aria-label={t('kachuful.bidPrompt')}
+      className="w-full max-w-md rounded-xl border border-action-secondary/25 bg-surface-primary/95 p-3 text-center shadow-md"
+    >
+      <p className="text-sm font-bold text-action-primary">{t('kachuful.bidPrompt')}</p>
+      <div
+        className="mt-3 flex flex-wrap justify-center gap-2"
+        role="group"
+        aria-label={t('kachuful.bidPrompt')}
+      >
+        {Array.from({ length: view.handSize + 1 }, (_, bid) => bid).map((bid) => {
+          const disabled = !view.legalBids.includes(bid);
+          return (
+            <button
+              key={bid}
+              type="button"
+              disabled={disabled}
+              aria-label={format('kachuful.placeBid', { count: bid })}
+              className={[
+                'min-h-12 min-w-12 rounded-md border px-3 py-2 text-base font-bold transition',
+                disabled
+                  ? 'cursor-not-allowed border-brand-accent/30 bg-background-canvas text-text-primary/40'
+                  : 'border-action-primary bg-surface-primary text-action-primary hover:bg-action-primary hover:text-text-onBrand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent',
+              ].join(' ')}
+              onClick={() => onPlaceBid(bid)}
+            >
+              {bid}
+            </button>
+          );
+        })}
+      </div>
+      {view.forbiddenBid !== null ? (
+        <p className="mt-2 text-xs leading-5 text-text-primary">
+          {format('kachuful.hookHint', { count: view.forbiddenBid })}
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
+function PlayerHand({
+  view,
+  largeCards,
+  onPlayCard,
+}: {
+  readonly view: KachufulViewState;
+  readonly largeCards: boolean;
+  readonly onPlayCard: (cardId: string) => void;
+}): ReactElement {
+  const { t, format } = createTranslator(view.locale);
+  const playable = new Set(view.playableCardIds);
+  const cardSize = largeCards ? 'lg' : 'md';
+
+  return (
+    <section className="w-full" aria-label={t('kachuful.yourHand')}>
+      <div className="imm-hand-rail">
+        <div className="flex items-end justify-center gap-2">
+          {view.ownHand.map((card) => {
+            const isPlayable =
+              view.phase === 'playing' && view.isHumanTurn && playable.has(card.id);
+            const label = cardFaceLabel(view, card);
+            return (
+              <button
+                key={card.id}
+                type="button"
+                className="imm-hand-card rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+                data-playable={isPlayable ? 'true' : 'false'}
+                data-disabled={isPlayable ? 'false' : 'true'}
+                disabled={!isPlayable}
+                aria-label={format('kachuful.playCardLabel', { card: label })}
+                onClick={() => onPlayCard(card.id)}
+              >
+                <PlayingCard card={card} size={cardSize} label={label} />
+              </button>
+            );
+          })}
+          {view.ownHand.length === 0 ? (
+            <p className="text-sm text-text-onBrand">{t('kachuful.handEmpty')}</p>
+          ) : null}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Scoreboard({ view }: { readonly view: KachufulViewState }): ReactElement {
+  const { t, format } = createTranslator(view.locale);
+  return (
+    <ol className="w-full space-y-1">
+      {view.scoreboard.map((row, index) => (
+        <li
+          key={row.playerId}
+          className={[
+            'flex items-center justify-between rounded-md px-3 py-2 text-sm',
+            row.isSelf ? 'bg-action-primary/10 font-bold' : 'bg-background-canvas',
+          ].join(' ')}
+        >
+          <span>
+            {index + 1}. {row.isSelf ? t('computer.youName') : row.playerName}
+          </span>
+          <span className="font-bold text-action-primary">
+            {format('kachuful.totalScore', { count: row.totalScore })}
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/** Between-rounds tally shown over the felt until the player advances. */
+function RoundOverlay({
+  view,
+  onNextRound,
+}: {
+  readonly view: KachufulViewState;
+  readonly onNextRound: () => void;
+}): ReactElement | null {
+  const { t } = createTranslator(view.locale);
+  if (view.phase !== 'roundScored') return null;
+
+  return (
+    <div className="imm-result-backdrop absolute inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+      <div
+        className="flex max-h-[90dvh] w-full max-w-md flex-col items-center gap-4 overflow-y-auto rounded-2xl bg-surface-primary p-6 text-center shadow-md"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="kachuful-round-title"
+      >
+        <p className="text-sm font-black uppercase tracking-widest text-brand-accent">
+          {t('kachuful.trickHeading')}
+        </p>
+        <h2 id="kachuful-round-title" className="text-2xl font-black text-action-primary">
+          {t('kachuful.roundComplete')}
+        </h2>
+        <Scoreboard view={view} />
+        <Button className="w-full" onClick={onNextRound}>
+          {t('kachuful.nextRound')}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function KachufulResult({
+  view,
+  onRematch,
+}: {
+  readonly view: KachufulViewState;
+  readonly onRematch: () => void;
+}): ReactElement | null {
+  const { t, format } = createTranslator(view.locale);
+  if (view.phase !== 'result' || !view.result) return null;
+
+  const result = view.result;
+  const heroSeat = view.seats.find((seat) => seat.id === result.winnerIds[0]) ?? null;
+  const title = result.isSelfWinner
+    ? t('kachuful.youWin')
+    : result.winnerNames.length > 1
+      ? format('kachuful.winnersAnnounce', { names: result.winnerNames.join(', ') })
+      : format('kachuful.winnerAnnounce', { name: result.winnerNames[0] ?? '' });
+
+  return (
+    <ImmersiveResultOverlay
+      open
+      titleId="kachuful-result-title"
+      eyebrow={t('kachuful.matchComplete')}
+      title={title}
+      hero={
+        heroSeat
+          ? { seatId: heroSeat.id, initial: heroSeat.avatarInitial, isSelf: heroSeat.isSelf }
+          : null
+      }
+      playAgainLabel={t('kachuful.playAgain')}
+      onRematch={onRematch}
+      returnHomeLabel={t('kachuful.returnHome')}
+    >
+      <div className="w-full rounded-md bg-background-canvas p-4">
+        <Scoreboard view={view} />
+      </div>
+    </ImmersiveResultOverlay>
+  );
+}
+
+function PlayingScreen({
+  view,
+  dispatch,
+  onLocaleChange,
+}: {
+  readonly view: KachufulViewState;
+  readonly dispatch: (intent: KachufulIntent) => void;
+  readonly onLocaleChange: (locale: KachufulViewState['locale']) => void;
+}): ReactElement {
+  const { t, format } = createTranslator(view.locale);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
+  const [largeCards, setLargeCards] = useState(false);
+  const [highContrast, setHighContrast] = useState(false);
+
+  const opponents = view.seats.filter((seat) => !seat.isSelf);
+  const selfSeat = view.seats.find((seat) => seat.isSelf);
+
+  const renderPod = (seat: KachufulViewState['seats'][number]): ReactElement => (
+    <ImmersivePod
+      key={seat.id}
+      seatId={seat.id}
+      initial={seat.avatarInitial}
+      name={seatDisplayName(view, seat)}
+      isSelf={seat.isSelf}
+      isActive={seat.isActive}
+      badge={format('kachuful.bidTricksSeat', {
+        bid: seat.bid ?? '—',
+        won: seat.tricksWon,
+      })}
+      badgeTone={seat.isActive ? 'accent' : 'default'}
+      tag={seat.isDealer ? t('kachuful.dealerBadge') : undefined}
+      activeMarker={t('computer.activeTurnMarker')}
+    />
+  );
+
+  const toolbar = (
+    <button
+      type="button"
+      className="imm-toolbar-button"
+      onClick={() => setSettingsOpen(true)}
+      aria-label={t('action.settings')}
+    >
+      <span aria-hidden>⚙️</span>
+    </button>
+  );
+
+  const showBidPanel = view.phase === 'bidding' && view.isHumanTurn;
+
+  return (
+    <>
+      <ImmersiveScene
+        ariaLabel={t('kachuful.modeLabel')}
+        modeLabel={t('kachuful.modeLabel')}
+        statusText={
+          view.statusValues ? format(view.statusKey, view.statusValues) : t(view.statusKey)
+        }
+        statusIsSelf={view.isHumanTurn}
+        reducedMotion={view.reducedMotion}
+        highContrast={highContrast}
+        toolbar={toolbar}
+        top={opponents.map(renderPod)}
+        middle={<TrickFelt view={view} />}
+        bottom={
+          <>
+            {showBidPanel ? (
+              <BidPanel view={view} onPlaceBid={(bid) => dispatch({ type: 'placeBid', bid })} />
+            ) : null}
+            {selfSeat ? renderPod(selfSeat) : null}
+            <PlayerHand
+              view={view}
+              largeCards={largeCards}
+              onPlayCard={(cardId) => dispatch({ type: 'playCard', cardId })}
+            />
+          </>
+        }
+        overlay={
+          <>
+            <RoundOverlay view={view} onNextRound={() => dispatch({ type: 'nextRound' })} />
+            <KachufulResult view={view} onRematch={() => dispatch({ type: 'rematch' })} />
+          </>
+        }
+      />
+
+      <SettingsSheet
+        open={settingsOpen}
+        view={view}
+        largeCards={largeCards}
+        highContrast={highContrast}
+        onClose={() => setSettingsOpen(false)}
+        onLocaleChange={onLocaleChange}
+        onToggleReducedMotion={() => dispatch({ type: 'toggleReducedMotion' })}
+        onToggleLargeCards={() => setLargeCards((value) => !value)}
+        onToggleHighContrast={() => setHighContrast((value) => !value)}
+        onOpenLog={() => {
+          setSettingsOpen(false);
+          setLogOpen(true);
+        }}
+      />
+      <LogDrawer open={logOpen} view={view} onClose={() => setLogOpen(false)} />
+    </>
+  );
+}
+
 export function KachufulComputerGame({
   initialConfig,
   autoStart = false,
@@ -110,7 +762,6 @@ export function KachufulComputerGame({
     },
   );
   const view = selectKachufulViewState(state);
-  const { t, format } = createTranslator(view.locale);
 
   useEffect(() => {
     if (initialConfig) return;
@@ -135,426 +786,17 @@ export function KachufulComputerGame({
     return () => window.clearTimeout(timer);
   }, [view.phase, view.isHumanTurn, view.currentPlayerName, view.reducedMotion]);
 
+  const onLocaleChange = (next: KachufulViewState['locale']): void => {
+    setPreferredLocale(next);
+    dispatch({ type: 'setLocale', locale: next });
+  };
+
   if (view.phase === 'setup') {
-    return renderSetup(view, dispatch, setPreferredLocale);
+    // Launched from the shared mobile setup shell, we auto-start into play; show
+    // the same neutral placeholder as every game rather than this legacy setup.
+    if (autoStart) return <ComputerGameStarting locale={view.locale} />;
+    return <SetupScreen view={view} dispatch={dispatch} onLocaleChange={onLocaleChange} />;
   }
 
-  return renderTable(view, dispatch, setPreferredLocale);
-
-  function renderSetup(
-    v: KachufulViewState,
-    send: typeof dispatch,
-    setLocale: typeof setPreferredLocale,
-  ): ReactElement {
-    return (
-      <main className="min-h-screen bg-background-canvas px-4 py-6 text-text-primary">
-        <section className="mx-auto flex max-w-5xl flex-col gap-6">
-          <div className="flex items-center justify-between gap-4">
-            <Link
-              href="/"
-              className="text-sm font-bold text-action-primary underline decoration-action-secondary decoration-2 underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-            >
-              ← {t('lobby.backToGames')}
-            </Link>
-            <LocaleSwitcher
-              locale={v.locale}
-              onLocaleChange={(next) => {
-                setLocale(next);
-                send({ type: 'setLocale', locale: next });
-              }}
-            />
-          </div>
-
-          <div className="rounded-lg bg-game-table p-5 text-text-onBrand shadow-md">
-            <p className="text-sm font-semibold uppercase">{t('kachuful.modeLabel')}</p>
-            <h1 className="mt-2 text-3xl font-bold">{t('kachuful.setupTitle')}</h1>
-            <p className="mt-3 max-w-2xl text-base leading-7">{t('kachuful.setupDescription')}</p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
-            <section className="rounded-lg bg-surface-primary p-4 shadow-md">
-              <h2 className="text-lg font-bold text-action-primary">
-                {t('kachuful.quickRulesTitle')}
-              </h2>
-              <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6">
-                <li>{t('kachuful.quickRuleTrump')}</li>
-                <li>{t('kachuful.quickRuleBid')}</li>
-                <li>{t('kachuful.quickRuleHook')}</li>
-                <li>{t('kachuful.quickRuleScoring')}</li>
-              </ul>
-            </section>
-
-            <section className="rounded-lg bg-surface-primary p-4 shadow-md">
-              <h2 className="text-lg font-bold text-action-primary">
-                {t('kachuful.quickGameTitle')}
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-text-primary">
-                {format('kachuful.quickGameSummary', {
-                  name: v.humanName.trim() || t('computer.youName'),
-                  count: v.playerCount,
-                })}
-              </p>
-              <Button
-                size="lg"
-                className="mt-4 w-full min-h-12"
-                onClick={() => send({ type: 'start' })}
-              >
-                {t('kachuful.startQuickGame')}
-              </Button>
-
-              <details className="mt-4 rounded-md border border-action-primary/20 bg-background-canvas p-3">
-                <summary className="cursor-pointer text-sm font-bold text-action-primary">
-                  {t('computer.customizeTable')}
-                </summary>
-
-                <label className="mt-4 flex flex-col gap-2 text-sm font-semibold text-text-primary">
-                  {t('kachuful.nameLabel')}
-                  <input
-                    className="min-h-12 rounded-md border border-brand-accent bg-surface-primary px-3 py-2"
-                    value={v.humanName}
-                    maxLength={32}
-                    placeholder={t('computer.youName')}
-                    onChange={(event) =>
-                      send({ type: 'setHumanName', humanName: event.target.value })
-                    }
-                  />
-                </label>
-
-                <div className="mt-4">
-                  <h3 className="text-sm font-bold text-action-primary">
-                    {t('kachuful.tableSize')}
-                  </h3>
-                  <div className="mt-3 flex flex-wrap gap-2" aria-label={t('kachuful.tableSize')}>
-                    {PLAYER_COUNTS.map((count) => (
-                      <button
-                        key={count}
-                        type="button"
-                        aria-pressed={v.playerCount === count}
-                        className={[
-                          'min-h-12 rounded-md border px-4 py-2 font-semibold transition',
-                          v.playerCount === count
-                            ? 'border-action-primary bg-action-primary text-text-onBrand'
-                            : 'border-brand-accent bg-surface-primary text-text-primary',
-                        ].join(' ')}
-                        onClick={() => send({ type: 'setPlayerCount', playerCount: count })}
-                      >
-                        {format('lobby.playerCount', { count })}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <h3 className="text-sm font-bold text-action-primary">
-                    {t('computer.difficultyLabel')}
-                  </h3>
-                  <div
-                    className="mt-3 flex flex-wrap gap-2"
-                    role="group"
-                    aria-label={t('computer.difficultyLabel')}
-                  >
-                    {DIFFICULTIES.map((level) => (
-                      <button
-                        key={level}
-                        type="button"
-                        aria-pressed={v.difficulty === level}
-                        className={[
-                          'min-h-12 rounded-md border px-4 py-2 font-semibold transition',
-                          v.difficulty === level
-                            ? 'border-action-primary bg-action-primary text-text-onBrand'
-                            : 'border-brand-accent bg-surface-primary text-text-primary',
-                        ].join(' ')}
-                        onClick={() => send({ type: 'setDifficulty', difficulty: level })}
-                      >
-                        {t(DIFFICULTY_LABEL_KEY[level])}
-                      </button>
-                    ))}
-                  </div>
-                  <p className="mt-2 text-xs leading-5 text-text-primary">
-                    {t('computer.difficultyHelp')}
-                  </p>
-                </div>
-              </details>
-            </section>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <Button
-              variant="ghost"
-              onClick={() => send({ type: 'toggleReducedMotion' })}
-              aria-pressed={v.reducedMotion}
-            >
-              {t('settings.reducedMotion')}
-            </Button>
-          </div>
-        </section>
-      </main>
-    );
-  }
-
-  function renderTable(
-    v: KachufulViewState,
-    send: typeof dispatch,
-    setLocale: typeof setPreferredLocale,
-  ): ReactElement {
-    const trumpLabel = t(v.trumpLabelKey);
-    return (
-      <main className="min-h-screen bg-background-canvas px-3 py-4 text-text-primary sm:px-4 sm:py-6">
-        <section className="mx-auto flex max-w-5xl flex-col gap-4">
-          <header className="flex flex-wrap items-center justify-between gap-3">
-            <Link
-              href="/"
-              className="text-sm font-bold text-action-primary underline decoration-action-secondary decoration-2 underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-            >
-              ← {t('lobby.backToGames')}
-            </Link>
-            <div className="flex items-center gap-3">
-              <span className="rounded-full bg-surface-primary px-3 py-1 text-xs font-bold text-action-primary shadow-sm">
-                {format('kachuful.roundLabel', { round: v.roundNumber, total: v.totalRounds })}
-              </span>
-              <span className="rounded-full bg-game-table px-3 py-1 text-xs font-bold text-text-onBrand shadow-sm">
-                {format('kachuful.trumpLabel', { trump: trumpLabel })}
-              </span>
-              <LocaleSwitcher
-                locale={v.locale}
-                onLocaleChange={(next) => {
-                  setLocale(next);
-                  send({ type: 'setLocale', locale: next });
-                }}
-              />
-            </div>
-          </header>
-
-          <p role="status" aria-live="polite" className="text-base font-semibold text-text-primary">
-            {v.instructionValues
-              ? format(v.instructionKey, v.instructionValues)
-              : t(v.instructionKey)}
-          </p>
-
-          <section
-            aria-label={t('kachuful.scoreboardHeading')}
-            className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4"
-          >
-            {v.seats.map((seat) => (
-              <div
-                key={seat.id}
-                data-seat-id={seat.id}
-                data-active={seat.isActive}
-                className={[
-                  'rounded-lg border p-3 shadow-sm transition',
-                  seat.isActive
-                    ? 'border-action-primary bg-action-primary/10'
-                    : 'border-brand-accent/40 bg-surface-primary',
-                ].join(' ')}
-              >
-                <div className="flex items-center gap-2">
-                  <span
-                    aria-hidden
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-game-table text-sm font-bold text-text-onBrand"
-                  >
-                    {seat.avatarInitial}
-                  </span>
-                  <span className="truncate text-sm font-bold">
-                    {seat.isSelf ? t('computer.youName') : seat.name}
-                  </span>
-                </div>
-                <div className="mt-2 flex flex-wrap gap-1 text-xs">
-                  {seat.isDealer && (
-                    <span className="rounded bg-brand-accent/30 px-1.5 py-0.5 font-semibold">
-                      {t('kachuful.dealerBadge')}
-                    </span>
-                  )}
-                  <span className="rounded bg-background-canvas px-1.5 py-0.5 font-semibold">
-                    {format('kachuful.bidTricksSeat', {
-                      bid: seat.bid ?? '—',
-                      won: seat.tricksWon,
-                    })}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs font-bold text-action-primary">
-                  {format('kachuful.totalScore', { count: seat.totalScore })}
-                </p>
-              </div>
-            ))}
-          </section>
-
-          {v.currentTrick.length > 0 && (
-            <section
-              aria-label={t('kachuful.trickHeading')}
-              className="rounded-lg bg-game-table/90 p-3 shadow-md"
-            >
-              <p className="mb-2 text-xs font-semibold uppercase text-text-onBrand">
-                {t('kachuful.trickHeading')}
-              </p>
-              <div className="flex flex-wrap items-end gap-3">
-                {v.currentTrick.map((entry) => (
-                  <div key={entry.playerId} className="flex flex-col items-center gap-1">
-                    <PlayingCard card={entry.card} size="sm" label={cardFaceLabel(v, entry.card)} />
-                    <span className="text-xs font-semibold text-text-onBrand">
-                      {entry.playerId === 'you' ? t('computer.youName') : entry.playerName}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {v.phase === 'bidding' && v.isHumanTurn && (
-            <section
-              aria-label={t('kachuful.bidPrompt')}
-              className="rounded-lg border border-action-primary/30 bg-surface-primary p-4 shadow-md"
-            >
-              <p className="text-sm font-bold text-action-primary">{t('kachuful.bidPrompt')}</p>
-              <div
-                className="mt-3 flex flex-wrap gap-2"
-                role="group"
-                aria-label={t('kachuful.bidPrompt')}
-              >
-                {Array.from({ length: v.handSize + 1 }, (_, bid) => bid).map((bid) => {
-                  const disabled = !v.legalBids.includes(bid);
-                  return (
-                    <button
-                      key={bid}
-                      type="button"
-                      disabled={disabled}
-                      aria-label={format('kachuful.placeBid', { count: bid })}
-                      className={[
-                        'min-h-12 min-w-12 rounded-md border px-3 py-2 text-base font-bold transition',
-                        disabled
-                          ? 'cursor-not-allowed border-brand-accent/30 bg-background-canvas text-text-primary/40'
-                          : 'border-action-primary bg-surface-primary text-action-primary hover:bg-action-primary hover:text-text-onBrand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent',
-                      ].join(' ')}
-                      onClick={() => send({ type: 'placeBid', bid })}
-                    >
-                      {bid}
-                    </button>
-                  );
-                })}
-              </div>
-              {v.forbiddenBid !== null && (
-                <p className="mt-2 text-xs leading-5 text-text-primary">
-                  {format('kachuful.hookHint', { count: v.forbiddenBid })}
-                </p>
-              )}
-            </section>
-          )}
-
-          <section
-            aria-label={t('kachuful.yourHand')}
-            className="rounded-lg bg-surface-primary p-3 shadow-md"
-          >
-            <p className="mb-2 text-xs font-semibold uppercase text-action-primary">
-              {t('kachuful.yourHand')}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {v.ownHand.map((card) => {
-                const playable =
-                  v.phase === 'playing' && v.isHumanTurn && v.playableCardIds.includes(card.id);
-                const label = cardFaceLabel(v, card);
-                if (playable) {
-                  return (
-                    <button
-                      key={card.id}
-                      type="button"
-                      aria-label={format('kachuful.playCardLabel', { card: label })}
-                      className="rounded-lg ring-2 ring-action-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-                      onClick={() => send({ type: 'playCard', cardId: card.id })}
-                    >
-                      <PlayingCard card={card} size="md" label={label} />
-                    </button>
-                  );
-                }
-                return (
-                  <div
-                    key={card.id}
-                    className={v.phase === 'playing' && v.isHumanTurn ? 'opacity-45' : undefined}
-                  >
-                    <PlayingCard card={card} size="md" label={label} />
-                  </div>
-                );
-              })}
-              {v.ownHand.length === 0 && (
-                <p className="text-sm text-text-primary">{t('kachuful.handEmpty')}</p>
-              )}
-            </div>
-          </section>
-
-          {v.phase === 'roundScored' && (
-            <section className="rounded-lg border border-action-primary/40 bg-surface-primary p-4 shadow-md">
-              <h2 className="text-lg font-bold text-action-primary">
-                {t('kachuful.roundComplete')}
-              </h2>
-              {renderScoreboard(v)}
-              <Button className="mt-4 w-full min-h-12" onClick={() => send({ type: 'nextRound' })}>
-                {t('kachuful.nextRound')}
-              </Button>
-            </section>
-          )}
-
-          {v.phase === 'result' && v.result && (
-            <section className="rounded-lg border border-action-primary bg-surface-primary p-5 text-center shadow-lg">
-              <p className="text-sm font-semibold uppercase text-action-primary">
-                {t('kachuful.matchComplete')}
-              </p>
-              <h2 className="mt-2 text-2xl font-bold">
-                {v.result.isSelfWinner
-                  ? t('kachuful.youWin')
-                  : v.result.winnerNames.length > 1
-                    ? format('kachuful.winnersAnnounce', { names: v.result.winnerNames.join(', ') })
-                    : format('kachuful.winnerAnnounce', { name: v.result.winnerNames[0] ?? '' })}
-              </h2>
-              {renderScoreboard(v)}
-              <div className="mt-4 flex flex-wrap justify-center gap-3">
-                <Button onClick={() => send({ type: 'rematch' })}>{t('kachuful.playAgain')}</Button>
-                <Link
-                  href="/"
-                  className="inline-flex min-h-12 items-center rounded-md border border-action-primary px-4 py-2 font-semibold text-action-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-                >
-                  {t('kachuful.returnHome')}
-                </Link>
-              </div>
-            </section>
-          )}
-
-          {v.events.length > 0 && (
-            <section
-              aria-label={t('kachuful.logHeading')}
-              className="rounded-lg bg-surface-primary/70 p-3"
-            >
-              <ul className="space-y-1 text-xs leading-5 text-text-primary">
-                {v.events.map((event) => (
-                  <li key={event.id}>
-                    {event.values ? format(event.messageKey, event.values) : t(event.messageKey)}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-        </section>
-      </main>
-    );
-  }
-
-  function renderScoreboard(v: KachufulViewState): ReactElement {
-    return (
-      <ol className="mt-3 space-y-1">
-        {v.scoreboard.map((row, index) => (
-          <li
-            key={row.playerId}
-            className={[
-              'flex items-center justify-between rounded-md px-3 py-2 text-sm',
-              row.isSelf ? 'bg-action-primary/10 font-bold' : 'bg-background-canvas',
-            ].join(' ')}
-          >
-            <span>
-              {index + 1}. {row.isSelf ? t('computer.youName') : row.playerName}
-            </span>
-            <span className="font-bold text-action-primary">
-              {format('kachuful.totalScore', { count: row.totalScore })}
-            </span>
-          </li>
-        ))}
-      </ol>
-    );
-  }
+  return <PlayingScreen view={view} dispatch={dispatch} onLocaleChange={onLocaleChange} />;
 }

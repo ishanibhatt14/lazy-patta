@@ -8,7 +8,11 @@ import { useEffect, useReducer, useRef, useState } from 'react';
 
 import { Button } from '../../../components/Button';
 import { PlayingCard } from '../../../components/PlayingCard';
+import { ComputerGameStarting } from '../../../components/game/ComputerGameStarting';
 import { LocaleSwitcher } from '../../../components/game/LocaleSwitcher';
+import { ImmersivePod } from '../../../components/game/immersive/ImmersivePod';
+import { ImmersiveResultOverlay } from '../../../components/game/immersive/ImmersiveResultOverlay';
+import { ImmersiveScene } from '../../../components/game/immersive/ImmersiveScene';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
 import { fanCardStyle, useHandLayout } from '../../../lib/hand-layout';
 import { createTranslator } from '../../../lib/i18n';
@@ -22,7 +26,6 @@ import type {
   JhabbuControllerState,
   JhabbuIntent,
   JhabbuRoundScore,
-  JhabbuSeatView,
   JhabbuViewState,
 } from './types';
 
@@ -127,6 +130,10 @@ function cardShortName(card: Pick<Card, 'rank' | 'suit'>): string {
 
 function playerName(view: JhabbuViewState, playerId: string): string {
   return view.seats.find((seat) => seat.id === playerId)?.name ?? playerId;
+}
+
+function seatDisplayName(seat: JhabbuViewState['seats'][number], locale: Locale): string {
+  return seat.isSelf ? createTranslator(locale).t('computer.youName') : seat.name;
 }
 
 function setupHint(view: JhabbuViewState): string {
@@ -274,41 +281,6 @@ function SetupScreen({
   );
 }
 
-function PlayerPod({
-  seat,
-  locale,
-  compact = false,
-}: {
-  readonly seat: JhabbuSeatView;
-  readonly locale: Locale;
-  readonly compact?: boolean;
-}): ReactElement {
-  const { t, format } = createTranslator(locale);
-  return (
-    <div
-      className="jh-pod"
-      data-active={seat.isActive ? 'true' : 'false'}
-      data-finished={seat.isFinished ? 'true' : 'false'}
-      data-self={seat.isSelf ? 'true' : 'false'}
-    >
-      <span className="jh-avatar" aria-hidden>
-        {seat.avatarInitial}
-      </span>
-      <span className="max-w-[6rem] truncate text-sm font-black">{seat.name}</span>
-      <span className="text-xs font-semibold">
-        {seat.isFinished
-          ? t('jhabbu.gotAway')
-          : format('jhabbu.podCardCount', { count: seat.cardCount })}
-      </span>
-      {seat.isPower ? <span className="jh-power-badge">{t('jhabbu.powerBadge')}</span> : null}
-      {seat.isActive ? <span className="sr-only">{t('computer.activeTurnMarker')}</span> : null}
-      {!compact && seat.isFinished ? (
-        <span className="jh-reaction">{t('jhabbu.reactionAway')}</span>
-      ) : null}
-    </div>
-  );
-}
-
 function SettingsSheet({
   open,
   view,
@@ -319,6 +291,8 @@ function SettingsSheet({
   onToggleReducedMotion,
   onToggleLargeCards,
   onToggleHighContrast,
+  onOpenHistory,
+  onOpenAccount,
 }: {
   readonly open: boolean;
   readonly view: JhabbuViewState;
@@ -329,6 +303,8 @@ function SettingsSheet({
   readonly onToggleReducedMotion: () => void;
   readonly onToggleLargeCards: () => void;
   readonly onToggleHighContrast: () => void;
+  readonly onOpenHistory: () => void;
+  readonly onOpenAccount: () => void;
 }): ReactElement | null {
   const { t } = createTranslator(view.locale);
   if (!open) return null;
@@ -392,6 +368,14 @@ function SettingsSheet({
             <span>{highContrast ? t('settings.on') : t('settings.off')}</span>
           </button>
         </div>
+        <div className="mt-4 grid gap-2">
+          <Button variant="secondary" className="w-full" onClick={onOpenHistory}>
+            {t('jhabbu.historyButton')}
+          </Button>
+          <Button variant="ghost" className="w-full" onClick={onOpenAccount}>
+            {t('jhabbu.accountButton')}
+          </Button>
+        </div>
       </section>
     </div>
   );
@@ -454,81 +438,44 @@ function HistoryDrawer({
   );
 }
 
-function TrickTable({ view }: { readonly view: JhabbuViewState }): ReactElement {
+/** The centre of the felt: led-suit / power / waste chips and the current trick. */
+function TrickFelt({ view }: { readonly view: JhabbuViewState }): ReactElement {
   const { t } = createTranslator(view.locale);
-  const topSeats = view.seats.filter((seat) => !seat.isSelf).slice(1, -1);
-  const leftSeat = view.seats.find((seat) => !seat.isSelf);
-  const rightSeat = [...view.seats].reverse().find((seat) => !seat.isSelf);
-  const selfSeat = view.seats.find((seat) => seat.isSelf);
   const latestThulla = view.currentTrick.find((entry) => entry.isThulla);
 
   return (
-    <section className="jh-table-scene" aria-label={t('jhabbu.modeLabel')}>
-      <div className="jh-seat-row jh-seat-top">
-        {topSeats.length > 0 ? (
-          topSeats.map((seat) => (
-            <PlayerPod key={seat.id} seat={seat} locale={view.locale} compact />
-          ))
-        ) : leftSeat ? (
-          <PlayerPod seat={leftSeat} locale={view.locale} compact />
-        ) : null}
+    <div className="flex w-full max-w-xl flex-col items-center gap-3">
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <span className="imm-pod-badge">{view.ledSuit ?? t('jhabbu.noLedSuit')}</span>
+        <span className="imm-pod-badge">
+          {t('jhabbu.powerBadge')}: {view.powerPlayerName}
+        </span>
+        <span className="imm-pod-badge">
+          {t('jhabbu.wastePile')} {view.wasteCount}
+        </span>
       </div>
 
-      <div className="jh-table-middle">
-        <div className="jh-side-seat">
-          {leftSeat && topSeats.length > 0 ? (
-            <PlayerPod seat={leftSeat} locale={view.locale} compact />
-          ) : null}
+      {latestThulla ? (
+        <p className="imm-zone-hint font-bold text-brand-accent">{t('jhabbu.thullaCallout')}</p>
+      ) : null}
+
+      {view.currentTrick.length > 0 ? (
+        <div className="imm-play-zone" aria-label={t('jhabbu.currentTrick')}>
+          {view.currentTrick.map((entry) => (
+            <figure
+              key={`${entry.playerId}-${entry.card.id}-${entry.sequence}`}
+              className="imm-trick-card"
+              data-thulla={entry.isThulla ? 'true' : 'false'}
+            >
+              <PlayingCard card={entry.card} size="sm" label={cardLabel(entry.card, view.locale)} />
+              <figcaption>{playerName(view, entry.playerId)}</figcaption>
+            </figure>
+          ))}
         </div>
-
-        <div className="jh-felt" data-thulla={latestThulla ? 'true' : 'false'}>
-          <div className="jh-indicators">
-            <span>{view.ledSuit ?? t('jhabbu.noLedSuit')}</span>
-            <span>
-              {t('jhabbu.powerBadge')}: {view.powerPlayerName}
-            </span>
-            <span>
-              {t('jhabbu.wastePile')} {view.wasteCount}
-            </span>
-          </div>
-
-          <div className="jh-trick-zone">
-            {latestThulla ? <p className="jh-thulla-callout">{t('jhabbu.thullaCallout')}</p> : null}
-            <h2 className="sr-only">{t('jhabbu.currentTrick')}</h2>
-            {view.currentTrick.length > 0 ? (
-              <div className="jh-trick-cards">
-                {view.currentTrick.map((entry) => (
-                  <figure
-                    key={`${entry.playerId}-${entry.card.id}-${entry.sequence}`}
-                    className="jh-trick-card"
-                    data-thulla={entry.isThulla ? 'true' : 'false'}
-                  >
-                    <PlayingCard
-                      card={entry.card}
-                      size="md"
-                      label={cardLabel(entry.card, view.locale)}
-                    />
-                    <figcaption>{playerName(view, entry.playerId)}</figcaption>
-                  </figure>
-                ))}
-              </div>
-            ) : (
-              <p className="jh-empty-trick">{t('jhabbu.emptyTrick')}</p>
-            )}
-          </div>
-        </div>
-
-        <div className="jh-side-seat">
-          {rightSeat && rightSeat.id !== leftSeat?.id ? (
-            <PlayerPod seat={rightSeat} locale={view.locale} compact />
-          ) : null}
-        </div>
-      </div>
-
-      <div className="jh-seat-row jh-seat-bottom">
-        {selfSeat ? <PlayerPod seat={selfSeat} locale={view.locale} /> : null}
-      </div>
-    </section>
+      ) : (
+        <p className="imm-zone-hint">{t('jhabbu.emptyTrick')}</p>
+      )}
+    </div>
   );
 }
 
@@ -548,8 +495,8 @@ function PlayerHandFan({
   const { ref, layout } = useHandLayout(view.ownHand.length, largeCards);
 
   return (
-    <section className="jh-hand-dock" aria-label={t('jhabbu.yourCards')}>
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-2">
+    <section className="w-full" aria-label={t('jhabbu.yourCards')}>
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-1">
         <div className="flex flex-wrap items-center justify-between gap-2 px-1">
           <div>
             <h2 className="text-sm font-black uppercase tracking-[0.16em] text-text-onBrand">
@@ -612,16 +559,14 @@ function PlayerHandFan({
   );
 }
 
-function ResultOverlay({
+function JhabbuResult({
   view,
   onRematch,
   onViewScores,
-  onOpenAccount,
 }: {
   readonly view: JhabbuViewState;
   readonly onRematch: () => void;
   readonly onViewScores: () => void;
-  readonly onOpenAccount: () => void;
 }): ReactElement | null {
   const { t, format } = createTranslator(view.locale);
   if (view.phase !== 'result') return null;
@@ -631,56 +576,49 @@ function ResultOverlay({
   const loser = view.seats.find((seat) => seat.id === view.result?.loserId);
   const loserCards = loser ? (view.result?.remainingCards[loser.id] ?? loser.cardCount) : 0;
 
+  const firstAway = view.finishOrderNames[0];
+  const heroSeat =
+    view.seats.find((seat) => seatDisplayName(seat, view.locale) === firstAway) ??
+    view.seats.find((seat) => seat.name === firstAway) ??
+    view.seats.find((seat) => seat.isFinished) ??
+    null;
+
   return (
-    <div className="jh-result-overlay">
-      <section
-        className="jh-result-card"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="jh-result-title"
-      >
-        <p className="text-sm font-black uppercase tracking-[0.18em] text-brand-accent">
-          {t('jhabbu.roundComplete')}
-        </p>
-        <h2 id="jh-result-title" className="mt-2 text-3xl font-black text-action-primary">
-          {selfPosition
-            ? format('jhabbu.resultYouGotAway', { position: selfPosition })
-            : t('jhabbu.resultFamilyLine')}
-        </h2>
-        <p className="mt-3 text-lg font-bold text-text-primary">
-          {format('jhabbu.resultLoserWithCards', { name: view.loserName, count: loserCards })}
-        </p>
-
-        <ol className="mt-5 space-y-2 rounded-md bg-background-canvas p-4 text-left">
-          {view.finishOrderNames.map((name) => (
-            <li key={name} className="font-semibold text-text-primary">
-              {name}
-            </li>
-          ))}
-          {view.loserName ? (
-            <li className="font-black text-action-primary">{view.loserName}</li>
-          ) : null}
-        </ol>
-
-        <div className="mt-5 flex flex-wrap justify-center gap-3">
-          <Button size="lg" onClick={onRematch}>
-            {t('jhabbu.playAgain')}
-          </Button>
-          <Button size="lg" variant="ghost" onClick={onViewScores}>
-            {t('jhabbu.scoresButton')}
-          </Button>
-          <Button size="lg" variant="ghost" onClick={onOpenAccount}>
-            {t('jhabbu.saveScores')}
-          </Button>
-          <Link
-            href="/"
-            className="inline-flex min-h-14 items-center justify-center rounded-md border border-action-primary px-7 text-lg font-semibold text-action-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-          >
-            {t('action.backToGames')}
-          </Link>
-        </div>
-      </section>
-    </div>
+    <ImmersiveResultOverlay
+      open
+      titleId="jh-result-title"
+      eyebrow={t('jhabbu.roundComplete')}
+      title={
+        selfPosition
+          ? format('jhabbu.resultYouGotAway', { position: selfPosition })
+          : t('jhabbu.resultFamilyLine')
+      }
+      hero={
+        heroSeat
+          ? { seatId: heroSeat.id, initial: heroSeat.avatarInitial, isSelf: heroSeat.isSelf }
+          : null
+      }
+      highlight={format('jhabbu.resultLoserWithCards', {
+        name: view.loserName,
+        count: loserCards,
+      })}
+      playAgainLabel={t('jhabbu.playAgain')}
+      onRematch={onRematch}
+      secondaryLabel={t('jhabbu.scoresButton')}
+      onSecondary={onViewScores}
+      returnHomeLabel={t('action.returnHome')}
+    >
+      <ol className="w-full space-y-1 rounded-md bg-background-canvas p-4 text-left">
+        {view.finishOrderNames.map((name) => (
+          <li key={name} className="font-semibold text-text-primary">
+            {name}
+          </li>
+        ))}
+        {view.loserName ? (
+          <li className="font-black text-action-primary">{view.loserName}</li>
+        ) : null}
+      </ol>
+    </ImmersiveResultOverlay>
   );
 }
 
@@ -700,67 +638,78 @@ function PlayingScreen({
   const [accountOpen, setAccountOpen] = useState(false);
   const [largeCards, setLargeCards] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
-  const latestEvent = view.events[0];
   const leaderName =
     view.roundScores.length > 0 ? (view.runningScores[0]?.playerName ?? null) : null;
 
+  const opponents = view.seats.filter((seat) => !seat.isSelf);
+  const selfSeat = view.seats.find((seat) => seat.isSelf);
+
+  const renderPod = (seat: JhabbuViewState['seats'][number]): ReactElement => (
+    <ImmersivePod
+      key={seat.id}
+      seatId={seat.id}
+      initial={seat.avatarInitial}
+      name={seatDisplayName(seat, view.locale)}
+      isSelf={seat.isSelf}
+      isActive={seat.isActive}
+      isFinished={seat.isFinished}
+      badge={
+        seat.isFinished
+          ? t('jhabbu.gotAway')
+          : format('jhabbu.podCardCount', { count: seat.cardCount })
+      }
+      badgeTone={seat.isFinished ? 'accent' : 'default'}
+      tag={seat.isPower ? t('jhabbu.powerBadge') : undefined}
+      activeMarker={t('computer.activeTurnMarker')}
+    />
+  );
+
+  const toolbar = (
+    <>
+      <button type="button" className="imm-toolbar-button" onClick={() => setScoreOpen(true)}>
+        {t('jhabbu.scoresButton')}
+      </button>
+      <button
+        type="button"
+        className="imm-toolbar-button"
+        onClick={() => setSettingsOpen(true)}
+        aria-label={t('action.settings')}
+      >
+        <span aria-hidden>⚙️</span>
+      </button>
+    </>
+  );
+
   return (
-    <main
-      className="jh-play-shell text-text-primary"
-      data-reduced-motion={view.reducedMotion ? 'true' : 'false'}
-      data-high-contrast={highContrast ? 'true' : 'false'}
-    >
-      <div className="jh-rain" aria-hidden />
-
-      <header className="jh-topbar">
-        <Link
-          href="/"
-          className="rounded-md px-2 py-1 text-sm font-black text-text-onBrand underline decoration-action-secondary decoration-2 underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-        >
-          {t('games.jhabbu.name')}
-        </Link>
-        <div className="min-w-0 text-center" role="status" aria-live="polite">
-          <p className="truncate text-sm font-black text-text-onBrand">
-            {format(view.statusKey, view.statusValues)}
-          </p>
-          <p className="truncate text-xs font-semibold text-text-onBrand/80">
-            {format(view.instructionKey, view.instructionValues)}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button type="button" className="jh-icon-button" onClick={() => setScoreOpen(true)}>
-            {t('jhabbu.scoresButton')}
-          </button>
-          <button type="button" className="jh-icon-button" onClick={() => setAccountOpen(true)}>
-            {t('jhabbu.accountButton')}
-          </button>
-          <button type="button" className="jh-icon-button" onClick={() => setHistoryOpen(true)}>
-            {t('jhabbu.historyButton')}
-          </button>
-          <button
-            type="button"
-            className="jh-icon-button"
-            onClick={() => setSettingsOpen(true)}
-            aria-label={t('action.settings')}
-          >
-            <span aria-hidden>⚙</span>
-          </button>
-        </div>
-      </header>
-
-      <div className="jh-live-message" aria-live="polite">
-        {latestEvent
-          ? format(latestEvent.messageKey, latestEvent.values)
-          : t('jhabbu.tableReadyHint')}
-      </div>
-
-      <TrickTable view={view} />
-
-      <PlayerHandFan
-        view={view}
-        largeCards={largeCards}
-        onPlayCard={(cardId) => dispatch({ type: 'playCard', cardId })}
-        onDrawFromWaste={() => dispatch({ type: 'drawFromWaste' })}
+    <>
+      <ImmersiveScene
+        ariaLabel={t('jhabbu.modeLabel')}
+        modeLabel={t('jhabbu.modeLabel')}
+        statusText={format(view.statusKey, view.statusValues)}
+        statusIsSelf={view.isHumanTurn}
+        reducedMotion={view.reducedMotion}
+        highContrast={highContrast}
+        toolbar={toolbar}
+        top={opponents.map(renderPod)}
+        middle={<TrickFelt view={view} />}
+        bottom={
+          <>
+            {selfSeat ? renderPod(selfSeat) : null}
+            <PlayerHandFan
+              view={view}
+              largeCards={largeCards}
+              onPlayCard={(cardId) => dispatch({ type: 'playCard', cardId })}
+              onDrawFromWaste={() => dispatch({ type: 'drawFromWaste' })}
+            />
+          </>
+        }
+        overlay={
+          <JhabbuResult
+            view={view}
+            onRematch={() => dispatch({ type: 'rematch' })}
+            onViewScores={() => setScoreOpen(true)}
+          />
+        }
       />
 
       <SettingsSheet
@@ -773,6 +722,14 @@ function PlayingScreen({
         onToggleReducedMotion={() => dispatch({ type: 'toggleReducedMotion' })}
         onToggleLargeCards={() => setLargeCards((value) => !value)}
         onToggleHighContrast={() => setHighContrast((value) => !value)}
+        onOpenHistory={() => {
+          setSettingsOpen(false);
+          setHistoryOpen(true);
+        }}
+        onOpenAccount={() => {
+          setSettingsOpen(false);
+          setAccountOpen(true);
+        }}
       />
       <HistoryDrawer open={historyOpen} view={view} onClose={() => setHistoryOpen(false)} />
       <JhabbuScoreDrawer
@@ -790,13 +747,7 @@ function PlayingScreen({
         roundScores={view.roundScores}
         onClose={() => setAccountOpen(false)}
       />
-      <ResultOverlay
-        view={view}
-        onRematch={() => dispatch({ type: 'rematch' })}
-        onViewScores={() => setScoreOpen(true)}
-        onOpenAccount={() => setAccountOpen(true)}
-      />
-    </main>
+    </>
   );
 }
 
@@ -864,6 +815,9 @@ export function JhabbuComputerGame({
   };
 
   if (view.phase === 'setup') {
+    // Launched from the shared mobile setup shell, we auto-start into play; show
+    // the same neutral placeholder as every game rather than this legacy setup.
+    if (autoStart) return <ComputerGameStarting locale={view.locale} />;
     return <SetupScreen view={view} dispatch={dispatch} onLocaleChange={onLocaleChange} />;
   }
 

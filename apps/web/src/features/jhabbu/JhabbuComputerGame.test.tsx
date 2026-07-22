@@ -36,8 +36,11 @@ describe('JhabbuComputerGame', () => {
     await user.click(screen.getByRole('button', { name: /Start 4-player game/i }));
 
     expect(screen.getByLabelText(/Jhabbu computer game/i)).toBeVisible();
-    expect(screen.getByRole('button', { name: /History/i })).toBeVisible();
     expect(screen.getByLabelText(/Your cards/i)).toBeVisible();
+
+    // History now lives inside the settings sheet on the immersive board.
+    await user.click(screen.getByRole('button', { name: /Settings/i }));
+    await user.click(screen.getByRole('button', { name: /History/i }));
     expect(screen.getByText(/Jhabbu started/i)).toBeVisible();
   });
 });
