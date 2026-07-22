@@ -8,11 +8,11 @@ import { recordGameLaunch } from '../../lib/mobile/daily-activity';
 import { rememberRecentGame } from '../../lib/mobile/recent';
 import type { MobileCatalogItem } from '../../lib/mobile-catalog';
 
+import { BottomSheet } from './BottomSheet';
+import { GameTile } from './GameTile';
 import { ACCENT_CLASSES } from './accent';
 import { GameTileArtwork } from './artwork/GameTileArtwork';
 import { PatternBackground } from './artwork/PatternBackground';
-import { BottomSheet } from './BottomSheet';
-import { GameTile } from './GameTile';
 import { CardsIcon, LearnIcon, PlayIcon } from './icons';
 
 /**

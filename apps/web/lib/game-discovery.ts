@@ -45,7 +45,7 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
   'gadha-chor': {
     slug: 'gadha-chor',
     playable: true,
-    onlinePlayable: true,
+    onlinePlayable: false,
     nameKey: 'games.gadhaChor.name',
     pageHeadingKey: 'games.gadhaChor.pageHeading',
     descriptionKey: 'games.gadhaChor.description',
@@ -83,7 +83,7 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
   'lal-satti': {
     slug: 'lal-satti',
     playable: true,
-    onlinePlayable: true,
+    onlinePlayable: false,
     nameKey: 'games.lalSatti.name',
     pageHeadingKey: 'games.lalSatti.pageHeading',
     descriptionKey: 'games.lalSatti.description',
@@ -120,10 +120,10 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
   },
   jhabbu: {
     slug: 'jhabbu',
-    // Both practice (single-player) and online/family multiplayer are live, so
-    // Jhabbu gets Play routes, a practice CTA, and a working "Play Online" CTA.
+    // Single-player (computer) is live; online/family rooms are not reliably
+    // live yet, so the online CTA renders as a "coming soon" affordance.
     playable: true,
-    onlinePlayable: true,
+    onlinePlayable: false,
     nameKey: 'games.jhabbu.name',
     pageHeadingKey: 'games.jhabbu.pageHeading',
     descriptionKey: 'games.jhabbu.description',
@@ -162,11 +162,10 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
   },
   kachuful: {
     slug: 'kachuful',
-    // Both the single-player (computer) experience and server-authoritative
-    // online/family rooms are live, so Kachuful gets Play routes, a practice
-    // CTA, a computer-play sitemap entry, and an active "Start family room" CTA.
+    // The single-player (computer) experience is live; online/family rooms are
+    // not reliably live yet, so the online CTA renders as "coming soon".
     playable: true,
-    onlinePlayable: true,
+    onlinePlayable: false,
     nameKey: 'games.kachuful.name',
     pageHeadingKey: 'games.kachuful.pageHeading',
     descriptionKey: 'games.kachuful.description',

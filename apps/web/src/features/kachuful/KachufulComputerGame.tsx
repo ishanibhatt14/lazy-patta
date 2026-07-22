@@ -8,6 +8,7 @@ import { useEffect, useReducer, useRef } from 'react';
 
 import { Button } from '../../../components/Button';
 import { PlayingCard } from '../../../components/PlayingCard';
+import { ComputerGameStarting } from '../../../components/game/ComputerGameStarting';
 import { LocaleSwitcher } from '../../../components/game/LocaleSwitcher';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
 import { createTranslator } from '../../../lib/i18n';
@@ -136,6 +137,9 @@ export function KachufulComputerGame({
   }, [view.phase, view.isHumanTurn, view.currentPlayerName, view.reducedMotion]);
 
   if (view.phase === 'setup') {
+    // Launched from the shared mobile setup shell, we auto-start into play; show
+    // the same neutral placeholder as every game rather than this legacy setup.
+    if (autoStart) return <ComputerGameStarting locale={view.locale} />;
     return renderSetup(view, dispatch, setPreferredLocale);
   }
 

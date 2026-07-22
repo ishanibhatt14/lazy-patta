@@ -19,6 +19,7 @@ import type { ComputerGameConfig } from '../../lib/mobile/computer-session';
 import { playCue } from '../../lib/sound';
 
 import { ComputerGameSetup } from './ComputerGameSetup';
+import { ComputerGameStarting } from './ComputerGameStarting';
 import { GameErrorBoundary } from './GameErrorBoundary';
 import { HowToPlayTutorial } from './HowToPlayTutorial';
 import { ImmersiveGameShell } from './immersive/ImmersiveGameShell';
@@ -135,6 +136,9 @@ export function ComputerGameExperience({
   ) : null;
 
   if (state.phase === 'setup') {
+    // Launched from the shared mobile setup shell, we auto-start into play; show
+    // the same neutral placeholder as every game rather than this setup surface.
+    if (autoStart) return <ComputerGameStarting locale={locale} />;
     return (
       <>
         <ComputerGameSetup

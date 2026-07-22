@@ -6,6 +6,7 @@ import type { ReactElement } from 'react';
 import { useEffect, useReducer, useRef } from 'react';
 
 import { Button } from '../../../components/Button';
+import { ComputerGameStarting } from '../../../components/game/ComputerGameStarting';
 import { LocaleSwitcher } from '../../../components/game/LocaleSwitcher';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
 import { createTranslator } from '../../../lib/i18n';
@@ -145,6 +146,9 @@ export function LalSattiComputerGame({
   }, [view.phase, view.isHumanTurn, view.currentPlayerName, view.reducedMotion]);
 
   if (view.phase === 'setup') {
+    // Launched from the shared mobile setup shell, we auto-start into play; show
+    // the same neutral placeholder as every game rather than this legacy setup.
+    if (autoStart) return <ComputerGameStarting locale={view.locale} />;
     return (
       <main className="min-h-screen bg-background-canvas px-4 py-6 text-text-primary">
         <section className="mx-auto flex max-w-5xl flex-col gap-6">

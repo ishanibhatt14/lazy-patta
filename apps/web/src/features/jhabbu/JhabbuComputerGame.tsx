@@ -8,6 +8,7 @@ import { useEffect, useReducer, useRef, useState } from 'react';
 
 import { Button } from '../../../components/Button';
 import { PlayingCard } from '../../../components/PlayingCard';
+import { ComputerGameStarting } from '../../../components/game/ComputerGameStarting';
 import { LocaleSwitcher } from '../../../components/game/LocaleSwitcher';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
 import { fanCardStyle, useHandLayout } from '../../../lib/hand-layout';
@@ -864,6 +865,9 @@ export function JhabbuComputerGame({
   };
 
   if (view.phase === 'setup') {
+    // Launched from the shared mobile setup shell, we auto-start into play; show
+    // the same neutral placeholder as every game rather than this legacy setup.
+    if (autoStart) return <ComputerGameStarting locale={view.locale} />;
     return <SetupScreen view={view} dispatch={dispatch} onLocaleChange={onLocaleChange} />;
   }
 

@@ -1,13 +1,20 @@
 // Captures the premium /mobile UI into artifacts/mobile-ui/ for visual review.
-// Hits the already-running dev server (default 3111) so no production build is
-// needed. Usage: node scripts/mobile-ui-shots.mjs [baseURL]
+// Covers the full journey for every game — Home, games grid, per-game setup and
+// active table, plus the honest Rooms "coming soon" screen, the in-app Learn
+// How-to-Play sheet, and Settings — at both target viewports and themes.
+//
+// Run against a PRODUCTION `next start` build (a fresh Playwright Chromium
+// cannot hydrate the Next dev server, so interactive clicks silently no-op):
+//   pnpm --filter @lazy-patta/web build && \
+//     pnpm --filter @lazy-patta/web exec next start --port 3100 &
+//   node scripts/mobile-ui-shots.mjs http://127.0.0.1:3100
 import { mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 import { chromium } from '@playwright/test';
 
-const BASE = process.argv[2] ?? 'http://127.0.0.1:3111';
+const BASE = process.argv[2] ?? 'http://127.0.0.1:3100';
 const OUT = resolve(dirname(fileURLToPath(import.meta.url)), '../../../artifacts/mobile-ui');
 const THEME_KEY = 'lazy-patta:mobile-theme';
 
@@ -15,6 +22,8 @@ const VIEWPORTS = [
   { tag: '390', width: 390, height: 844 },
   { tag: '320', width: 320, height: 568 },
 ];
+
+const GAMES = ['gadha-chor', 'lal-satti', 'jhabbu', 'kachuful'];
 
 async function shot(page, name, { fullPage = true } = {}) {
   await page.screenshot({ path: resolve(OUT, `${name}.png`), fullPage });
@@ -28,7 +37,7 @@ async function gotoMobile(page, path, theme) {
     [THEME_KEY, theme],
   );
   await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(400);
+  await page.waitForTimeout(300);
 }
 
 async function run() {
@@ -46,46 +55,43 @@ async function run() {
       const suffix = `${vp.tag}-${theme}`;
       console.log(`Viewport ${suffix}`);
 
-      // Home.
+      // Game-agnostic surfaces.
       await gotoMobile(page, '/mobile', theme);
       await shot(page, `home-${suffix}`);
 
-      // Games grid.
       await gotoMobile(page, '/mobile/games', theme);
       await shot(page, `games-${suffix}`);
 
-      // Setup bottom sheet: tap the first available game tile. The sheet is a
-      // fixed-position modal, so capture the viewport (not fullPage). Dev-server
-      // hydration can lag the first paint, so retry the click until it opens.
-      const tile = page.locator('button:has-text("Gadha Chor")').first();
-      const dialog = page.locator('[role="dialog"]');
-      if (await tile.count()) {
-        for (let i = 0; i < 10 && (await dialog.count()) === 0; i += 1) {
-          await tile.click();
-          await page.waitForTimeout(300);
-        }
+      // Rooms: the honest "coming soon" screen — no auth, no loader.
+      await gotoMobile(page, '/mobile/rooms', theme);
+      await shot(page, `rooms-${suffix}`);
+
+      // Learn: list, then open the in-app How-to-Play sheet for the first game.
+      await gotoMobile(page, '/mobile/how-to-play', theme);
+      await shot(page, `learn-${suffix}`);
+      const learnCard = page.getByRole('button', { name: /How to play/i }).first();
+      if (await learnCard.count()) {
+        await learnCard.click();
         await page.waitForTimeout(400);
-        await shot(page, `sheet-${suffix}`, { fullPage: false });
+        await shot(page, `learn-sheet-${suffix}`, { fullPage: false });
       }
 
-      // Settings.
       await gotoMobile(page, '/mobile/settings', theme);
       await shot(page, `settings-${suffix}`);
 
-      // Computer setup.
-      await gotoMobile(page, '/play/gadha-chor/computer', theme);
-      await shot(page, `setup-${suffix}`);
+      // Per-game journey: shared setup shell → active table.
+      for (const slug of GAMES) {
+        await gotoMobile(page, `/mobile/game/${slug}/setup?mode=computer`, theme);
+        await shot(page, `setup-${slug}-${suffix}`);
 
-      // Active felt table: start the game and wait for the felt shell to mount.
-      const start = page.locator('button:has-text("Start game")').first();
-      const felt = page.locator('.gc-shell');
-      if (await start.count()) {
-        for (let i = 0; i < 10 && (await felt.count()) === 0; i += 1) {
+        const start = page.getByRole('button', { name: /^Start game$/i }).first();
+        if (await start.count()) {
           await start.click();
-          await page.waitForTimeout(400);
+          // Setup creates a session and routes to the auto-starting table.
+          await page.waitForURL(/\/computer\//, { timeout: 8000 }).catch(() => undefined);
+          await page.waitForTimeout(2500);
+          await shot(page, `table-${slug}-${suffix}`, { fullPage: false });
         }
-        await page.waitForTimeout(1500);
-        await shot(page, `table-${suffix}`, { fullPage: false });
       }
 
       await context.close();

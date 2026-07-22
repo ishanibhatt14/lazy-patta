@@ -9,13 +9,13 @@ import { readRecentGame } from '../../lib/mobile/recent';
 import { MOBILE_CATALOG, type MobileCatalogItem } from '../../lib/mobile-catalog';
 import { LandingLanguageMenu } from '../home/landing/LandingLanguageMenu';
 
+import { DailyPlayCard } from './DailyPlayCard';
+import { GameCatalogGrid } from './GameCatalogGrid';
+import { InviteFamilyCard } from './InviteFamilyCard';
 import { LazyPattaLogoMark } from './artwork/LazyPattaLogoMark';
 import { PatternBackground } from './artwork/PatternBackground';
 import { PlayerAvatar } from './artwork/PlayerAvatar';
-import { DailyPlayCard } from './DailyPlayCard';
-import { GameCatalogGrid } from './GameCatalogGrid';
 import { CardsIcon, KeyIcon, SettingsIcon } from './icons';
-import { InviteFamilyCard } from './InviteFamilyCard';
 
 export function MobileHome(): ReactElement {
   const { locale } = usePreferredLocale();

@@ -133,29 +133,6 @@ export function MobileComputerGameSetup({
               </p>
             </fieldset>
           ) : null}
-
-          <label className="grid gap-2 text-sm font-black text-action-primary">
-            {t.t('auth.guestNameLabel')}
-            <input
-              type="text"
-              autoComplete="nickname"
-              maxLength={24}
-              value={config.humanName}
-              onChange={(event) => onChange({ ...config, humanName: event.target.value })}
-              placeholder={t.t('computer.youName')}
-              className="min-h-12 rounded-xl border border-action-primary/25 bg-background-canvas px-3 text-base font-semibold text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-            />
-          </label>
-
-          <label className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-action-primary/15 bg-background-canvas px-3 text-sm font-bold text-text-primary">
-            <span>{t.t('settings.reducedMotion')}</span>
-            <input
-              type="checkbox"
-              checked={config.reducedMotion}
-              onChange={(event) => onChange({ ...config, reducedMotion: event.target.checked })}
-              className="h-5 w-5 accent-action-primary"
-            />
-          </label>
         </div>
       </section>
 
