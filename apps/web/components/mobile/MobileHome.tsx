@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState, type ReactElement } from 'react';
 
+import { trackGrowthEvent } from '../../lib/growth/analytics';
 import { createTranslator } from '../../lib/i18n';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import { readRecentGame } from '../../lib/mobile/recent';
@@ -23,6 +24,7 @@ export function MobileHome(): ReactElement {
   // localStorage is client-only; read after mount so SSR and first paint agree.
   const [recent, setRecent] = useState<MobileCatalogItem | undefined>(undefined);
   useEffect(() => setRecent(readRecentGame()), []);
+  useEffect(() => trackGrowthEvent({ name: 'mobile_home_viewed' }), []);
 
   return (
     <div className="flex flex-col gap-6">

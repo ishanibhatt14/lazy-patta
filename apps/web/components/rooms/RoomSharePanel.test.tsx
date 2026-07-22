@@ -14,25 +14,25 @@ describe('RoomSharePanel', () => {
       configurable: true,
     });
 
-    render(<RoomSharePanel code="BA2026" locale="en" />);
+    render(<RoomSharePanel code="LP57AB" locale="en" />);
 
-    expect(screen.getByText(/\/join\/BA2026/)).toBeVisible();
+    expect(screen.getByText(/\/join\/LP57AB/)).toBeVisible();
 
     const whatsapp = screen.getByRole('link', { name: /Share on WhatsApp/i });
     const href = whatsapp.getAttribute('href') ?? '';
     expect(href).toContain('wa.me');
-    expect(decodeURIComponent(href)).toContain('BA2026');
+    expect(decodeURIComponent(href)).toContain('LP57AB');
 
     await user.click(screen.getByRole('button', { name: /Copy invite link/i }));
 
     expect(writeText).toHaveBeenCalledTimes(1);
-    expect(writeText.mock.calls[0]?.[0]).toContain('/join/BA2026');
+    expect(writeText.mock.calls[0]?.[0]).toContain('/join/LP57AB');
     expect(writeText.mock.calls[0]?.[0]).toContain('lazypatta.com');
     expect(await screen.findByText(/Link copied!/i)).toBeVisible();
   });
 
   it('omits the native share button when Web Share is unavailable', () => {
-    render(<RoomSharePanel code="BA2026" locale="en" />);
+    render(<RoomSharePanel code="LP57AB" locale="en" />);
     expect(screen.queryByRole('button', { name: /Share…/i })).toBeNull();
   });
 });
