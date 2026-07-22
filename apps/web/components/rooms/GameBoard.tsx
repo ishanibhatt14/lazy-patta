@@ -10,7 +10,7 @@ import {
 } from '@lazy-patta/game-contracts';
 import { mintPositionToken } from '@lazy-patta/game-engine';
 import type { JhabbuResult } from '@lazy-patta/jhabbu-engine';
-import type { KachufulResult } from '@lazy-patta/kachuful-engine';
+import { trickWinner, type KachufulResult } from '@lazy-patta/kachuful-engine';
 import { playableCards, toTableauLanes, type LalSattiResult } from '@lazy-patta/lal-satti-engine';
 import type { Locale, MessageKey } from '@lazy-patta/localization';
 import {
@@ -374,6 +374,7 @@ export function GameBoard({
         game={game}
         snapshot={snapshot as KachufulPublicSnapshot}
         hand={hand}
+        seats={positioned}
         userId={userId}
         locale={locale}
         reducedMotion={reducedMotion}
@@ -1047,6 +1048,7 @@ interface KachufulOnlineBoardProps {
   readonly game: GameRow;
   readonly snapshot: KachufulPublicSnapshot;
   readonly hand: readonly Card[];
+  readonly seats: readonly PositionedSeat[];
   readonly userId: string;
   readonly locale: Locale;
   readonly reducedMotion: boolean;
@@ -1077,6 +1079,7 @@ function KachufulOnlineBoard({
   game,
   snapshot,
   hand,
+  seats,
   userId,
   locale,
   reducedMotion,
@@ -1140,6 +1143,130 @@ function KachufulOnlineBoard({
     return legal.map((card) => card.id);
   }, [hand, isMyTurn, snapshot.phase, snapshot.ledSuit]);
   const playable = useMemo(() => new Set(playableIds), [playableIds]);
+
+  const playerById = useMemo(
+    () => new Map(snapshot.players.map((player) => [player.id, player] as const)),
+    [snapshot.players],
+  );
+
+  // The card currently winning the in-progress trick, decided with the same rule
+  // the engine uses to award it. Only meaningful once a card has led.
+  const winningId = useMemo<string | null>(() => {
+    if (snapshot.currentTrick.length === 0 || snapshot.ledSuit === null) return null;
+    return trickWinner(snapshot.currentTrick, snapshot.ledSuit, snapshot.trump).playerId;
+  }, [snapshot.currentTrick, snapshot.ledSuit, snapshot.trump]);
+
+  // When it's my turn and I hold the led suit, I'm forced to follow it.
+  const mustFollowSuit =
+    isMyTurn &&
+    snapshot.phase === 'playing' &&
+    snapshot.ledSuit !== null &&
+    hand.some((card) => card.suit === snapshot.ledSuit);
+
+  // Presentation seats around the felt: self anchors the bottom, opponents wrap
+  // the rim (parent already positioned them). Counts/turn come from the snapshot.
+  const selfSeat = seats.find((seat) => seat.position === 'bottom');
+  const topSeats = seats.filter((seat) => seat.position === 'top');
+  const leftSeats = seats.filter((seat) => seat.position === 'left');
+  const rightSeats = seats.filter((seat) => seat.position === 'right');
+
+  const renderSeatPod = (seat: PositionedSeat): ReactElement => {
+    const player = playerById.get(seat.id);
+    return (
+      <div
+        key={seat.id}
+        data-seat-id={seat.id}
+        data-active={seat.isActive}
+        data-self={seat.isSelf}
+        className={[
+          'flex min-w-[7rem] max-w-[11rem] flex-col gap-1 rounded-xl border px-3 py-2 text-text-onBrand shadow-sm transition',
+          seat.isActive
+            ? 'border-brand-accent bg-surface-primary/25 ring-2 ring-brand-accent'
+            : 'border-text-onBrand/20 bg-surface-primary/10',
+        ].join(' ')}
+      >
+        <div className="flex items-center gap-2">
+          <span
+            aria-hidden
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-surface-primary text-xs font-bold text-action-primary"
+          >
+            {seat.avatarInitial}
+          </span>
+          <span className="truncate text-sm font-bold">
+            {seat.isSelf ? t.t('rooms.you') : seat.name}
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-1 text-[0.7rem] font-semibold">
+          {player?.isDealer ? (
+            <span className="rounded bg-brand-accent/40 px-1.5 py-0.5">
+              {t.t('kachuful.dealerBadge')}
+            </span>
+          ) : null}
+          <span className="rounded bg-surface-primary/20 px-1.5 py-0.5">
+            {t.format('kachuful.bidTricksSeat', {
+              bid: player?.bid ?? '—',
+              won: player?.tricksWon ?? 0,
+            })}
+          </span>
+          <span className="rounded bg-surface-primary/20 px-1.5 py-0.5">
+            {t.format('kachuful.cardsLeftSeat', { count: seat.cardCount })}
+          </span>
+        </div>
+      </div>
+    );
+  };
+
+  const renderTrick = (): ReactElement => {
+    const ledGlyph = snapshot.ledSuit ? (SUIT_GLYPH[snapshot.ledSuit] ?? snapshot.ledSuit) : null;
+    return (
+      <div className="flex h-full min-h-[9rem] flex-col items-center justify-center gap-2 rounded-2xl bg-game-table/50 p-3">
+        <div className="flex flex-wrap items-center justify-center gap-2 text-[0.7rem] font-semibold uppercase tracking-wide text-text-onBrand/80">
+          <span className="rounded-full bg-surface-primary/15 px-2 py-0.5">
+            {t.format('kachuful.trumpLabel', { trump: trumpText })}
+          </span>
+          {ledGlyph ? (
+            <span className="rounded-full bg-surface-primary/15 px-2 py-0.5">
+              {t.format('kachuful.trickLedSuit', { suit: ledGlyph })}
+            </span>
+          ) : null}
+        </div>
+        {snapshot.currentTrick.length > 0 ? (
+          <>
+            <div className="flex flex-wrap items-end justify-center gap-3">
+              {snapshot.currentTrick.map((entry) => {
+                const isWinning = entry.playerId === winningId;
+                return (
+                  <div key={entry.playerId} className="flex flex-col items-center gap-1">
+                    <div
+                      className={
+                        isWinning ? 'rounded-lg ring-2 ring-brand-accent ring-offset-1' : undefined
+                      }
+                    >
+                      <PlayingCard card={entry.card} size="sm" label={cardLabel(entry.card)} />
+                    </div>
+                    <span className="text-xs font-semibold text-text-onBrand">
+                      {nameFor(entry.playerId)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            {winningId ? (
+              <p className="text-xs font-bold text-brand-accent">
+                {t.format('kachuful.trickWinning', { name: nameFor(winningId) })}
+              </p>
+            ) : null}
+          </>
+        ) : (
+          <p className="max-w-[16rem] text-center text-xs font-semibold text-text-onBrand/80">
+            {snapshot.currentPlayerId
+              ? t.format('kachuful.trickWaiting', { name: nameFor(snapshot.currentPlayerId) })
+              : t.t('kachuful.trickHeading')}
+          </p>
+        )}
+      </div>
+    );
+  };
 
   const submit = useCallback(
     async (action: KachufulClientAction): Promise<void> => {
@@ -1219,73 +1346,77 @@ function KachufulOnlineBoard({
           </p>
 
           <section
-            aria-label={t.t('kachuful.scoreboardHeading')}
-            className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4"
+            aria-label={t.t('kachuful.tableLabel')}
+            className="rounded-[1.75rem] border border-brand-accent/30 bg-game-table/95 p-3 shadow-lg sm:p-5"
           >
-            {snapshot.players.map((player) => {
-              const name = nameFor(player.id);
-              const active = isActive && snapshot.currentPlayerId === player.id;
-              return (
-                <div
-                  key={player.id}
-                  data-active={active}
-                  className={[
-                    'rounded-lg border p-3 shadow-sm transition',
-                    active
-                      ? 'border-action-primary bg-action-primary/10'
-                      : 'border-brand-accent/40 bg-surface-primary',
-                  ].join(' ')}
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      aria-hidden
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-game-table text-sm font-bold text-text-onBrand"
-                    >
-                      {initialFor(name)}
-                    </span>
-                    <span className="truncate text-sm font-bold">{name}</span>
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-1 text-xs">
-                    {player.isDealer ? (
-                      <span className="rounded bg-brand-accent/30 px-1.5 py-0.5 font-semibold">
-                        {t.t('kachuful.dealerBadge')}
-                      </span>
-                    ) : null}
-                    <span className="rounded bg-background-canvas px-1.5 py-0.5 font-semibold">
-                      {t.format('kachuful.bidTricksSeat', {
-                        bid: player.bid ?? '—',
-                        won: player.tricksWon,
-                      })}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-xs font-bold text-action-primary">
-                    {t.format('kachuful.totalScore', { count: player.totalScore })}
-                  </p>
-                </div>
-              );
-            })}
+            {topSeats.length > 0 ? (
+              <div className="flex flex-wrap justify-center gap-3">
+                {topSeats.map(renderSeatPod)}
+              </div>
+            ) : null}
+            <div className="mt-3 flex items-stretch justify-between gap-3">
+              <div className="flex flex-col justify-center gap-3">
+                {leftSeats.map(renderSeatPod)}
+              </div>
+              <div className="min-w-0 flex-1">{renderTrick()}</div>
+              <div className="flex flex-col justify-center gap-3">
+                {rightSeats.map(renderSeatPod)}
+              </div>
+            </div>
+            {selfSeat ? (
+              <div className="mt-3 flex justify-center">{renderSeatPod(selfSeat)}</div>
+            ) : null}
           </section>
 
-          {snapshot.currentTrick.length > 0 ? (
-            <section
-              aria-label={t.t('kachuful.trickHeading')}
-              className="rounded-lg bg-game-table/90 p-3 shadow-md"
-            >
-              <p className="mb-2 text-xs font-semibold uppercase text-text-onBrand">
-                {t.t('kachuful.trickHeading')}
-              </p>
-              <div className="flex flex-wrap items-end gap-3">
-                {snapshot.currentTrick.map((entry) => (
-                  <div key={entry.playerId} className="flex flex-col items-center gap-1">
-                    <PlayingCard card={entry.card} size="sm" label={cardLabel(entry.card)} />
-                    <span className="text-xs font-semibold text-text-onBrand">
-                      {nameFor(entry.playerId)}
-                    </span>
+          <details className="rounded-lg bg-surface-primary/95 p-3 shadow-sm">
+            <summary className="cursor-pointer text-sm font-bold text-action-primary">
+              {t.t('kachuful.scoreboardHeading')}
+            </summary>
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+              {snapshot.players.map((player) => {
+                const name = nameFor(player.id);
+                const active = isActive && snapshot.currentPlayerId === player.id;
+                return (
+                  <div
+                    key={player.id}
+                    data-active={active}
+                    className={[
+                      'rounded-lg border p-3 shadow-sm transition',
+                      active
+                        ? 'border-action-primary bg-action-primary/10'
+                        : 'border-brand-accent/40 bg-surface-primary',
+                    ].join(' ')}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        aria-hidden
+                        className="flex h-8 w-8 items-center justify-center rounded-full bg-game-table text-sm font-bold text-text-onBrand"
+                      >
+                        {initialFor(name)}
+                      </span>
+                      <span className="truncate text-sm font-bold">{name}</span>
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-1 text-xs">
+                      {player.isDealer ? (
+                        <span className="rounded bg-brand-accent/30 px-1.5 py-0.5 font-semibold">
+                          {t.t('kachuful.dealerBadge')}
+                        </span>
+                      ) : null}
+                      <span className="rounded bg-background-canvas px-1.5 py-0.5 font-semibold">
+                        {t.format('kachuful.bidTricksSeat', {
+                          bid: player.bid ?? '—',
+                          won: player.tricksWon,
+                        })}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs font-bold text-action-primary">
+                      {t.format('kachuful.totalScore', { count: player.totalScore })}
+                    </p>
                   </div>
-                ))}
-              </div>
-            </section>
-          ) : null}
+                );
+              })}
+            </div>
+          </details>
 
           {snapshot.phase === 'bidding' && isMyTurn ? (
             <section
@@ -1334,6 +1465,13 @@ function KachufulOnlineBoard({
             <p className="mb-2 text-xs font-semibold uppercase text-action-primary">
               {t.t('kachuful.yourHand')}
             </p>
+            {mustFollowSuit && snapshot.ledSuit ? (
+              <p className="mb-2 text-sm font-semibold text-action-primary">
+                {t.format('kachuful.followSuitHint', {
+                  suit: SUIT_GLYPH[snapshot.ledSuit] ?? snapshot.ledSuit,
+                })}
+              </p>
+            ) : null}
             <div className="flex flex-wrap gap-2">
               {hand.map((card) => {
                 const canPlay = snapshot.phase === 'playing' && isMyTurn && playable.has(card.id);
