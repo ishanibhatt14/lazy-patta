@@ -54,7 +54,11 @@ export function ImmersiveResultOverlay({
   return (
     <div className="imm-result-backdrop absolute inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
       <div
-        className="flex max-h-[90dvh] w-full max-w-md flex-col items-center gap-4 overflow-y-auto rounded-2xl bg-surface-primary p-6 text-center shadow-md"
+        // The panel is a light/raised surface, so it must set on-surface text
+        // rather than inherit the felt's `text-onBrand` colour from `.imm-scene`
+        // (which reads as faint cream-on-white / ink-on-plum). Coloured children
+        // (title, eyebrow, highlight pill) still override this locally.
+        className="flex max-h-[90dvh] w-full max-w-md flex-col items-center gap-4 overflow-y-auto rounded-2xl bg-surface-primary p-6 text-center text-text-primary shadow-md"
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}

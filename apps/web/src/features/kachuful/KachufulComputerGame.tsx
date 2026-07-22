@@ -593,7 +593,9 @@ function RoundOverlay({
   return (
     <div className="imm-result-backdrop absolute inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
       <div
-        className="flex max-h-[90dvh] w-full max-w-md flex-col items-center gap-4 overflow-y-auto rounded-2xl bg-surface-primary p-6 text-center shadow-md"
+        // On-surface text: without this the panel inherits `.imm-scene`'s
+        // `text-onBrand` colour and the standings names read faint.
+        className="flex max-h-[90dvh] w-full max-w-md flex-col items-center gap-4 overflow-y-auto rounded-2xl bg-surface-primary p-6 text-center text-text-primary shadow-md"
         role="dialog"
         aria-modal="true"
         aria-labelledby="kachuful-round-title"
@@ -646,7 +648,10 @@ function KachufulResult({
       onRematch={onRematch}
       returnHomeLabel={t('kachuful.returnHome')}
     >
-      <div className="w-full rounded-md bg-background-canvas p-4">
+      {/* Scoreboard rows carry their own canvas fill, so they sit directly on
+          the surface panel — a canvas wrapper here would flatten them into the
+          rows (canvas-on-canvas) and lose all row separation. */}
+      <div className="w-full">
         <Scoreboard view={view} />
       </div>
     </ImmersiveResultOverlay>
