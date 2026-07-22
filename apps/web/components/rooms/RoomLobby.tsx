@@ -3,10 +3,13 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
 
+import { timeoutState, type AsyncViewState } from '../../lib/async-view-state';
 import { useAuth } from '../../lib/auth/auth-context';
+import { trackGrowthEvent } from '../../lib/growth/analytics';
 import { createTranslator } from '../../lib/i18n';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import { startGame } from '../../lib/online-game/games-client';
+import { rememberRecentRoom } from '../../lib/rooms/recent-rooms';
 import {
   addBotSeat,
   fetchRoomByCode,
@@ -50,6 +53,13 @@ function gameLabel(gameKey: string | undefined, t: ReturnType<typeof createTrans
   return t.t('rooms.gameGadhaChor');
 }
 
+function gameSlug(gameKey: string | undefined): 'gadha-chor' | 'lal-satti' | 'jhabbu' | 'kachuful' {
+  if (gameKey === 'lal_satti') return 'lal-satti';
+  if (gameKey === 'jhabbu') return 'jhabbu';
+  if (gameKey === 'kachuful') return 'kachuful';
+  return 'gadha-chor';
+}
+
 export function RoomLobby({ code }: { code: string }): ReactElement {
   const { state, configured } = useAuth();
   const { locale } = usePreferredLocale();
@@ -59,6 +69,11 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
   const [error, setError] = useState<string | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const [joined, setJoined] = useState(false);
+  const [initState, setInitState] = useState<AsyncViewState<RoomWithSeats>>({
+    status: 'loading',
+    startedAt: Date.now(),
+  });
+  const [slowInit, setSlowInit] = useState(false);
 
   const userId = state.status === 'signed-in' ? state.session.user.userId : undefined;
   const displayName = state.status === 'signed-in' ? state.session.user.displayName : undefined;
@@ -67,8 +82,13 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
     try {
       const next = await fetchRoomByCode(getSupabaseBrowserClient(), code);
       setData(next);
+      if (next) {
+        rememberRecentRoom({ roomCode: code, gameSlug: gameSlug(next.room.game_key) });
+        setInitState({ status: 'success', data: next });
+      } else setInitState({ status: 'empty' });
     } catch (caught) {
       setError(messageFor(caught, t.t('rooms.errorGeneric')));
+      setInitState({ status: 'error', code: 'room_fetch_failed', recoverable: true });
     }
   }, [code, t]);
 
@@ -76,15 +96,21 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
   useEffect(() => {
     if (!configured || !userId || joined) return;
     let cancelled = false;
+    setInitState({ status: 'loading', startedAt: Date.now() });
     void (async () => {
       try {
+        trackGrowthEvent({ name: 'invite_opened' });
         await joinRoomByCode(getSupabaseBrowserClient(), code, displayName);
         if (!cancelled) {
           setJoined(true);
           await refresh();
+          trackGrowthEvent({ name: 'room_joined', gameSlug: gameSlug(data?.room.game_key) });
         }
       } catch (caught) {
-        if (!cancelled) setError(messageFor(caught, t.t('rooms.errorGeneric')));
+        if (!cancelled) {
+          setError(messageFor(caught, t.t('rooms.errorGeneric')));
+          setInitState({ status: 'error', code: 'room_join_failed', recoverable: true });
+        }
       }
     })();
     return () => {
@@ -97,6 +123,17 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
     const id = setInterval(() => void refresh(), POLL_MS);
     return () => clearInterval(id);
   }, [joined, refresh]);
+
+  useEffect(() => {
+    if (initState.status !== 'loading') return;
+    setSlowInit(false);
+    const slowId = window.setTimeout(() => setSlowInit(true), 8_000);
+    const timeoutId = window.setTimeout(() => setInitState(timeoutState()), 12_000);
+    return () => {
+      window.clearTimeout(slowId);
+      window.clearTimeout(timeoutId);
+    };
+  }, [initState]);
 
   if (!configured) {
     return (
@@ -132,6 +169,65 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
     }
   };
 
+  if (initState.status === 'loading' && !room) {
+    return (
+      <div className="flex w-full max-w-sm flex-col items-center gap-3 rounded-lg bg-surface-primary p-6 text-center shadow-sm">
+        <p className="text-sm font-semibold text-text-primary">{t.t('rooms.loadingRoom')}</p>
+        {slowInit ? (
+          <p role="status" className="text-sm text-text-primary">
+            {t.t('rooms.takingLonger')}
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (initState.status === 'empty' && !room) {
+    return (
+      <div className="flex w-full max-w-sm flex-col gap-3 rounded-lg bg-surface-primary p-6 text-center shadow-sm">
+        <h2 className="text-lg font-semibold text-text-primary">{t.t('rooms.notFoundTitle')}</h2>
+        <p className="text-sm text-text-primary">{t.t('rooms.notFoundBody')}</p>
+        <Button onClick={() => router.push('/mobile/rooms')}>
+          {t.t('rooms.enterAnotherCode')}
+        </Button>
+        <Button variant="ghost" onClick={() => router.push('/mobile')}>
+          {t.t('action.returnHome')}
+        </Button>
+      </div>
+    );
+  }
+
+  if (initState.status === 'error' && !room) {
+    return (
+      <div className="flex w-full max-w-sm flex-col gap-3 rounded-lg bg-surface-primary p-6 text-center shadow-sm">
+        <h2 className="text-lg font-semibold text-text-primary">
+          {initState.code === 'room_initialization_timeout'
+            ? t.t('rooms.timeoutTitle')
+            : t.t('rooms.unavailableTitle')}
+        </h2>
+        <p className="text-sm text-text-primary">{t.t('rooms.timeoutBody')}</p>
+        <Button
+          onClick={() => {
+            setError(undefined);
+            setJoined(false);
+            setInitState({ status: 'loading', startedAt: Date.now() });
+          }}
+        >
+          {t.t('action.tryAgain')}
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => router.push('/mobile/game/gadha-chor/setup?mode=computer')}
+        >
+          {t.t('action.playComputer')}
+        </Button>
+        <Button variant="ghost" onClick={() => router.push('/mobile/rooms')}>
+          {t.t('rooms.enterAnotherCode')}
+        </Button>
+      </div>
+    );
+  }
+
   // Once the host starts, the room leaves 'lobby' — swap the seat list for the
   // live board, which takes over the viewport as a full-screen immersive table
   // (matching the solo experience). Truth still comes from the server; the board
@@ -165,7 +261,14 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
         <span className="text-xs text-text-primary">{t.t('rooms.shareHint')}</span>
       </header>
 
-      <RoomSharePanel code={code} locale={locale} />
+      <RoomSharePanel
+        code={code}
+        locale={locale}
+        gameName={gameLabel(room?.game_key, t)}
+        inviterName={displayName}
+        occupiedSeats={humanCount}
+        maxPlayers={room?.max_seats}
+      />
 
       <ul className="flex flex-col gap-2">
         {seats.map((seat) => {
@@ -227,7 +330,17 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
             disabled={busy || !canStart}
             onClick={() =>
               withBusy(async () => {
+                trackGrowthEvent({
+                  name: 'game_start_clicked',
+                  gameSlug: gameSlug(room.game_key),
+                  playerCount: humanCount,
+                });
                 await startGame(getSupabaseBrowserClient(), room.id);
+                trackGrowthEvent({
+                  name: 'game_start_succeeded',
+                  gameSlug: gameSlug(room.game_key),
+                  playerCount: humanCount,
+                });
               })
             }
           >
