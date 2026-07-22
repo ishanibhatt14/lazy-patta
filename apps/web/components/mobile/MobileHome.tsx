@@ -6,12 +6,14 @@ import { useEffect, useState, type ReactElement } from 'react';
 import { trackGrowthEvent } from '../../lib/growth/analytics';
 import { createTranslator } from '../../lib/i18n';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
+import { resolveActiveSession, type ActiveSessionPointer } from '../../lib/mobile/active-session';
 import { readRecentGame } from '../../lib/mobile/recent';
-import { MOBILE_CATALOG, type MobileCatalogItem } from '../../lib/mobile-catalog';
+import { findCatalogItem, MOBILE_CATALOG, type MobileCatalogItem } from '../../lib/mobile-catalog';
 import { LandingLanguageMenu } from '../home/landing/LandingLanguageMenu';
 
 import { DailyPlayCard } from './DailyPlayCard';
 import { GameCatalogGrid } from './GameCatalogGrid';
+import { InstallHomeCard } from './InstallHomeCard';
 import { InviteFamilyCard } from './InviteFamilyCard';
 import { LazyPattaLogoMark } from './artwork/LazyPattaLogoMark';
 import { PatternBackground } from './artwork/PatternBackground';
@@ -23,8 +25,20 @@ export function MobileHome(): ReactElement {
   const t = createTranslator(locale);
   // localStorage is client-only; read after mount so SSR and first paint agree.
   const [recent, setRecent] = useState<MobileCatalogItem | undefined>(undefined);
+  const [active, setActive] = useState<ActiveSessionPointer | null>(null);
   useEffect(() => setRecent(readRecentGame()), []);
+  useEffect(() => {
+    let cancelled = false;
+    void resolveActiveSession().then((pointer) => {
+      if (!cancelled) setActive(pointer);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   useEffect(() => trackGrowthEvent({ name: 'mobile_home_viewed' }), []);
+
+  const activeItem = active ? findCatalogItem(active.gameSlug) : undefined;
 
   return (
     <div className="flex flex-col gap-6">
@@ -96,7 +110,24 @@ export function MobileHome(): ReactElement {
         </Link>
       </div>
 
-      {recent?.practiceRoute ? (
+      {active && activeItem ? (
+        <Link
+          href={`/mobile/game/${active.gameSlug}/computer/${active.sessionId}`}
+          className="flex items-center justify-between gap-3 rounded-2xl border border-brand-accent/40 bg-brand-accent/10 px-5 py-4 transition active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+        >
+          <span className="flex flex-col">
+            <span className="text-xs font-bold uppercase tracking-wide text-brand-accent">
+              {t.t('mobile.home.continueGame')}
+            </span>
+            <span className="text-base font-black text-action-primary">
+              {t.t(activeItem.nameKey)}
+            </span>
+          </span>
+          <span className="rounded-full bg-action-primary px-4 py-2 text-sm font-black text-text-onBrand">
+            {t.t('mobile.home.continueCta')}
+          </span>
+        </Link>
+      ) : recent?.practiceRoute ? (
         <Link
           href={recent.practiceRoute}
           className="flex items-center justify-between gap-3 rounded-2xl border border-brand-accent/40 bg-brand-accent/10 px-5 py-4 transition active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
@@ -114,6 +145,8 @@ export function MobileHome(): ReactElement {
       ) : null}
 
       <DailyPlayCard t={t} />
+
+      <InstallHomeCard t={t} engaged={recent !== undefined || active !== null} />
 
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-3">

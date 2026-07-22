@@ -5,6 +5,7 @@ import { useEffect, useState, type ReactElement } from 'react';
 
 import { createTranslator } from '../../lib/i18n';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
+import { clearActiveSession, rememberActiveSession } from '../../lib/mobile/active-session';
 import { computerGameSessions, type ComputerGameSession } from '../../lib/mobile/computer-session';
 import { findGameDefinition } from '../../lib/mobile/game-registry';
 import { JhabbuComputerGame } from '../../src/features/jhabbu/JhabbuComputerGame';
@@ -28,15 +29,35 @@ export function MobileComputerGameRoute({
   useEffect(() => {
     let cancelled = false;
     void computerGameSessions.load(sessionId).then((loaded) => {
-      if (!cancelled) setSession(loaded);
+      if (cancelled) return;
+      setSession(loaded);
+      // Point Home's "Continue" at this table while it's live; a missing or
+      // finished session must not linger as a resume target.
+      if (loaded && loaded.status !== 'abandoned') {
+        rememberActiveSession({ gameSlug: loaded.gameSlug, sessionId: loaded.sessionId });
+      } else {
+        clearActiveSession();
+      }
     });
     return () => {
       cancelled = true;
     };
   }, [sessionId]);
 
+  // Guard against an accidental swipe-back / reload mid-game losing the table.
+  const inProgress = session != null && session.status !== 'abandoned';
+  useEffect(() => {
+    if (!inProgress || typeof window === 'undefined') return;
+    const warn = (event: BeforeUnloadEvent): void => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [inProgress]);
+
   if (!game || (session && session.gameSlug !== game.slug)) {
-    return <RecoveryState message={t.t('error.recoverable')} />;
+    return <RecoveryState message={t.t('mobile.restore.failed')} />;
   }
 
   if (session === undefined) {
@@ -50,7 +71,7 @@ export function MobileComputerGameRoute({
   }
 
   if (session === null) {
-    return <RecoveryState message={t.t('error.recoverable')} />;
+    return <RecoveryState message={t.t('mobile.restore.failed')} />;
   }
 
   const props = { initialConfig: session.config, autoStart: true };
