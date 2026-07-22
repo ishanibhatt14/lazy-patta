@@ -9,6 +9,7 @@ interface OpponentDrawFanProps {
   readonly locale: Locale;
   readonly slots: readonly HiddenCardSlot[];
   readonly onChooseCard: (positionToken: string) => void;
+  readonly armedToken?: string | null;
 }
 
 const SPREAD_STEP_DEG = 7;
@@ -37,6 +38,7 @@ export function OpponentDrawFan({
   locale,
   slots,
   onChooseCard,
+  armedToken = null,
 }: OpponentDrawFanProps): ReactElement | null {
   const { t, format } = createTranslator(locale);
   if (slots.length === 0) return null;
@@ -72,6 +74,7 @@ export function OpponentDrawFan({
               })}
               data-position-token={slot.positionToken}
               data-selectable={slot.isSelectable ? 'true' : 'false'}
+              data-armed={armedToken === slot.positionToken ? 'true' : 'false'}
             >
               <BandhaniCardBackPlaceholder className="h-16 w-12" />
             </button>

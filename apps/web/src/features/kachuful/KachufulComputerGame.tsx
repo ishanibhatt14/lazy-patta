@@ -18,6 +18,7 @@ import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng
 import { createTranslator } from '../../../lib/i18n';
 import { usePreferredLocale } from '../../../lib/locale/preferred-locale-context';
 import type { ComputerGameConfig } from '../../../lib/mobile/computer-session';
+import { resolveCardTap } from '../../../lib/mobile/play-interaction';
 
 import {
   createKachufulController,
@@ -318,22 +319,30 @@ function SettingsSheet({
   view,
   largeCards,
   highContrast,
+  confirmBeforePlay,
+  leftHanded,
   onClose,
   onLocaleChange,
   onToggleReducedMotion,
   onToggleLargeCards,
   onToggleHighContrast,
+  onToggleConfirmBeforePlay,
+  onToggleLeftHanded,
   onOpenLog,
 }: {
   readonly open: boolean;
   readonly view: KachufulViewState;
   readonly largeCards: boolean;
   readonly highContrast: boolean;
+  readonly confirmBeforePlay: boolean;
+  readonly leftHanded: boolean;
   readonly onClose: () => void;
   readonly onLocaleChange: (locale: KachufulViewState['locale']) => void;
   readonly onToggleReducedMotion: () => void;
   readonly onToggleLargeCards: () => void;
   readonly onToggleHighContrast: () => void;
+  readonly onToggleConfirmBeforePlay: () => void;
+  readonly onToggleLeftHanded: () => void;
   readonly onOpenLog: () => void;
 }): ReactElement | null {
   const { t } = createTranslator(view.locale);
@@ -379,6 +388,24 @@ function SettingsSheet({
         >
           <span>{t('settings.highContrastCards')}</span>
           <span>{highContrast ? t('settings.on') : t('settings.off')}</span>
+        </button>
+        <button
+          type="button"
+          className={rowClass}
+          onClick={onToggleConfirmBeforePlay}
+          aria-pressed={confirmBeforePlay}
+        >
+          <span>{t('settings.confirmBeforePlay')}</span>
+          <span>{confirmBeforePlay ? t('settings.on') : t('settings.off')}</span>
+        </button>
+        <button
+          type="button"
+          className={rowClass}
+          onClick={onToggleLeftHanded}
+          aria-pressed={leftHanded}
+        >
+          <span>{t('settings.leftHanded')}</span>
+          <span>{leftHanded ? t('settings.on') : t('settings.off')}</span>
         </button>
       </div>
       <div className="mt-4">
@@ -513,23 +540,34 @@ function BidPanel({
 function PlayerHand({
   view,
   largeCards,
-  onPlayCard,
+  canPlay,
+  armedCardId,
+  invalidCardId,
+  onSelectCard,
 }: {
   readonly view: KachufulViewState;
   readonly largeCards: boolean;
-  readonly onPlayCard: (cardId: string) => void;
+  readonly canPlay: boolean;
+  readonly armedCardId: string | null;
+  readonly invalidCardId: string | null;
+  readonly onSelectCard: (cardId: string) => void;
 }): ReactElement {
   const { t, format } = createTranslator(view.locale);
   const playable = new Set(view.playableCardIds);
   const cardSize = largeCards ? 'lg' : 'md';
+
+  const hintKey = invalidCardId
+    ? ('kachuful.invalidCardHint' as const)
+    : armedCardId
+      ? ('settings.confirmTapAgain' as const)
+      : null;
 
   return (
     <section className="w-full" aria-label={t('kachuful.yourHand')}>
       <div className="imm-hand-rail">
         <div className="flex items-end justify-center gap-2">
           {view.ownHand.map((card) => {
-            const isPlayable =
-              view.phase === 'playing' && view.isHumanTurn && playable.has(card.id);
+            const isPlayable = canPlay && playable.has(card.id);
             const label = cardFaceLabel(view, card);
             return (
               <button
@@ -537,10 +575,12 @@ function PlayerHand({
                 type="button"
                 className="imm-hand-card rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
                 data-playable={isPlayable ? 'true' : 'false'}
-                data-disabled={isPlayable ? 'false' : 'true'}
-                disabled={!isPlayable}
+                data-disabled={canPlay ? 'false' : 'true'}
+                data-armed={card.id === armedCardId ? 'true' : 'false'}
+                data-invalid={card.id === invalidCardId ? 'true' : 'false'}
+                disabled={!canPlay}
                 aria-label={format('kachuful.playCardLabel', { card: label })}
-                onClick={() => onPlayCard(card.id)}
+                onClick={() => onSelectCard(card.id)}
               >
                 <PlayingCard card={card} size={cardSize} label={label} />
               </button>
@@ -551,6 +591,14 @@ function PlayerHand({
           ) : null}
         </div>
       </div>
+      {hintKey ? (
+        <p
+          className="mt-1 text-center text-xs font-semibold text-text-onBrand"
+          aria-live="polite"
+        >
+          {t(hintKey)}
+        </p>
+      ) : null}
     </section>
   );
 }
@@ -662,16 +710,66 @@ function PlayingScreen({
   view,
   dispatch,
   onLocaleChange,
+  initialConfirmBeforePlay = false,
 }: {
   readonly view: KachufulViewState;
   readonly dispatch: (intent: KachufulIntent) => void;
   readonly onLocaleChange: (locale: KachufulViewState['locale']) => void;
+  readonly initialConfirmBeforePlay?: boolean;
 }): ReactElement {
   const { t, format } = createTranslator(view.locale);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [largeCards, setLargeCards] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
+  const [confirmBeforePlay, setConfirmBeforePlay] = useState(initialConfirmBeforePlay);
+  const [leftHanded, setLeftHanded] = useState(false);
+  const [armedCardId, setArmedCardId] = useState<string | null>(null);
+  const [invalidCardId, setInvalidCardId] = useState<string | null>(null);
+
+  const canPlay = view.phase === 'playing' && view.isHumanTurn;
+
+  // A stale arming or shake must never outlive the human's play turn.
+  useEffect(() => {
+    if (!canPlay) {
+      setArmedCardId(null);
+      setInvalidCardId(null);
+    }
+  }, [canPlay]);
+
+  useEffect(() => {
+    if (!invalidCardId) return;
+    const timer = window.setTimeout(() => setInvalidCardId(null), 700);
+    return () => window.clearTimeout(timer);
+  }, [invalidCardId]);
+
+  const onSelectCard = (cardId: string): void => {
+    const outcome = resolveCardTap({
+      cardId,
+      isHumanTurn: canPlay,
+      playableCardIds: view.playableCardIds,
+      confirmBeforePlay,
+      armedCardId,
+    });
+    switch (outcome.kind) {
+      case 'ignore':
+        return;
+      case 'commit':
+        setArmedCardId(null);
+        setInvalidCardId(null);
+        dispatch({ type: 'playCard', cardId: outcome.cardId });
+        return;
+      case 'arm':
+        setInvalidCardId(null);
+        setArmedCardId(outcome.cardId);
+        return;
+      case 'invalid':
+        setArmedCardId(null);
+        setInvalidCardId(null);
+        window.requestAnimationFrame(() => setInvalidCardId(cardId));
+        return;
+    }
+  };
 
   const opponents = view.seats.filter((seat) => !seat.isSelf);
   const selfSeat = view.seats.find((seat) => seat.isSelf);
@@ -718,6 +816,7 @@ function PlayingScreen({
         statusIsSelf={view.isHumanTurn}
         reducedMotion={view.reducedMotion}
         highContrast={highContrast}
+        leftHanded={leftHanded}
         toolbar={toolbar}
         top={opponents.map(renderPod)}
         middle={<TrickFelt view={view} />}
@@ -730,7 +829,10 @@ function PlayingScreen({
             <PlayerHand
               view={view}
               largeCards={largeCards}
-              onPlayCard={(cardId) => dispatch({ type: 'playCard', cardId })}
+              canPlay={canPlay}
+              armedCardId={armedCardId}
+              invalidCardId={invalidCardId}
+              onSelectCard={onSelectCard}
             />
           </>
         }
@@ -747,11 +849,18 @@ function PlayingScreen({
         view={view}
         largeCards={largeCards}
         highContrast={highContrast}
+        confirmBeforePlay={confirmBeforePlay}
+        leftHanded={leftHanded}
         onClose={() => setSettingsOpen(false)}
         onLocaleChange={onLocaleChange}
         onToggleReducedMotion={() => dispatch({ type: 'toggleReducedMotion' })}
         onToggleLargeCards={() => setLargeCards((value) => !value)}
         onToggleHighContrast={() => setHighContrast((value) => !value)}
+        onToggleConfirmBeforePlay={() => {
+          setArmedCardId(null);
+          setConfirmBeforePlay((value) => !value);
+        }}
+        onToggleLeftHanded={() => setLeftHanded((value) => !value)}
         onOpenLog={() => {
           setSettingsOpen(false);
           setLogOpen(true);
@@ -842,5 +951,12 @@ export function KachufulComputerGame({
     return <SetupScreen view={view} dispatch={dispatch} onLocaleChange={onLocaleChange} />;
   }
 
-  return <PlayingScreen view={view} dispatch={dispatch} onLocaleChange={onLocaleChange} />;
+  return (
+    <PlayingScreen
+      view={view}
+      dispatch={dispatch}
+      onLocaleChange={onLocaleChange}
+      initialConfirmBeforePlay={initialConfig?.confirmBeforePlay ?? false}
+    />
+  );
 }

@@ -15,6 +15,8 @@ interface PlayerHandFanProps {
   readonly isHumanTurn: boolean;
   readonly focusedCardId?: string | null;
   readonly invalidCardId?: string | null;
+  /** Confirm-before-play: the card lined up, awaiting a second tap to commit. */
+  readonly armedCardId?: string | null;
   readonly largeCards?: boolean;
   /** Playable card tapped → play it; non-playable tapped → gentle shake + hint. */
   readonly onSelect: (card: Card) => void;
@@ -36,6 +38,7 @@ export function PlayerHandFan({
   isHumanTurn,
   focusedCardId = null,
   invalidCardId = null,
+  armedCardId = null,
   largeCards = false,
   onSelect,
   onFocusCard,
@@ -79,6 +82,7 @@ export function PlayerHandFan({
         data-playable={playable ? 'true' : 'false'}
         data-focused={card.id === focusedCardId ? 'true' : 'false'}
         data-invalid={card.id === invalidCardId ? 'true' : 'false'}
+        data-armed={card.id === armedCardId ? 'true' : 'false'}
         onClick={() => onSelect(card)}
         onMouseEnter={() => onFocusCard(card)}
         onMouseLeave={() => onFocusCard(null)}

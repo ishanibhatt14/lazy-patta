@@ -12,9 +12,13 @@ interface SettingsSheetProps {
   readonly reducedMotion: boolean;
   readonly largeCards: boolean;
   readonly highContrast: boolean;
+  readonly confirmBeforePlay: boolean;
+  readonly leftHanded: boolean;
   readonly onToggleReducedMotion: () => void;
   readonly onToggleLargeCards: () => void;
   readonly onToggleHighContrast: () => void;
+  readonly onToggleConfirmBeforePlay: () => void;
+  readonly onToggleLeftHanded: () => void;
   readonly onLocaleChange: (locale: Locale) => void;
   readonly onOpenHistory: () => void;
   readonly onOpenAccount: () => void;
@@ -36,9 +40,13 @@ export function SettingsSheet({
   reducedMotion,
   largeCards,
   highContrast,
+  confirmBeforePlay,
+  leftHanded,
   onToggleReducedMotion,
   onToggleLargeCards,
   onToggleHighContrast,
+  onToggleConfirmBeforePlay,
+  onToggleLeftHanded,
   onLocaleChange,
   onOpenHistory,
   onOpenAccount,
@@ -123,6 +131,28 @@ export function SettingsSheet({
             aria-pressed={highContrast}
           >
             {t('lalSatti.highContrastCards')}
+          </button>
+          <button
+            type="button"
+            onClick={onToggleConfirmBeforePlay}
+            className={`${TOGGLE_CLASS} flex flex-col items-start justify-center py-2 text-left`}
+            aria-pressed={confirmBeforePlay}
+          >
+            <span className="block">{t('settings.confirmBeforePlay')}</span>
+            <span className="mt-1 block text-xs font-medium leading-5 text-text-primary">
+              {t('settings.confirmBeforePlayHint')}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={onToggleLeftHanded}
+            className={`${TOGGLE_CLASS} flex flex-col items-start justify-center py-2 text-left`}
+            aria-pressed={leftHanded}
+          >
+            <span className="block">{t('settings.leftHanded')}</span>
+            <span className="mt-1 block text-xs font-medium leading-5 text-text-primary">
+              {t('settings.leftHandedHint')}
+            </span>
           </button>
           <button type="button" onClick={onOpenHistory} className={TOGGLE_CLASS}>
             {t('lalSatti.gameHistoryTitle')}

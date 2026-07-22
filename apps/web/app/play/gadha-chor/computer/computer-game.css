@@ -237,6 +237,11 @@
   padding: clamp(0.5rem, 2vw, 1.1rem);
 }
 
+/* Left-handed: pull the self pod and hand toward the left thumb. */
+.gc-shell[data-left-handed='true'] .gc-regions > div:last-child {
+  align-items: flex-start;
+}
+
 /* ---- Player pods -------------------------------------------------- */
 
 .gc-pod-ring {
@@ -408,6 +413,14 @@
 .gc-fan-card[data-selected='true'] {
   transform: translateY(-1.2rem) scale(1.05);
   filter: drop-shadow(0 0 0.9rem var(--lp-action-secondary));
+}
+
+.gc-fan-card[data-armed='true'] {
+  transform: translateY(-1.2rem) scale(1.05);
+  border-color: var(--lp-brand-accent);
+  outline: 0.18rem solid var(--lp-brand-accent);
+  outline-offset: 0.1rem;
+  filter: drop-shadow(0 0 0.9rem var(--lp-brand-accent));
 }
 
 /* ---- Central discard pile ---------------------------------------- */

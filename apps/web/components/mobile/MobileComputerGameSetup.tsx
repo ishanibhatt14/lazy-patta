@@ -133,6 +133,27 @@ export function MobileComputerGameSetup({
               </p>
             </fieldset>
           ) : null}
+
+          <fieldset className="grid gap-2">
+            <legend className="text-sm font-black text-action-primary">
+              {t.t('mobile.setup.accessibility')}
+            </legend>
+            <ToggleRow
+              label={t.t('settings.reducedMotion')}
+              on={config.reducedMotion}
+              onLabel={t.t('settings.on')}
+              offLabel={t.t('settings.off')}
+              onToggle={() => onChange({ ...config, reducedMotion: !config.reducedMotion })}
+            />
+            <ToggleRow
+              label={t.t('settings.confirmBeforePlay')}
+              hint={t.t('settings.confirmBeforePlayHint')}
+              on={config.confirmBeforePlay}
+              onLabel={t.t('settings.on')}
+              offLabel={t.t('settings.off')}
+              onToggle={() => onChange({ ...config, confirmBeforePlay: !config.confirmBeforePlay })}
+            />
+          </fieldset>
         </div>
       </section>
 
@@ -153,6 +174,42 @@ export function MobileComputerGameSetup({
         </div>
       </nav>
     </main>
+  );
+}
+
+function ToggleRow({
+  label,
+  hint,
+  on,
+  onLabel,
+  offLabel,
+  onToggle,
+}: {
+  readonly label: string;
+  readonly hint?: string;
+  readonly on: boolean;
+  readonly onLabel: string;
+  readonly offLabel: string;
+  readonly onToggle: () => void;
+}): ReactElement {
+  return (
+    <div className="grid gap-1">
+      <button
+        type="button"
+        aria-pressed={on}
+        onClick={onToggle}
+        className={[
+          'flex min-h-12 items-center justify-between rounded-xl border px-4 text-sm font-black transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent',
+          on
+            ? 'border-action-primary bg-action-primary text-text-onBrand'
+            : 'border-action-primary/25 bg-background-canvas text-action-primary',
+        ].join(' ')}
+      >
+        <span>{label}</span>
+        <span>{on ? onLabel : offLabel}</span>
+      </button>
+      {hint ? <p className="text-xs leading-5 text-text-primary/75">{hint}</p> : null}
+    </div>
   );
 }
 

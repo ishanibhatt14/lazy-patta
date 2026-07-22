@@ -389,6 +389,26 @@
   animation: ls-invalid-shake 320ms ease-in-out both;
 }
 
+/* Confirm-before-play: the lined-up card lifts and wears a haldi ring while it
+   waits for the second, committing tap. */
+.ls-hand-card[data-armed='true'] {
+  transform: translateY(-1rem) scale(1.05);
+  outline: 3px solid var(--lp-action-secondary);
+  outline-offset: 3px;
+  border-radius: 0.6rem;
+  z-index: 55;
+}
+
+/* Left-handed layout pulls the hand and the playable-cards tray toward the left
+   edge so the cards sit under a left thumb instead of a right one. */
+.ls-shell[data-left-handed='true'] .ls-hand-rail {
+  justify-content: flex-start;
+}
+
+.ls-shell[data-left-handed='true'] .ls-play-tray {
+  align-items: flex-start;
+}
+
 /* ---- Playable-cards tray ------------------------------------------ */
 /* A thumb-zone shortcut showing only the cards playable this turn as big,
    fully-spaced tap targets, so choosing a move on a phone is never a hunt

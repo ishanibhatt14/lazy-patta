@@ -13,6 +13,8 @@ interface ActionStageProps {
   readonly locale: Locale;
   readonly view: ComputerGameViewState;
   readonly onChooseCard: (positionToken: string) => void;
+  /** The slot armed by a first tap, awaiting the confirming second tap. */
+  readonly armedToken: string | null;
   /** First-turn coach mark pointing at the eligible hidden hand. */
   readonly showCoachMark: boolean;
   readonly onDismissCoachMark: () => void;
@@ -28,6 +30,7 @@ export function ActionStage({
   locale,
   view,
   onChooseCard,
+  armedToken,
   showCoachMark,
   onDismissCoachMark,
 }: ActionStageProps): ReactElement {
@@ -36,7 +39,20 @@ export function ActionStage({
   return (
     <div className="flex flex-col items-center justify-center gap-3">
       {showCoachMark ? <GadhaCoachMark locale={locale} onDismiss={onDismissCoachMark} /> : null}
-      <OpponentDrawFan locale={locale} slots={view.hiddenCards} onChooseCard={onChooseCard} />
+      <OpponentDrawFan
+        locale={locale}
+        slots={view.hiddenCards}
+        onChooseCard={onChooseCard}
+        armedToken={armedToken}
+      />
+      {armedToken !== null ? (
+        <p
+          className="rounded-full bg-background-canvas px-3 py-1 text-xs font-semibold text-action-primary"
+          aria-live="polite"
+        >
+          {t('gadhaChor.confirmTapAgain')}
+        </p>
+      ) : null}
 
       <div className="flex flex-col items-center gap-2 text-center">
         <PairDiscardPile justAdded={Boolean(view.draw?.pairRemoved)} />

@@ -336,6 +336,7 @@ export function LalSattiComputerGame({
       onPlayCard={(cardId) => dispatch({ type: 'playCard', cardId })}
       onPass={() => dispatch({ type: 'pass' })}
       onRematch={() => dispatch({ type: 'rematch' })}
+      initialConfirmBeforePlay={initialConfig?.confirmBeforePlay ?? false}
       onToggleReducedMotion={() => dispatch({ type: 'toggleReducedMotion' })}
       onLocaleChange={(next) => {
         setPreferredLocale(next);

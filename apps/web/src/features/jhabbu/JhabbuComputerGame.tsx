@@ -19,6 +19,7 @@ import { fanCardStyle, useHandLayout } from '../../../lib/hand-layout';
 import { createTranslator } from '../../../lib/i18n';
 import { usePreferredLocale } from '../../../lib/locale/preferred-locale-context';
 import type { ComputerGameConfig } from '../../../lib/mobile/computer-session';
+import { resolveCardTap } from '../../../lib/mobile/play-interaction';
 
 import { JhabbuAccountSheet } from './JhabbuAccountSheet';
 import { JhabbuScoreDrawer } from './JhabbuScoreDrawer';
@@ -303,11 +304,15 @@ function SettingsSheet({
   view,
   largeCards,
   highContrast,
+  confirmBeforePlay,
+  leftHanded,
   onClose,
   onLocaleChange,
   onToggleReducedMotion,
   onToggleLargeCards,
   onToggleHighContrast,
+  onToggleConfirmBeforePlay,
+  onToggleLeftHanded,
   onOpenHistory,
   onOpenAccount,
 }: {
@@ -315,11 +320,15 @@ function SettingsSheet({
   readonly view: JhabbuViewState;
   readonly largeCards: boolean;
   readonly highContrast: boolean;
+  readonly confirmBeforePlay: boolean;
+  readonly leftHanded: boolean;
   readonly onClose: () => void;
   readonly onLocaleChange: (locale: JhabbuViewState['locale']) => void;
   readonly onToggleReducedMotion: () => void;
   readonly onToggleLargeCards: () => void;
   readonly onToggleHighContrast: () => void;
+  readonly onToggleConfirmBeforePlay: () => void;
+  readonly onToggleLeftHanded: () => void;
   readonly onOpenHistory: () => void;
   readonly onOpenAccount: () => void;
 }): ReactElement | null {
@@ -383,6 +392,24 @@ function SettingsSheet({
           >
             <span>{t('settings.highContrastCards')}</span>
             <span>{highContrast ? t('settings.on') : t('settings.off')}</span>
+          </button>
+          <button
+            type="button"
+            className="jh-setting-row"
+            onClick={onToggleConfirmBeforePlay}
+            aria-pressed={confirmBeforePlay}
+          >
+            <span>{t('settings.confirmBeforePlay')}</span>
+            <span>{confirmBeforePlay ? t('settings.on') : t('settings.off')}</span>
+          </button>
+          <button
+            type="button"
+            className="jh-setting-row"
+            onClick={onToggleLeftHanded}
+            aria-pressed={leftHanded}
+          >
+            <span>{t('settings.leftHanded')}</span>
+            <span>{leftHanded ? t('settings.on') : t('settings.off')}</span>
           </button>
         </div>
         <div className="mt-4 grid gap-2">
@@ -499,17 +526,27 @@ function TrickFelt({ view }: { readonly view: JhabbuViewState }): ReactElement {
 function PlayerHandFan({
   view,
   largeCards,
-  onPlayCard,
+  armedCardId,
+  invalidCardId,
+  onSelectCard,
   onDrawFromWaste,
 }: {
   readonly view: JhabbuViewState;
   readonly largeCards: boolean;
-  readonly onPlayCard: (cardId: string) => void;
+  readonly armedCardId: string | null;
+  readonly invalidCardId: string | null;
+  readonly onSelectCard: (cardId: string) => void;
   readonly onDrawFromWaste: () => void;
 }): ReactElement {
   const { t, format } = createTranslator(view.locale);
   const playable = new Set(view.playableCardIds);
   const { ref, layout } = useHandLayout(view.ownHand.length, largeCards);
+
+  const hintKey = invalidCardId
+    ? ('jhabbu.invalidCardHint' as const)
+    : armedCardId
+      ? ('settings.confirmTapAgain' as const)
+      : null;
 
   return (
     <section className="w-full" aria-label={t('jhabbu.yourCards')}>
@@ -525,10 +562,12 @@ function PlayerHandFan({
                     name: view.currentPlayerName || view.powerPlayerName,
                   })}
             </h2>
-            <p className="text-xs font-semibold text-text-onBrand/85">
-              {view.playableCardIds.length > 0
-                ? format('jhabbu.playableCount', { count: view.playableCardIds.length })
-                : t('jhabbu.noPlayableCards')}
+            <p className="text-xs font-semibold text-text-onBrand/85" aria-live="polite">
+              {hintKey
+                ? t(hintKey)
+                : view.playableCardIds.length > 0
+                  ? format('jhabbu.playableCount', { count: view.playableCardIds.length })
+                  : t('jhabbu.noPlayableCards')}
             </p>
           </div>
           {view.canDrawFromWaste ? (
@@ -553,8 +592,10 @@ function PlayerHandFan({
                   style={fanCardStyle(index, view.ownHand.length, layout)}
                   data-playable={isPlayable ? 'true' : 'false'}
                   data-disabled={view.isHumanTurn ? 'false' : 'true'}
-                  onClick={() => onPlayCard(card.id)}
-                  disabled={!isPlayable}
+                  data-armed={card.id === armedCardId ? 'true' : 'false'}
+                  data-invalid={card.id === invalidCardId ? 'true' : 'false'}
+                  onClick={() => onSelectCard(card.id)}
+                  disabled={!view.isHumanTurn}
                   aria-label={
                     isPlayable
                       ? format('jhabbu.playCardLabel', { card: cardShortName(card) })
@@ -643,10 +684,12 @@ function PlayingScreen({
   view,
   dispatch,
   onLocaleChange,
+  initialConfirmBeforePlay = false,
 }: {
   readonly view: JhabbuViewState;
   readonly dispatch: (intent: JhabbuIntent) => void;
   readonly onLocaleChange: (locale: JhabbuViewState['locale']) => void;
+  readonly initialConfirmBeforePlay?: boolean;
 }): ReactElement {
   const { t, format } = createTranslator(view.locale);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -655,8 +698,54 @@ function PlayingScreen({
   const [accountOpen, setAccountOpen] = useState(false);
   const [largeCards, setLargeCards] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
+  const [confirmBeforePlay, setConfirmBeforePlay] = useState(initialConfirmBeforePlay);
+  const [leftHanded, setLeftHanded] = useState(false);
+  const [armedCardId, setArmedCardId] = useState<string | null>(null);
+  const [invalidCardId, setInvalidCardId] = useState<string | null>(null);
   const leaderName =
     view.roundScores.length > 0 ? (view.runningScores[0]?.playerName ?? null) : null;
+
+  // A stale arming or shake must never outlive the human's turn.
+  useEffect(() => {
+    if (!view.isHumanTurn) {
+      setArmedCardId(null);
+      setInvalidCardId(null);
+    }
+  }, [view.isHumanTurn]);
+
+  useEffect(() => {
+    if (!invalidCardId) return;
+    const timer = window.setTimeout(() => setInvalidCardId(null), 700);
+    return () => window.clearTimeout(timer);
+  }, [invalidCardId]);
+
+  const onSelectCard = (cardId: string): void => {
+    const outcome = resolveCardTap({
+      cardId,
+      isHumanTurn: view.isHumanTurn,
+      playableCardIds: view.playableCardIds,
+      confirmBeforePlay,
+      armedCardId,
+    });
+    switch (outcome.kind) {
+      case 'ignore':
+        return;
+      case 'commit':
+        setArmedCardId(null);
+        setInvalidCardId(null);
+        dispatch({ type: 'playCard', cardId: outcome.cardId });
+        return;
+      case 'arm':
+        setInvalidCardId(null);
+        setArmedCardId(outcome.cardId);
+        return;
+      case 'invalid':
+        setArmedCardId(null);
+        setInvalidCardId(null);
+        window.requestAnimationFrame(() => setInvalidCardId(cardId));
+        return;
+    }
+  };
 
   const opponents = view.seats.filter((seat) => !seat.isSelf);
   const selfSeat = view.seats.find((seat) => seat.isSelf);
@@ -706,6 +795,7 @@ function PlayingScreen({
         statusIsSelf={view.isHumanTurn}
         reducedMotion={view.reducedMotion}
         highContrast={highContrast}
+        leftHanded={leftHanded}
         toolbar={toolbar}
         top={opponents.map(renderPod)}
         middle={<TrickFelt view={view} />}
@@ -715,7 +805,9 @@ function PlayingScreen({
             <PlayerHandFan
               view={view}
               largeCards={largeCards}
-              onPlayCard={(cardId) => dispatch({ type: 'playCard', cardId })}
+              armedCardId={armedCardId}
+              invalidCardId={invalidCardId}
+              onSelectCard={onSelectCard}
               onDrawFromWaste={() => dispatch({ type: 'drawFromWaste' })}
             />
           </>
@@ -734,11 +826,18 @@ function PlayingScreen({
         view={view}
         largeCards={largeCards}
         highContrast={highContrast}
+        confirmBeforePlay={confirmBeforePlay}
+        leftHanded={leftHanded}
         onClose={() => setSettingsOpen(false)}
         onLocaleChange={onLocaleChange}
         onToggleReducedMotion={() => dispatch({ type: 'toggleReducedMotion' })}
         onToggleLargeCards={() => setLargeCards((value) => !value)}
         onToggleHighContrast={() => setHighContrast((value) => !value)}
+        onToggleConfirmBeforePlay={() => {
+          setArmedCardId(null);
+          setConfirmBeforePlay((value) => !value);
+        }}
+        onToggleLeftHanded={() => setLeftHanded((value) => !value)}
         onOpenHistory={() => {
           setSettingsOpen(false);
           setHistoryOpen(true);
@@ -848,5 +947,12 @@ export function JhabbuComputerGame({
     return <SetupScreen view={view} dispatch={dispatch} onLocaleChange={onLocaleChange} />;
   }
 
-  return <PlayingScreen view={view} dispatch={dispatch} onLocaleChange={onLocaleChange} />;
+  return (
+    <PlayingScreen
+      view={view}
+      dispatch={dispatch}
+      onLocaleChange={onLocaleChange}
+      initialConfirmBeforePlay={initialConfig?.confirmBeforePlay ?? false}
+    />
+  );
 }

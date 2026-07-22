@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { CourtyardBackdropPlaceholder, type ReactionKind } from '../../../../components/game/art';
 import { createTranslator } from '../../../../lib/i18n';
+import { resolveCardTap } from '../../../../lib/mobile/play-interaction';
 import { LAL_SATTI_HUMAN_ID } from '../players';
 import type { LalSattiViewState } from '../types';
 
@@ -32,6 +33,8 @@ interface LalSattiGameShellProps {
   readonly onRematch: () => void;
   readonly onToggleReducedMotion: () => void;
   readonly onLocaleChange: (locale: Locale) => void;
+  readonly initialConfirmBeforePlay?: boolean;
+  readonly initialLeftHanded?: boolean;
 }
 
 function displayName(name: string, locale: Locale): string {
@@ -68,6 +71,8 @@ export function LalSattiGameShell({
   onRematch,
   onToggleReducedMotion,
   onLocaleChange,
+  initialConfirmBeforePlay = false,
+  initialLeftHanded = false,
 }: LalSattiGameShellProps): ReactElement {
   const { t } = createTranslator(locale);
 
@@ -77,8 +82,11 @@ export function LalSattiGameShell({
   const [accountOpen, setAccountOpen] = useState(false);
   const [largeCards, setLargeCards] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
+  const [confirmBeforePlay, setConfirmBeforePlay] = useState(initialConfirmBeforePlay);
+  const [leftHanded, setLeftHanded] = useState(initialLeftHanded);
 
   const [focusedCard, setFocusedCard] = useState<Card | null>(null);
+  const [armedCardId, setArmedCardId] = useState<string | null>(null);
   const [invalidCardId, setInvalidCardId] = useState<string | null>(null);
   const [justPlacedCardId, setJustPlacedCardId] = useState<string | null>(null);
   const [openingSuit, setOpeningSuit] = useState<Card['suit'] | null>(null);
@@ -133,18 +141,44 @@ export function LalSattiGameShell({
     return () => window.clearTimeout(timer);
   }, [invalidCardId]);
 
-  const coachMessageKey = invalidCardId ? ('lalSatti.invalidCardHint' as const) : null;
+  // A stale "tap again" arming must never outlive the human's turn.
+  useEffect(() => {
+    if (!view.isHumanTurn) setArmedCardId(null);
+  }, [view.isHumanTurn]);
+
+  const coachMessageKey = invalidCardId
+    ? ('lalSatti.invalidCardHint' as const)
+    : armedCardId
+      ? ('settings.confirmTapAgain' as const)
+      : null;
 
   const onSelectCard = (card: Card): void => {
-    if (!view.isHumanTurn) return;
-    if (view.playableCardIds.includes(card.id)) {
-      setInvalidCardId(null);
-      onPlayCard(card.id);
-      return;
+    const outcome = resolveCardTap({
+      cardId: card.id,
+      isHumanTurn: view.isHumanTurn,
+      playableCardIds: view.playableCardIds,
+      confirmBeforePlay,
+      armedCardId,
+    });
+    switch (outcome.kind) {
+      case 'ignore':
+        return;
+      case 'commit':
+        setArmedCardId(null);
+        setInvalidCardId(null);
+        onPlayCard(outcome.cardId);
+        return;
+      case 'arm':
+        setInvalidCardId(null);
+        setArmedCardId(outcome.cardId);
+        return;
+      case 'invalid':
+        setArmedCardId(null);
+        setInvalidCardId(null);
+        // Re-arm on the next frame so a repeated tap re-triggers the shake.
+        window.requestAnimationFrame(() => setInvalidCardId(card.id));
+        return;
     }
-    setInvalidCardId(null);
-    // Re-arm on the next frame so a repeated tap re-triggers the shake.
-    window.requestAnimationFrame(() => setInvalidCardId(card.id));
   };
 
   const reactionFor = (
@@ -171,6 +205,7 @@ export function LalSattiGameShell({
       className="ls-shell"
       data-reduced-motion={view.reducedMotion ? 'true' : 'false'}
       data-high-contrast={highContrast ? 'true' : 'false'}
+      data-left-handed={leftHanded ? 'true' : 'false'}
     >
       <CourtyardBackdropPlaceholder />
 
@@ -247,6 +282,7 @@ export function LalSattiGameShell({
               isHumanTurn={view.isHumanTurn}
               focusedCardId={focusedCard?.id ?? null}
               invalidCardId={invalidCardId}
+              armedCardId={armedCardId}
               largeCards={largeCards}
               onSelect={onSelectCard}
               onFocusCard={setFocusedCard}
@@ -277,9 +313,16 @@ export function LalSattiGameShell({
         reducedMotion={view.reducedMotion}
         largeCards={largeCards}
         highContrast={highContrast}
+        confirmBeforePlay={confirmBeforePlay}
+        leftHanded={leftHanded}
         onToggleReducedMotion={onToggleReducedMotion}
         onToggleLargeCards={() => setLargeCards((value) => !value)}
         onToggleHighContrast={() => setHighContrast((value) => !value)}
+        onToggleConfirmBeforePlay={() => {
+          setArmedCardId(null);
+          setConfirmBeforePlay((value) => !value);
+        }}
+        onToggleLeftHanded={() => setLeftHanded((value) => !value)}
         onLocaleChange={onLocaleChange}
         onOpenHistory={() => {
           setSettingsOpen(false);

@@ -157,6 +157,12 @@
   gap: 0.5rem;
 }
 
+/* Left-handed layout pulls the self pod and hand toward the left edge so the
+   cards sit under a left thumb instead of a right one. */
+.imm-shell[data-left-handed='true'] .imm-region-bottom {
+  align-items: flex-start;
+}
+
 /* ---- Toolbar buttons (top bar) ----------------------------------- */
 
 .imm-toolbar-button {
@@ -347,8 +353,44 @@
   z-index: 50;
 }
 
+/* Non-playable cards stay readable but recede so the legal moves lead the eye.
+   Tapping one is still allowed (it triggers the coach hint), so this is a visual
+   cue, not a disabled state. */
+.imm-hand-card:not([data-playable='true']):not([data-armed='true']) {
+  opacity: 0.72;
+}
+
 .imm-hand-card[data-disabled='true'] {
   opacity: 0.55;
+}
+
+/* Confirm-before-play: the lined-up card lifts and wears a haldi ring while it
+   waits for the second, committing tap. */
+.imm-hand-card[data-armed='true'] {
+  opacity: 1;
+  transform: translateY(-0.9rem) scale(1.05);
+  outline: 3px solid var(--lp-action-secondary);
+  outline-offset: 3px;
+  border-radius: 0.6rem;
+  z-index: 55;
+}
+
+/* A brief shake when an unplayable card is tapped, paired with the coach hint. */
+.imm-hand-card[data-invalid='true'] {
+  animation: imm-invalid-shake 320ms ease-in-out both;
+}
+
+@keyframes imm-invalid-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-0.3rem);
+  }
+  75% {
+    transform: translateX(0.3rem);
+  }
 }
 
 /* ---- Result / celebration overlay -------------------------------- */

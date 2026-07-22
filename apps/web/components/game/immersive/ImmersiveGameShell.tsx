@@ -2,10 +2,11 @@
 
 import type { Locale } from '@lazy-patta/localization';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { ComputerGameSeat, ComputerGameViewState } from '../../../lib/computer-game/types';
 import { createTranslator } from '../../../lib/i18n';
+import { resolveCardTap } from '../../../lib/mobile/play-interaction';
 import { Button } from '../../Button';
 import { CourtyardBackdropPlaceholder, type ReactionKind } from '../art';
 
@@ -26,6 +27,8 @@ interface ImmersiveGameShellProps {
   readonly onToggleReducedMotion: () => void;
   readonly onLocaleChange: (locale: Locale) => void;
   readonly onHowToPlay: () => void;
+  readonly initialConfirmBeforePlay?: boolean;
+  readonly initialLeftHanded?: boolean;
 }
 
 interface Reaction {
@@ -55,10 +58,16 @@ export function ImmersiveGameShell({
   onToggleReducedMotion,
   onLocaleChange,
   onHowToPlay,
+  initialConfirmBeforePlay = false,
+  initialLeftHanded = false,
 }: ImmersiveGameShellProps): ReactElement {
   const { t } = createTranslator(locale);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [largeCards, setLargeCards] = useState(false);
+  const [confirmBeforePlay, setConfirmBeforePlay] = useState(initialConfirmBeforePlay);
+  const [leftHanded, setLeftHanded] = useState(initialLeftHanded);
+  // The slot armed by a first tap, awaiting a confirming second tap.
+  const [armedToken, setArmedToken] = useState<string | null>(null);
   // First-turn coaching: shown until the human completes one draw (or dismisses).
   const [hasDrawnOnce, setHasDrawnOnce] = useState(false);
   const [coachDismissed, setCoachDismissed] = useState(false);
@@ -78,11 +87,34 @@ export function ImmersiveGameShell({
   // share one owner). Drives pod emphasis/dim and coach-mark visibility.
   const drawSourceOwnerId = view.hiddenCards.find((slot) => slot.isSelectable)?.ownerId ?? null;
   const isHumanDrawTurn = view.currentTurn.isSelf && drawSourceOwnerId !== null;
-  const showCoachMark = isHumanDrawTurn && !hasDrawnOnce && !coachDismissed;
+  const showCoachMark = isHumanDrawTurn && !hasDrawnOnce && !coachDismissed && armedToken === null;
+
+  const selectableTokens = view.hiddenCards
+    .filter((slot) => slot.isSelectable)
+    .map((slot) => slot.positionToken);
+
+  // A pending arm never survives the opponent's turn or a fresh deal.
+  useEffect(() => {
+    if (!isHumanDrawTurn) setArmedToken(null);
+  }, [isHumanDrawTurn]);
 
   const handleChooseCard = (positionToken: string): void => {
-    setHasDrawnOnce(true);
-    onChooseCard(positionToken);
+    const outcome = resolveCardTap({
+      cardId: positionToken,
+      isHumanTurn: isHumanDrawTurn,
+      playableCardIds: selectableTokens,
+      confirmBeforePlay,
+      armedCardId: armedToken,
+    });
+    if (outcome.kind === 'arm') {
+      setArmedToken(outcome.cardId);
+      return;
+    }
+    if (outcome.kind === 'commit') {
+      setArmedToken(null);
+      setHasDrawnOnce(true);
+      onChooseCard(positionToken);
+    }
   };
 
   const podEmphasis = (seat: ComputerGameSeat): { drawSource: boolean; dimmed: boolean } => {
@@ -92,7 +124,11 @@ export function ImmersiveGameShell({
   };
 
   return (
-    <main className="gc-shell" data-reduced-motion={view.settings.reducedMotion ? 'true' : 'false'}>
+    <main
+      className="gc-shell"
+      data-reduced-motion={view.settings.reducedMotion ? 'true' : 'false'}
+      data-left-handed={leftHanded ? 'true' : 'false'}
+    >
       <CourtyardBackdropPlaceholder />
 
       <div className="relative z-10 px-3 pt-2">
@@ -135,6 +171,7 @@ export function ImmersiveGameShell({
               locale={locale}
               view={view}
               onChooseCard={handleChooseCard}
+              armedToken={armedToken}
               showCoachMark={showCoachMark}
               onDismissCoachMark={() => setCoachDismissed(true)}
             />
@@ -190,6 +227,13 @@ export function ImmersiveGameShell({
         onHowToPlay={onHowToPlay}
         largeCards={largeCards}
         onToggleLargeCards={() => setLargeCards((value) => !value)}
+        confirmBeforePlay={confirmBeforePlay}
+        onToggleConfirmBeforePlay={() => {
+          setConfirmBeforePlay((value) => !value);
+          setArmedToken(null);
+        }}
+        leftHanded={leftHanded}
+        onToggleLeftHanded={() => setLeftHanded((value) => !value)}
       />
     </main>
   );

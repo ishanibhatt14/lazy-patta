@@ -191,6 +191,7 @@ export function ComputerGameExperience({
           dispatch({ type: 'setLocale', locale: next });
         }}
         onHowToPlay={() => setTutorialOpen(true)}
+        initialConfirmBeforePlay={initialConfig?.confirmBeforePlay ?? false}
       />
       {tutorial}
     </GameErrorBoundary>

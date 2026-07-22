@@ -417,6 +417,33 @@
     drop-shadow(0 0.55rem 0.7rem rgb(0 0 0 / 24%));
 }
 
+/* Confirm-before-play: the lined-up card wears a haldi ring while it waits for
+   the second, committing tap. Kept to outline + glow so the fan's inline
+   transform (rotation/offset) is never disturbed. */
+.jh-card-button[data-armed='true'] {
+  z-index: 100;
+  filter: drop-shadow(0 0 0.6rem var(--lp-action-secondary));
+  outline: 3px solid var(--lp-action-secondary);
+  outline-offset: 3px;
+  border-radius: 0.6rem;
+  opacity: 1;
+}
+
+/* A brief glow when an unplayable card is tapped, paired with the coach hint. */
+.jh-card-button[data-invalid='true'] {
+  animation: jh-invalid-flash 360ms ease-in-out;
+}
+
+@keyframes jh-invalid-flash {
+  0%,
+  100% {
+    filter: none;
+  }
+  50% {
+    filter: drop-shadow(0 0 0.5rem #c0392b) brightness(1.04);
+  }
+}
+
 .jh-play-shell[data-high-contrast='true'] .jh-card-button:not([data-playable='true']) {
   opacity: 0.88;
   filter: grayscale(0.35);

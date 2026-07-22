@@ -20,6 +20,10 @@ interface GameSettingsSheetProps {
   readonly onHowToPlay: () => void;
   readonly largeCards: boolean;
   readonly onToggleLargeCards: () => void;
+  readonly confirmBeforePlay: boolean;
+  readonly onToggleConfirmBeforePlay: () => void;
+  readonly leftHanded: boolean;
+  readonly onToggleLeftHanded: () => void;
 }
 
 const TOGGLE_CLASS =
@@ -42,6 +46,10 @@ export function GameSettingsSheet({
   onHowToPlay,
   largeCards,
   onToggleLargeCards,
+  confirmBeforePlay,
+  onToggleConfirmBeforePlay,
+  leftHanded,
+  onToggleLeftHanded,
 }: GameSettingsSheetProps): ReactElement | null {
   const { t, format } = createTranslator(locale);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -129,6 +137,28 @@ export function GameSettingsSheet({
             <span className="block">{t('settings.largeCards')}</span>
             <span className="mt-1 block text-xs font-medium leading-5 text-text-primary">
               {t('settings.largeCardsHint')}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={onToggleConfirmBeforePlay}
+            className={`${TOGGLE_CLASS} flex flex-col items-start justify-center py-2 text-left`}
+            aria-pressed={confirmBeforePlay}
+          >
+            <span className="block">{t('settings.confirmBeforePlay')}</span>
+            <span className="mt-1 block text-xs font-medium leading-5 text-text-primary">
+              {t('settings.confirmBeforePlayHint')}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={onToggleLeftHanded}
+            className={`${TOGGLE_CLASS} flex flex-col items-start justify-center py-2 text-left`}
+            aria-pressed={leftHanded}
+          >
+            <span className="block">{t('settings.leftHanded')}</span>
+            <span className="mt-1 block text-xs font-medium leading-5 text-text-primary">
+              {t('settings.leftHandedHint')}
             </span>
           </button>
           <button type="button" onClick={onHowToPlay} className={TOGGLE_CLASS}>

@@ -24,6 +24,8 @@ interface ImmersiveSceneProps {
   readonly overlay?: ReactNode;
   readonly reducedMotion?: boolean;
   readonly highContrast?: boolean;
+  /** Left-handed layout pulls the hand toward the left edge for a left thumb. */
+  readonly leftHanded?: boolean;
 }
 
 /**
@@ -48,12 +50,14 @@ export function ImmersiveScene({
   overlay,
   reducedMotion = false,
   highContrast = false,
+  leftHanded = false,
 }: ImmersiveSceneProps): ReactElement {
   return (
     <main
       className="imm-shell"
       data-reduced-motion={reducedMotion ? 'true' : 'false'}
       data-high-contrast={highContrast ? 'true' : 'false'}
+      data-left-handed={leftHanded ? 'true' : 'false'}
     >
       <CourtyardBackdropPlaceholder />
 
