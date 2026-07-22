@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { GameRow } from '../../lib/online-game/games-client';
+import type { KachufulPublicSnapshot } from '../../lib/online-game/kachuful-authority';
 import type { RoomSeat } from '../../lib/rooms/rooms-client';
 
 import { GameBoard } from './GameBoard';
@@ -12,6 +13,7 @@ const fetchLatestGame = vi.fn();
 const fetchMyHand = vi.fn();
 const drawCard = vi.fn();
 const submitLalSattiAction = vi.fn();
+const submitKachufulAction = vi.fn();
 
 vi.mock('../../lib/supabase/browser-client', () => ({
   getSupabaseBrowserClient: (): Record<string, never> => ({}),
@@ -22,6 +24,7 @@ vi.mock('../../lib/online-game/games-client', () => ({
   fetchMyHand: (...args: unknown[]) => fetchMyHand(...args),
   drawCard: (...args: unknown[]) => drawCard(...args),
   submitLalSattiAction: (...args: unknown[]) => submitLalSattiAction(...args),
+  submitKachufulAction: (...args: unknown[]) => submitKachufulAction(...args),
 }));
 
 function card(suit: Card['suit'], rank: Card['rank']): Card {
@@ -119,5 +122,88 @@ describe('GameBoard (online, immersive felt table)', () => {
     expect(await screen.findByText(/Waiting for Ba/i)).toBeVisible();
     // No draw fan when it is not the viewer's turn.
     expect(screen.queryByRole('button', { name: /Hidden card/i })).toBeNull();
+  });
+});
+
+function kachufulPlayer(
+  id: string,
+  overrides: Partial<KachufulPublicSnapshot['players'][number]> = {},
+): KachufulPublicSnapshot['players'][number] {
+  return {
+    id,
+    seat: 0,
+    handCount: 2,
+    bid: 1,
+    tricksWon: 0,
+    roundScore: 0,
+    totalScore: 0,
+    isBot: id.startsWith('bot:'),
+    isDealer: false,
+    ...overrides,
+  };
+}
+
+function kachufulGame(overrides: Partial<KachufulPublicSnapshot> = {}): GameRow {
+  const snapshot: KachufulPublicSnapshot = {
+    gameKey: 'kachuful',
+    rulePackId: 'kachuful_family',
+    players: [
+      kachufulPlayer('u1', { seat: 0, tricksWon: 2, isDealer: true }),
+      kachufulPlayer('bot:1', { seat: 1, bid: 2 }),
+      kachufulPlayer('bot:2', { seat: 2, bid: 0 }),
+    ],
+    currentPlayerId: 'u1',
+    phase: 'playing',
+    trump: 'spades',
+    handSize: 4,
+    roundNumber: 2,
+    totalRounds: 7,
+    ledSuit: 'hearts',
+    currentTrick: [{ playerId: 'bot:1', card: card('hearts', 'king'), sequence: 0 }],
+    matchWinnerIds: [],
+    stateVersion: 8,
+    ...overrides,
+  };
+  return {
+    id: 'g-kachuful',
+    game_key: 'kachuful',
+    status: 'active',
+    state_version: snapshot.stateVersion,
+    public_snapshot: snapshot,
+    result: null,
+  };
+}
+
+describe('GameBoard (online, Kachuful table)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // A heart to follow with, plus an off-suit card that must be greyed out.
+    fetchMyHand.mockResolvedValue([card('hearts', '7'), card('spades', '2')]);
+  });
+
+  it('renders the central trick with the winning card and a follow-suit hint', async () => {
+    fetchLatestGame.mockResolvedValue(kachufulGame());
+
+    render(<GameBoard roomId="r1" seats={SEATS} userId="u1" locale="en" />);
+
+    // The led card sits in the central trick, not a hidden dashboard row.
+    expect(await screen.findByRole('img', { name: /King of Hearts/i })).toBeVisible();
+    // The board resolves and announces who is currently winning the trick.
+    expect(screen.getByText(/Winning: Ba/i)).toBeVisible();
+    expect(screen.getByText(/Led:/)).toBeVisible();
+    // Because the viewer holds a heart, they are told they must follow suit.
+    expect(screen.getByText(/you must follow suit/i)).toBeVisible();
+    // Detailed standings are tucked into a collapsible summary, not always-on.
+    expect(screen.getByText('Players and scores').tagName).toBe('SUMMARY');
+  });
+
+  it('keeps the trick area visible while waiting for the lead', async () => {
+    fetchLatestGame.mockResolvedValue(
+      kachufulGame({ currentPlayerId: 'bot:1', ledSuit: null, currentTrick: [] }),
+    );
+
+    render(<GameBoard roomId="r1" seats={SEATS} userId="u1" locale="en" />);
+
+    expect(await screen.findByText(/Waiting for Ba to lead/i)).toBeVisible();
   });
 });
