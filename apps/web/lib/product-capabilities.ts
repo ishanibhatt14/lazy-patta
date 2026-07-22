@@ -40,7 +40,10 @@ export const GAME_CAPABILITIES: Record<ProductGameSlug, GameCapability> = {
     availability: {
       game: 'available',
       computer: 'available',
-      privateRoom: 'available',
+      // Family rooms are not reliably live yet (see /mobile/rooms and
+      // GAME_DISCOVERY.onlinePlayable). PR 8 flips this to 'available' once the
+      // vertical slice passes; until then no surface may promise private rooms.
+      privateRoom: 'coming-soon',
       passAndPlay: 'coming-soon',
     },
     players: { min: 2, max: 6, defaultComputer: 4 },
@@ -51,13 +54,17 @@ export const GAME_CAPABILITIES: Record<ProductGameSlug, GameCapability> = {
       createRoom: '/mobile/rooms?game=gadha_chor',
     },
     roomGameKey: 'gadha_chor',
+    reasonKeys: { roomUnavailable: 'rooms.unavailableComingSoon' },
   },
   'lal-satti': {
     gameSlug: 'lal-satti',
     availability: {
       game: 'available',
       computer: 'available',
-      privateRoom: 'available',
+      // Family rooms are not reliably live yet (see /mobile/rooms and
+      // GAME_DISCOVERY.onlinePlayable). PR 8 flips this to 'available' once the
+      // vertical slice passes; until then no surface may promise private rooms.
+      privateRoom: 'coming-soon',
       passAndPlay: 'coming-soon',
     },
     players: { min: 3, max: 6, defaultComputer: 4 },
@@ -68,13 +75,17 @@ export const GAME_CAPABILITIES: Record<ProductGameSlug, GameCapability> = {
       createRoom: '/mobile/rooms?game=lal_satti',
     },
     roomGameKey: 'lal_satti',
+    reasonKeys: { roomUnavailable: 'rooms.unavailableComingSoon' },
   },
   jhabbu: {
     gameSlug: 'jhabbu',
     availability: {
       game: 'available',
       computer: 'available',
-      privateRoom: 'available',
+      // Family rooms are not reliably live yet (see /mobile/rooms and
+      // GAME_DISCOVERY.onlinePlayable). PR 8 flips this to 'available' once the
+      // vertical slice passes; until then no surface may promise private rooms.
+      privateRoom: 'coming-soon',
       passAndPlay: 'coming-soon',
     },
     players: { min: 3, max: 6, defaultComputer: 4 },
@@ -85,13 +96,17 @@ export const GAME_CAPABILITIES: Record<ProductGameSlug, GameCapability> = {
       createRoom: '/mobile/rooms?game=jhabbu',
     },
     roomGameKey: 'jhabbu',
+    reasonKeys: { roomUnavailable: 'rooms.unavailableComingSoon' },
   },
   kachuful: {
     gameSlug: 'kachuful',
     availability: {
       game: 'available',
       computer: 'available',
-      privateRoom: 'available',
+      // Family rooms are not reliably live yet (see /mobile/rooms and
+      // GAME_DISCOVERY.onlinePlayable). PR 8 flips this to 'available' once the
+      // vertical slice passes; until then no surface may promise private rooms.
+      privateRoom: 'coming-soon',
       passAndPlay: 'coming-soon',
     },
     players: { min: 3, max: 7, defaultComputer: 4 },
@@ -102,6 +117,7 @@ export const GAME_CAPABILITIES: Record<ProductGameSlug, GameCapability> = {
       createRoom: '/mobile/rooms?game=kachuful',
     },
     roomGameKey: 'kachuful',
+    reasonKeys: { roomUnavailable: 'rooms.unavailableComingSoon' },
   },
   mendicot: {
     gameSlug: 'mendicot',

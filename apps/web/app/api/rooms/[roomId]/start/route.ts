@@ -26,6 +26,7 @@ import {
   persistLalSattiStart,
 } from '../../../../../lib/online-game/lal-satti-authority';
 import { getRequestUserId } from '../../../../../lib/online-game/route-context';
+import { findCapabilityByRoomGameKey, isRoomCapable } from '../../../../../lib/product-capabilities';
 import {
   getSupabaseAdminClient,
   isAuthorityConfigured,
@@ -82,6 +83,20 @@ export async function POST(request: Request, ctx: Context): Promise<Response> {
     room.game_key === 'lal_satti' || room.game_key === 'jhabbu' || room.game_key === 'kachuful'
       ? room.game_key
       : 'gadha_chor';
+
+  // Defense in depth: the capability registry is the single source of truth for
+  // whether a game's family-room mode is live. Even if a client bypasses the
+  // disabled UI and reaches this route, the server refuses to start a room for a
+  // game whose private-room mode is not 'available'. Flipping the capability to
+  // 'available' (PR 8) is the only change needed to open this path.
+  const capability = findCapabilityByRoomGameKey(gameKey);
+  if (!capability || !isRoomCapable(capability)) {
+    return NextResponse.json(
+      { error: 'family rooms are not available for this game yet' },
+      { status: 409 },
+    );
+  }
+
   const rules =
     gameKey === 'lal_satti'
       ? LAL_SATTI_CLASSIC
