@@ -1,6 +1,7 @@
 import type { MessageKey } from '@lazy-patta/localization';
 
 import { GAME_DISCOVERY, type GameSlug } from './game-discovery';
+import { GAME_REGISTRY } from './mobile/game-registry';
 import type { OnlineGameKey } from './rooms/rooms-client';
 
 /**
@@ -50,20 +51,10 @@ const DIFFICULTY_KEY: Record<GameDifficulty, MessageKey> = {
   fast: 'mobile.difficulty.fast',
 };
 
-/** Maps a discovery slug to the online-room game key used by `rooms-client`. */
-const ROOM_GAME_KEY: Record<GameSlug, OnlineGameKey> = {
-  'gadha-chor': 'gadha_chor',
-  'lal-satti': 'lal_satti',
-  jhabbu: 'jhabbu',
-  kachuful: 'kachuful',
-};
-
 interface PlayableShape {
   readonly slug: GameSlug;
   readonly difficulty: GameDifficulty;
   readonly durationMinutes: { readonly min: number; readonly max: number };
-  readonly minPlayers: number;
-  readonly maxPlayers: number;
   readonly taglineKey: MessageKey;
   readonly accent: GameAccent;
 }
@@ -73,8 +64,6 @@ const PLAYABLE_SHAPES: readonly PlayableShape[] = [
     slug: 'gadha-chor',
     difficulty: 'easy',
     durationMinutes: { min: 5, max: 10 },
-    minPlayers: 2,
-    maxPlayers: 6,
     taglineKey: 'games.gadhaChor.description',
     accent: 'maroon',
   },
@@ -82,8 +71,6 @@ const PLAYABLE_SHAPES: readonly PlayableShape[] = [
     slug: 'lal-satti',
     difficulty: 'strategy',
     durationMinutes: { min: 10, max: 20 },
-    minPlayers: 3,
-    maxPlayers: 6,
     taglineKey: 'games.lalSatti.description',
     accent: 'teal',
   },
@@ -91,8 +78,6 @@ const PLAYABLE_SHAPES: readonly PlayableShape[] = [
     slug: 'jhabbu',
     difficulty: 'fast',
     durationMinutes: { min: 15, max: 30 },
-    minPlayers: 3,
-    maxPlayers: 6,
     taglineKey: 'games.jhabbu.description',
     accent: 'saffron',
   },
@@ -100,8 +85,6 @@ const PLAYABLE_SHAPES: readonly PlayableShape[] = [
     slug: 'kachuful',
     difficulty: 'strategy',
     durationMinutes: { min: 20, max: 40 },
-    minPlayers: 3,
-    maxPlayers: 7,
     taglineKey: 'games.kachuful.description',
     accent: 'indigo',
   },
@@ -109,6 +92,7 @@ const PLAYABLE_SHAPES: readonly PlayableShape[] = [
 
 function playableItem(shape: PlayableShape): MobileCatalogItem {
   const discovery = GAME_DISCOVERY[shape.slug];
+  const game = GAME_REGISTRY[shape.slug];
   return {
     id: shape.slug,
     slug: shape.slug,
@@ -119,11 +103,11 @@ function playableItem(shape: PlayableShape): MobileCatalogItem {
     difficulty: shape.difficulty,
     difficultyKey: DIFFICULTY_KEY[shape.difficulty],
     durationMinutes: shape.durationMinutes,
-    minPlayers: shape.minPlayers,
-    maxPlayers: shape.maxPlayers,
-    practiceRoute: discovery.playable ? discovery.computerHref : undefined,
-    roomGameKey: discovery.onlinePlayable ? ROOM_GAME_KEY[shape.slug] : undefined,
-    rulesRoute: `/games/${shape.slug}`,
+    minPlayers: game.players.min,
+    maxPlayers: game.players.max,
+    practiceRoute: discovery.playable ? game.routes.mobileSetup : undefined,
+    roomGameKey: discovery.onlinePlayable ? game.roomGameKey : undefined,
+    rulesRoute: game.routes.rules,
     accent: shape.accent,
   };
 }
@@ -174,9 +158,7 @@ export function findCatalogItem(id: string): MobileCatalogItem | undefined {
 
 /** True when `count` players can sit at this game's table. */
 export function isValidPlayerCount(item: MobileCatalogItem, count: number): boolean {
-  return (
-    Number.isInteger(count) && count >= item.minPlayers && count <= item.maxPlayers
-  );
+  return Number.isInteger(count) && count >= item.minPlayers && count <= item.maxPlayers;
 }
 
 /** True when a table with `seated` players may start (enough to deal). */

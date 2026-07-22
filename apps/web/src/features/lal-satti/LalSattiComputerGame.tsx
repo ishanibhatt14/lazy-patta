@@ -10,6 +10,7 @@ import { LocaleSwitcher } from '../../../components/game/LocaleSwitcher';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
 import { createTranslator } from '../../../lib/i18n';
 import { usePreferredLocale } from '../../../lib/locale/preferred-locale-context';
+import type { ComputerGameConfig } from '../../../lib/mobile/computer-session';
 
 import {
   createLalSattiController,
@@ -83,9 +84,16 @@ function prefersReducedMotion(): boolean {
   );
 }
 
-export function LalSattiComputerGame(): ReactElement {
+export function LalSattiComputerGame({
+  initialConfig,
+  autoStart = false,
+}: {
+  readonly initialConfig?: ComputerGameConfig;
+  readonly autoStart?: boolean;
+} = {}): ReactElement {
   const { locale: preferredLocale, setLocale: setPreferredLocale } = usePreferredLocale();
   const controllerRef = useRef<LalSattiController | null>(null);
+  const autoStartedRef = useRef(false);
 
   if (controllerRef.current === null) {
     const rng = seededRng();
@@ -94,7 +102,7 @@ export function LalSattiComputerGame(): ReactElement {
     controllerRef.current = createLalSattiController(
       rng ?? createCryptoRng(),
       preferredLocale,
-      rng ? 'hard' : 'medium',
+      initialConfig?.difficulty ?? (rng ? 'hard' : 'medium'),
     );
   }
 
@@ -104,19 +112,30 @@ export function LalSattiComputerGame(): ReactElement {
       controller.dispatch(current, intent),
     {
       ...controller.initialState,
-      reducedMotion: prefersReducedMotion(),
+      playerCount: initialConfig?.playerCount ?? controller.initialState.playerCount,
+      humanName: initialConfig?.humanName ?? controller.initialState.humanName,
+      difficulty: initialConfig?.difficulty ?? controller.initialState.difficulty,
+      reducedMotion: initialConfig?.reducedMotion ?? prefersReducedMotion(),
+      hasHydratedSession: initialConfig ? true : controller.initialState.hasHydratedSession,
     },
   );
   const view = selectLalSattiViewState(state);
   const t = createTranslator(view.locale);
 
   useEffect(() => {
+    if (initialConfig) return;
     dispatch({ type: 'hydrateSession', ...readStoredSession() });
-  }, []);
+  }, [initialConfig]);
 
   useEffect(() => {
     writeStoredSession(state);
   }, [state]);
+
+  useEffect(() => {
+    if (!autoStart || autoStartedRef.current || state.phase !== 'setup') return;
+    autoStartedRef.current = true;
+    dispatch({ type: 'start' });
+  }, [autoStart, state.phase]);
 
   useEffect(() => {
     if (view.phase !== 'playing' || view.isHumanTurn) return;

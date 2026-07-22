@@ -24,7 +24,10 @@ export function MobileSettings(): ReactElement {
       <h1 className="text-2xl font-black text-action-primary">{t.t('mobile.settings.title')}</h1>
 
       <section aria-labelledby="settings-language" className="flex flex-col gap-3">
-        <h2 id="settings-language" className="text-sm font-black uppercase tracking-wide text-brand-accent">
+        <h2
+          id="settings-language"
+          className="text-sm font-black uppercase tracking-wide text-brand-accent"
+        >
           {t.t('mobile.settings.languageSection')}
         </h2>
         <div className="grid gap-2">
@@ -62,7 +65,10 @@ export function MobileSettings(): ReactElement {
       </section>
 
       <section aria-labelledby="settings-appearance" className="flex flex-col gap-3">
-        <h2 id="settings-appearance" className="text-sm font-black uppercase tracking-wide text-brand-accent">
+        <h2
+          id="settings-appearance"
+          className="text-sm font-black uppercase tracking-wide text-brand-accent"
+        >
           {t.t('mobile.settings.appearanceSection')}
         </h2>
         <button

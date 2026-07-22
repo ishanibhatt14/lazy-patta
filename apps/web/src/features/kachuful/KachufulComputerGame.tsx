@@ -12,6 +12,7 @@ import { LocaleSwitcher } from '../../../components/game/LocaleSwitcher';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
 import { createTranslator } from '../../../lib/i18n';
 import { usePreferredLocale } from '../../../lib/locale/preferred-locale-context';
+import type { ComputerGameConfig } from '../../../lib/mobile/computer-session';
 
 import {
   createKachufulController,
@@ -75,16 +76,23 @@ function cardFaceLabel(view: KachufulViewState, card: Card): string {
   });
 }
 
-export function KachufulComputerGame(): ReactElement {
+export function KachufulComputerGame({
+  initialConfig,
+  autoStart = false,
+}: {
+  readonly initialConfig?: ComputerGameConfig;
+  readonly autoStart?: boolean;
+} = {}): ReactElement {
   const { locale: preferredLocale, setLocale: setPreferredLocale } = usePreferredLocale();
   const controllerRef = useRef<KachufulController | null>(null);
+  const autoStartedRef = useRef(false);
 
   if (controllerRef.current === null) {
     const rng = seededRng();
     controllerRef.current = createKachufulController(
       rng ?? createCryptoRng(),
       preferredLocale,
-      rng ? 'hard' : 'medium',
+      initialConfig?.difficulty ?? (rng ? 'hard' : 'medium'),
     );
   }
 
@@ -92,18 +100,32 @@ export function KachufulComputerGame(): ReactElement {
   const [state, dispatch] = useReducer(
     (current: KachufulControllerState, intent: KachufulIntent) =>
       controller.dispatch(current, intent),
-    { ...controller.initialState, reducedMotion: prefersReducedMotion() },
+    {
+      ...controller.initialState,
+      playerCount: initialConfig?.playerCount ?? controller.initialState.playerCount,
+      humanName: initialConfig?.humanName ?? controller.initialState.humanName,
+      difficulty: initialConfig?.difficulty ?? controller.initialState.difficulty,
+      reducedMotion: initialConfig?.reducedMotion ?? prefersReducedMotion(),
+      hasHydratedSession: initialConfig ? true : controller.initialState.hasHydratedSession,
+    },
   );
   const view = selectKachufulViewState(state);
   const { t, format } = createTranslator(view.locale);
 
   useEffect(() => {
+    if (initialConfig) return;
     dispatch({ type: 'hydrateSession', humanName: readStoredName() });
-  }, []);
+  }, [initialConfig]);
 
   useEffect(() => {
     writeStoredName(state);
   }, [state]);
+
+  useEffect(() => {
+    if (!autoStart || autoStartedRef.current || state.phase !== 'setup') return;
+    autoStartedRef.current = true;
+    dispatch({ type: 'start' });
+  }, [autoStart, state.phase]);
 
   useEffect(() => {
     const acting = view.phase === 'bidding' || view.phase === 'playing';

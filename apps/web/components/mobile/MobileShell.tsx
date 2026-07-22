@@ -38,6 +38,11 @@ export function MobileShell({ children }: { readonly children: ReactNode }): Rea
   const { locale } = usePreferredLocale();
   const { t } = createTranslator(locale);
   const pathname = usePathname() ?? '/mobile';
+  const gameplay = pathname.startsWith('/mobile/game/') && pathname.includes('/computer/');
+
+  if (gameplay) {
+    return <div className="min-h-[100dvh] bg-background-canvas">{children}</div>;
+  }
 
   return (
     <div className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col bg-background-canvas">

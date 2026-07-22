@@ -24,7 +24,7 @@ describe('GameCatalogGrid', () => {
     const dialog = screen.getByRole('dialog');
     expect(within(dialog).getByRole('link', { name: /Play computer/i })).toHaveAttribute(
       'href',
-      '/play/gadha-chor/computer',
+      '/mobile/game/gadha-chor/setup?mode=computer',
     );
     expect(within(dialog).getByRole('link', { name: /Create room/i })).toHaveAttribute(
       'href',

@@ -15,10 +15,9 @@ const VIEWPORTS = [
 
 async function startGame(page: Page, players: number): Promise<void> {
   await page.goto(ROUTE);
-  await page.getByText('Customize table').click();
-  await page.getByRole('button', { name: `${players} players`, exact: true }).click();
-  await page.getByRole('textbox', { name: 'Your table name' }).fill('Aanya');
-  await page.getByRole('button', { name: 'Start quick game' }).click();
+  if (players !== 4) await page.getByRole('button', { name: String(players), exact: true }).click();
+  await page.getByRole('textbox', { name: 'Table name' }).fill('Aanya');
+  await page.getByRole('button', { name: 'Start game' }).click();
   await expect(page.getByRole('status')).toBeVisible();
   await expect(page.locator('[data-seat-id]')).toHaveCount(players);
   // The deterministic resting frame: the seeded opening (7♥) and any bot lead-in

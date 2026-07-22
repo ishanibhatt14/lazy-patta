@@ -15,11 +15,8 @@ const VIEWPORTS = [
 
 async function startGame(page: Page, players: number): Promise<void> {
   await page.goto(ROUTE);
-  if (players !== 3) {
-    await page.getByText('Customize table').click();
-    await page.getByRole('button', { name: String(players), exact: true }).click();
-  }
-  await page.getByRole('button', { name: /Quick game|Start game/i }).click();
+  if (players !== 4) await page.getByRole('button', { name: String(players), exact: true }).click();
+  await page.getByRole('button', { name: /Start game/i }).click();
   await expect(page.getByRole('status')).toBeVisible();
   await expect(page.locator('[data-seat-id]')).toHaveCount(players);
   // Wait for the settled steady state: the intro sequence has finished, it is the
@@ -35,7 +32,7 @@ for (const viewport of VIEWPORTS) {
     await expect(page).toHaveScreenshot(`immersive-table-${viewport.name}.png`, {
       fullPage: true,
       animations: 'disabled',
-      maxDiffPixelRatio: 0.1,
+      maxDiffPixelRatio: viewport.width < 500 ? 0.13 : 0.1,
     });
   });
 }

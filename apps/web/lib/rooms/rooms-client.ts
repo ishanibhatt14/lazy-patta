@@ -57,12 +57,13 @@ export async function createRoom(
   client: SupabaseClient,
   input: CreateRoomInput = {},
 ): Promise<Room> {
+  const gameKey = input.gameKey ?? 'gadha_chor';
   return unwrap<Room>(
     await client.rpc('create_room', {
-      p_max_seats: input.maxSeats ?? 6,
+      p_max_seats: input.maxSeats ?? (gameKey === 'kachuful' ? 7 : 6),
       p_locale: input.locale ?? 'en',
       p_display_name: input.displayName ?? null,
-      p_game_key: input.gameKey ?? 'gadha_chor',
+      p_game_key: gameKey,
     }),
   );
 }

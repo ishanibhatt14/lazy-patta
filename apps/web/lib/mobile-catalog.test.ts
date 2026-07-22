@@ -30,7 +30,7 @@ describe('MOBILE_CATALOG', () => {
     expect(PLAYABLE_CATALOG).toHaveLength(4);
     for (const game of PLAYABLE_CATALOG) {
       expect(game.availability).toBe('available');
-      expect(game.practiceRoute).toMatch(/^\/play\/.+\/computer$/);
+      expect(game.practiceRoute).toMatch(/^\/mobile\/game\/.+\/setup\?mode=computer$/);
       expect(game.roomGameKey).toBeTruthy();
     }
   });
@@ -52,7 +52,12 @@ describe('MOBILE_CATALOG', () => {
 
   it('resolves every message key against the English catalogue', () => {
     for (const game of MOBILE_CATALOG) {
-      for (const key of [game.nameKey, game.taglineKey, game.alternateNamesKey, game.difficultyKey]) {
+      for (const key of [
+        game.nameKey,
+        game.taglineKey,
+        game.alternateNamesKey,
+        game.difficultyKey,
+      ]) {
         expect(en[key], key).toBeTruthy();
       }
     }

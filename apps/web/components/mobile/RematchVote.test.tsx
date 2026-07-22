@@ -16,9 +16,7 @@ const players: readonly PlayerRematchState[] = [
 
 describe('RematchVote', () => {
   it('shows a live ready-of-total count and each player status', () => {
-    render(
-      <RematchVote players={players} viewerId="me" minPlayers={2} t={t} onVote={() => {}} />,
-    );
+    render(<RematchVote players={players} viewerId="me" minPlayers={2} t={t} onVote={() => {}} />);
 
     expect(screen.getByText(/1 of 2 players are ready/i)).toBeVisible();
     expect(screen.getByText(/^You$/)).toBeVisible();
