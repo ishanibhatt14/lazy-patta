@@ -13,9 +13,7 @@ export function toCssVariables(): string {
   const dark = resolveColors('dark');
   const tokens = Object.keys(light) as SemanticColorToken[];
 
-  const rootLines = tokens
-    .map((token) => `  ${cssVarName(token)}: ${light[token]};`)
-    .join('\n');
+  const rootLines = tokens.map((token) => `  ${cssVarName(token)}: ${light[token]};`).join('\n');
   const darkLines = tokens
     .filter((token) => dark[token] !== light[token])
     .map((token) => `  ${cssVarName(token)}: ${dark[token]};`)

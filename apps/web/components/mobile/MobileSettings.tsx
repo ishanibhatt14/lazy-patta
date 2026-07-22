@@ -79,7 +79,11 @@ export function MobileSettings(): ReactElement {
         >
           {t.t('mobile.settings.appearanceSection')}
         </h2>
-        <div role="radiogroup" aria-labelledby="settings-appearance" className="grid grid-cols-3 gap-2">
+        <div
+          role="radiogroup"
+          aria-labelledby="settings-appearance"
+          className="grid grid-cols-3 gap-2"
+        >
           {THEME_CHOICES.map(({ value, labelKey }) => {
             const selected = value === themeChoice;
             return (
@@ -105,7 +109,10 @@ export function MobileSettings(): ReactElement {
       </section>
 
       <section aria-labelledby="settings-motion" className="flex flex-col gap-3">
-        <h2 id="settings-motion" className="text-sm font-black uppercase tracking-wide text-brand-accent">
+        <h2
+          id="settings-motion"
+          className="text-sm font-black uppercase tracking-wide text-brand-accent"
+        >
           {t.t('mobile.settings.motionSection')}
         </h2>
         <button
