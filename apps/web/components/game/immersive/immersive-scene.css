@@ -1,0 +1,414 @@
+/* ------------------------------------------------------------------ *
+ * Shared immersive courtyard scene.                                   *
+ *                                                                     *
+ * A game-agnostic clone of the Gadha Chor `.gc-*` scene, namespaced   *
+ * `.imm-*` so newer boards (Jhabbu, Kachuful) can reach the same      *
+ * premium felt-table look without duplicating ~500 lines of CSS or    *
+ * touching the two hand-tuned original shells. One evening sky, a      *
+ * peacock-green felt inside a wooden rim, sparing bandhani dots. All   *
+ * decorative layers are pointer/aria inert and every animation        *
+ * collapses to its resting frame under reduced motion.                *
+ * ------------------------------------------------------------------ */
+
+.imm-shell {
+  --imm-turn-transfer: 220ms;
+  --imm-lift: 100ms;
+  --imm-result: 320ms;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+  color: var(--lp-text-onBrand);
+  background:
+    radial-gradient(
+      120% 90% at 50% -10%,
+      color-mix(in srgb, var(--lp-accent-indigo), transparent 55%) 0,
+      transparent 60%
+    ),
+    linear-gradient(
+      180deg,
+      var(--lp-scene-skyTop) 0%,
+      var(--lp-scene-skyBottom) 78%,
+      var(--lp-scene-rimEdge) 100%
+    );
+}
+
+/* Faint hanging-lantern glow near the top of the courtyard. */
+.imm-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      9rem 6rem at 18% 8%,
+      color-mix(in srgb, var(--lp-action-secondary), transparent 72%) 0,
+      transparent 70%
+    ),
+    radial-gradient(
+      9rem 6rem at 82% 8%,
+      color-mix(in srgb, var(--lp-accent-kumkum), transparent 76%) 0,
+      transparent 70%
+    );
+}
+
+.imm-scene {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  /* Never let wide play-zone / hand content stretch the rim past the viewport. */
+  min-width: 0;
+  overflow: hidden;
+  margin: 0.5rem;
+  border-radius: 1.75rem;
+  padding: clamp(0.5rem, 2vw, 1.25rem);
+  /* Wooden / woven rim around the felt. */
+  background: linear-gradient(135deg, var(--lp-scene-rim) 0%, var(--lp-scene-rimEdge) 100%);
+  box-shadow:
+    0 1.25rem 2.5rem rgba(0, 0, 0, 0.4),
+    inset 0 0 0 0.15rem color-mix(in srgb, var(--lp-action-secondary), transparent 60%);
+}
+
+@media (min-width: 1024px) {
+  .imm-scene {
+    max-height: calc(100dvh - 5rem);
+    margin: 0.75rem auto;
+    width: min(100%, 72rem);
+  }
+}
+
+.imm-felt {
+  position: absolute;
+  inset: clamp(0.5rem, 2vw, 1.25rem);
+  border-radius: 1.35rem;
+  background: radial-gradient(
+    120% 120% at 50% 42%,
+    var(--lp-game-table) 0%,
+    var(--lp-scene-feltDeep) 100%
+  );
+  box-shadow: inset 0 0 3.5rem rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.imm-felt-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  pointer-events: none;
+  background:
+    radial-gradient(circle, var(--lp-action-secondary) 0 0.09rem, transparent 0.1rem) 0 0 / 2.1rem
+      2.1rem,
+    radial-gradient(circle, var(--lp-background-canvas) 0 0.06rem, transparent 0.07rem) 1.05rem
+      1.05rem / 2.1rem 2.1rem,
+    radial-gradient(circle, var(--lp-accent-kumkum) 0 0.05rem, transparent 0.06rem) 1.05rem 0 /
+      2.1rem 2.1rem;
+}
+
+.imm-felt-border {
+  position: absolute;
+  inset: 0.55rem;
+  border-radius: 1rem;
+  border: 0.12rem dashed color-mix(in srgb, var(--lp-action-secondary), transparent 55%);
+  pointer-events: none;
+}
+
+.imm-regions {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  /* Single column pinned to the container so wide content can't blow it out. */
+  grid-template-columns: minmax(0, 1fr);
+  height: 100%;
+  width: 100%;
+  gap: clamp(0.25rem, 1.2vh, 0.75rem);
+  padding: clamp(0.5rem, 2vw, 1.1rem);
+}
+
+.imm-region-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: clamp(0.5rem, 3vw, 1.25rem);
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.imm-region-middle {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.imm-region-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  gap: 0.5rem;
+}
+
+/* ---- Toolbar buttons (top bar) ----------------------------------- */
+
+.imm-toolbar-button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0 0.75rem;
+  border-radius: 999rem;
+  background: color-mix(in srgb, var(--lp-background-canvas), transparent 10%);
+  color: var(--lp-action-primary);
+  font-size: 0.8rem;
+  font-weight: 800;
+  box-shadow: 0 0.35rem 0.7rem rgba(0, 0, 0, 0.28);
+}
+
+.imm-toolbar-button:focus-visible {
+  outline: 0.15rem solid var(--lp-brand-accent);
+  outline-offset: 0.15rem;
+}
+
+/* ---- Player pods -------------------------------------------------- */
+
+.imm-pod {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  text-align: center;
+  transition:
+    opacity var(--imm-turn-transfer) ease,
+    transform var(--imm-turn-transfer) ease,
+    filter var(--imm-turn-transfer) ease;
+}
+
+.imm-pod-ring {
+  position: relative;
+  display: inline-flex;
+  border-radius: 999rem;
+  padding: 0.18rem;
+  border: 0.16rem solid transparent;
+  transition:
+    border-color var(--imm-turn-transfer) ease,
+    box-shadow var(--imm-turn-transfer) ease;
+}
+
+.imm-pod[data-active='true'] .imm-pod-ring {
+  border-color: var(--lp-action-secondary);
+  box-shadow:
+    0 0 0 0.12rem color-mix(in srgb, var(--lp-action-secondary), transparent 30%),
+    0 0 1.1rem color-mix(in srgb, var(--lp-action-secondary), transparent 40%);
+  animation: imm-ring-pulse 1600ms ease-in-out infinite;
+}
+
+.imm-pod[data-finished='true'] {
+  opacity: 0.72;
+}
+
+@keyframes imm-ring-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0.12rem color-mix(in srgb, var(--lp-action-secondary), transparent 30%),
+      0 0 0.9rem color-mix(in srgb, var(--lp-action-secondary), transparent 55%);
+  }
+  50% {
+    box-shadow:
+      0 0 0 0.16rem color-mix(in srgb, var(--lp-action-secondary), transparent 20%),
+      0 0 1.5rem color-mix(in srgb, var(--lp-action-secondary), transparent 25%);
+  }
+}
+
+.imm-pod-name {
+  max-width: 6.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--lp-text-onBrand);
+  text-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.4);
+}
+
+.imm-pod-badge {
+  border-radius: 999rem;
+  padding: 0.05rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--lp-background-canvas), transparent 15%);
+  color: var(--lp-action-primary);
+}
+
+.imm-pod-badge[data-tone='accent'] {
+  background: var(--lp-brand-accent);
+  color: var(--lp-text-onBrand);
+}
+
+.imm-pod-tag {
+  border-radius: 999rem;
+  padding: 0.02rem 0.4rem;
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: color-mix(in srgb, var(--lp-action-secondary), transparent 20%);
+  color: var(--lp-text-onBrand);
+}
+
+/* ---- Central card play zone -------------------------------------- */
+
+.imm-play-zone {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.5rem;
+  max-width: 100%;
+}
+
+.imm-trick-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  animation: imm-card-in var(--imm-result) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.imm-trick-card figcaption,
+.imm-trick-card > span:last-child {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--lp-text-onBrand);
+  text-shadow: 0 0.05rem 0.15rem rgba(0, 0, 0, 0.4);
+}
+
+@keyframes imm-card-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-0.8rem) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.imm-zone-hint {
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--lp-text-onBrand);
+  background: color-mix(in srgb, var(--lp-scene-feltDeep), transparent 25%);
+  box-shadow: inset 0 0 0 0.08rem color-mix(in srgb, var(--lp-action-secondary), transparent 55%);
+}
+
+/* ---- Hand rail --------------------------------------------------- */
+
+.imm-hand-rail {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  min-height: 4.75rem;
+  padding-bottom: max(env(safe-area-inset-bottom), 0.35rem);
+  overflow-x: auto;
+}
+
+.imm-hand-card {
+  position: relative;
+  transition:
+    transform var(--imm-lift) ease-out,
+    filter var(--imm-lift) ease-out;
+  transform-origin: bottom center;
+}
+
+.imm-hand-card[data-playable='true'] {
+  cursor: pointer;
+}
+
+.imm-hand-card[data-playable='true']:hover,
+.imm-hand-card[data-playable='true']:focus-visible {
+  transform: translateY(-0.8rem) scale(1.04);
+  filter: drop-shadow(0 0.5rem 0.6rem rgba(0, 0, 0, 0.4));
+  z-index: 50;
+}
+
+.imm-hand-card[data-disabled='true'] {
+  opacity: 0.55;
+}
+
+/* ---- Result / celebration overlay -------------------------------- */
+
+.imm-result-backdrop {
+  animation: imm-fade-in var(--imm-result) ease-out both;
+}
+
+.imm-result-badge {
+  animation: imm-badge-pop 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 120ms;
+}
+
+@keyframes imm-badge-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes imm-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---- High contrast: firm up the felt/card separation ------------- */
+
+.imm-shell[data-high-contrast='true'] .imm-felt {
+  background: var(--lp-scene-feltDeep);
+}
+
+.imm-shell[data-high-contrast='true'] .imm-pod-name,
+.imm-shell[data-high-contrast='true'] .imm-trick-card > span:last-child {
+  text-shadow: 0 0.05rem 0.35rem rgba(0, 0, 0, 0.85);
+}
+
+/* ------------------------------------------------------------------ *
+ * Reduced motion: hold every state at its resting frame.             *
+ * ------------------------------------------------------------------ */
+
+[data-reduced-motion='true'] .imm-pod,
+[data-reduced-motion='true'] .imm-pod[data-active='true'] .imm-pod-ring,
+[data-reduced-motion='true'] .imm-hand-card,
+[data-reduced-motion='true'] .imm-trick-card,
+[data-reduced-motion='true'] .imm-result-backdrop,
+[data-reduced-motion='true'] .imm-result-badge {
+  animation: none;
+  transition: none;
+}
+
+[data-reduced-motion='true'] .imm-trick-card,
+[data-reduced-motion='true'] .imm-result-badge {
+  opacity: 1;
+  transform: none;
+}
