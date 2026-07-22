@@ -15,14 +15,18 @@ function renderGrid(): void {
 }
 
 describe('GameCatalogGrid', () => {
-  it('opens a setup sheet with a real practice link and no room link (rooms not live)', async () => {
+  it('opens a setup sheet with real practice links and no room link (rooms not live)', async () => {
     renderGrid();
     const user = userEvent.setup();
 
     await user.click(screen.getByRole('button', { name: /Gadha Chor/i }));
 
     const dialog = screen.getByRole('dialog');
-    expect(within(dialog).getByRole('link', { name: /Play computer/i })).toHaveAttribute(
+    expect(within(dialog).getByRole('link', { name: /Quick Play/i })).toHaveAttribute(
+      'href',
+      '/mobile/game/gadha-chor/setup?mode=computer&quick=1',
+    );
+    expect(within(dialog).getByRole('link', { name: /Change settings/i })).toHaveAttribute(
       'href',
       '/mobile/game/gadha-chor/setup?mode=computer',
     );
@@ -51,7 +55,7 @@ describe('GameCatalogGrid', () => {
     const user = userEvent.setup();
 
     await user.click(screen.getByRole('button', { name: /Kachuful/i }));
-    await user.click(screen.getByRole('link', { name: /Play computer/i }));
+    await user.click(screen.getByRole('link', { name: /Quick Play/i }));
 
     expect(window.localStorage.getItem('lazy-patta:mobile-recent-game')).toBe('kachuful');
   });
