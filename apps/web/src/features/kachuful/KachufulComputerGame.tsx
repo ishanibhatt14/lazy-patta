@@ -13,6 +13,7 @@ import { LocaleSwitcher } from '../../../components/game/LocaleSwitcher';
 import { ImmersivePod } from '../../../components/game/immersive/ImmersivePod';
 import { ImmersiveResultOverlay } from '../../../components/game/immersive/ImmersiveResultOverlay';
 import { ImmersiveScene } from '../../../components/game/immersive/ImmersiveScene';
+import { driveToResult, previewResultRequested } from '../../../lib/computer-game/preview-result';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
 import { createTranslator } from '../../../lib/i18n';
 import { usePreferredLocale } from '../../../lib/locale/preferred-locale-context';
@@ -70,6 +71,34 @@ function prefersReducedMotion(): boolean {
     typeof window.matchMedia === 'function' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
   );
+}
+
+/**
+ * Auto-picks a legal move for the `?preview=result` screenshot seam: start the
+ * deal, let bots step, place the lowest legal bid, play the first playable card,
+ * and advance each scored round until the match ends.
+ */
+function pickPreviewIntent(view: KachufulViewState): KachufulIntent | null {
+  switch (view.phase) {
+    case 'setup':
+      return { type: 'start' };
+    case 'roundScored':
+      return { type: 'nextRound' };
+    case 'bidding': {
+      if (!view.isHumanTurn) return { type: 'botStep' };
+      const [bid] = view.legalBids;
+      if (bid !== undefined) return { type: 'placeBid', bid };
+      return null;
+    }
+    case 'playing': {
+      if (!view.isHumanTurn) return { type: 'botStep' };
+      const [cardId] = view.playableCardIds;
+      if (cardId !== undefined) return { type: 'playCard', cardId };
+      return null;
+    }
+    default:
+      return null;
+  }
 }
 
 function cardFaceLabel(view: KachufulViewState, card: Card): string {
@@ -760,6 +789,16 @@ export function KachufulComputerGame({
       reducedMotion: initialConfig?.reducedMotion ?? prefersReducedMotion(),
       hasHydratedSession: initialConfig ? true : controller.initialState.hasHydratedSession,
     },
+    (base) =>
+      previewResultRequested()
+        ? driveToResult({
+            initialState: base,
+            dispatch: controller.dispatch,
+            selectView: selectKachufulViewState,
+            pickIntent: pickPreviewIntent,
+            isResult: (view) => view.phase === 'result',
+          })
+        : base,
   );
   const view = selectKachufulViewState(state);
 

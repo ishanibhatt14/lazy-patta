@@ -8,6 +8,7 @@ import { useEffect, useReducer, useRef } from 'react';
 import { Button } from '../../../components/Button';
 import { ComputerGameStarting } from '../../../components/game/ComputerGameStarting';
 import { LocaleSwitcher } from '../../../components/game/LocaleSwitcher';
+import { driveToResult, previewResultRequested } from '../../../lib/computer-game/preview-result';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
 import { createTranslator } from '../../../lib/i18n';
 import { usePreferredLocale } from '../../../lib/locale/preferred-locale-context';
@@ -19,7 +20,12 @@ import {
   type LalSattiController,
 } from './controller';
 import { LalSattiGameShell } from './immersive/LalSattiGameShell';
-import type { LalSattiControllerState, LalSattiIntent, LalSattiRoundScore } from './types';
+import type {
+  LalSattiControllerState,
+  LalSattiIntent,
+  LalSattiRoundScore,
+  LalSattiViewState,
+} from './types';
 
 const PLAYER_COUNTS = [3, 4, 5, 6] as const;
 const DIFFICULTIES: readonly BotDifficulty[] = ['easy', 'medium', 'hard'];
@@ -85,6 +91,22 @@ function prefersReducedMotion(): boolean {
   );
 }
 
+/**
+ * Auto-picks a legal move for the `?preview=result` screenshot seam: let bots
+ * step, play the first playable card, and pass only when nothing is playable,
+ * until the match ends.
+ */
+function pickPreviewIntent(view: LalSattiViewState): LalSattiIntent | null {
+  if (view.phase === 'setup') return { type: 'start' };
+  if (view.phase === 'playing') {
+    if (!view.isHumanTurn) return { type: 'botStep' };
+    const [cardId] = view.playableCardIds;
+    if (cardId !== undefined) return { type: 'playCard', cardId };
+    if (view.canPass) return { type: 'pass' };
+  }
+  return null;
+}
+
 export function LalSattiComputerGame({
   initialConfig,
   autoStart = false,
@@ -119,6 +141,16 @@ export function LalSattiComputerGame({
       reducedMotion: initialConfig?.reducedMotion ?? prefersReducedMotion(),
       hasHydratedSession: initialConfig ? true : controller.initialState.hasHydratedSession,
     },
+    (base) =>
+      previewResultRequested()
+        ? driveToResult({
+            initialState: base,
+            dispatch: controller.dispatch,
+            selectView: selectLalSattiViewState,
+            pickIntent: pickPreviewIntent,
+            isResult: (view) => view.phase === 'result',
+          })
+        : base,
   );
   const view = selectLalSattiViewState(state);
   const t = createTranslator(view.locale);

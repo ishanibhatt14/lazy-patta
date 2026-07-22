@@ -67,9 +67,17 @@ export function MobileComputerSetupPage({ gameSlug }: { readonly gameSlug: strin
         abortRef.current.signal,
       );
       rememberRecentGame(game.slug);
-      const seed = searchParams.get('seed');
       const nextRoute = game.routes.mobileComputer(session.sessionId);
-      router.replace(seed ? `${nextRoute}?seed=${encodeURIComponent(seed)}` : nextRoute);
+      // Preserve the visual-regression query params (`seed` pins the deal,
+      // `preview=result` opens straight on the celebration overlay) so the
+      // screenshot shooter can drive the board deterministically.
+      const forwarded = new URLSearchParams();
+      const seed = searchParams.get('seed');
+      if (seed !== null) forwarded.set('seed', seed);
+      const preview = searchParams.get('preview');
+      if (preview !== null) forwarded.set('preview', preview);
+      const query = forwarded.toString();
+      router.replace(query ? `${nextRoute}?${query}` : nextRoute);
     } catch (caught) {
       requestRef.current = null;
       setError(caught instanceof Error ? caught.message : t.t('error.recoverable'));

@@ -25,6 +25,12 @@ const VIEWPORTS = [
 
 const GAMES = ['gadha-chor', 'lal-satti', 'jhabbu', 'kachuful'];
 
+// Games whose immersive boards support the `?preview=result` seam — the reducer
+// is driven synchronously to its `phase:'result'` celebration so we can shoot
+// the real Play Again overlay. A fixed seed keeps the deal reproducible.
+const RESULT_GAMES = ['lal-satti', 'jhabbu', 'kachuful'];
+const RESULT_SEED = 42;
+
 async function shot(page, name, { fullPage = true } = {}) {
   await page.screenshot({ path: resolve(OUT, `${name}.png`), fullPage });
   console.log('  saved', name);
@@ -91,6 +97,29 @@ async function run() {
           await page.waitForURL(/\/computer\//, { timeout: 8000 }).catch(() => undefined);
           await page.waitForTimeout(2500);
           await shot(page, `table-${slug}-${suffix}`, { fullPage: false });
+        }
+      }
+
+      // Result celebration overlays via the `?preview=result` seam.
+      for (const slug of RESULT_GAMES) {
+        await gotoMobile(
+          page,
+          `/mobile/game/${slug}/setup?mode=computer&preview=result&seed=${RESULT_SEED}`,
+          theme,
+        );
+        const start = page.getByRole('button', { name: /^Start game$/i }).first();
+        if (await start.count()) {
+          await start.click();
+          await page.waitForURL(/\/computer\//, { timeout: 8000 }).catch(() => undefined);
+          // The board mounts straight on its terminal state; wait for the
+          // Play Again dialog rather than a fixed delay.
+          await page
+            .getByRole('button', { name: /Play again/i })
+            .first()
+            .waitFor({ timeout: 8000 })
+            .catch(() => undefined);
+          await page.waitForTimeout(400);
+          await shot(page, `result-${slug}-${suffix}`, { fullPage: false });
         }
       }
 

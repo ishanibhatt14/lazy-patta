@@ -13,6 +13,7 @@ import { LocaleSwitcher } from '../../../components/game/LocaleSwitcher';
 import { ImmersivePod } from '../../../components/game/immersive/ImmersivePod';
 import { ImmersiveResultOverlay } from '../../../components/game/immersive/ImmersiveResultOverlay';
 import { ImmersiveScene } from '../../../components/game/immersive/ImmersiveScene';
+import { driveToResult, previewResultRequested } from '../../../lib/computer-game/preview-result';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
 import { fanCardStyle, useHandLayout } from '../../../lib/hand-layout';
 import { createTranslator } from '../../../lib/i18n';
@@ -88,6 +89,22 @@ function prefersReducedMotion(): boolean {
     typeof window.matchMedia === 'function' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
   );
+}
+
+/**
+ * Auto-picks a legal move for the `?preview=result` screenshot seam: start the
+ * deal, let bots step on their turns, and always play the first playable card
+ * (or draw the waste) on the human's turn until the match ends.
+ */
+function pickPreviewIntent(view: JhabbuViewState): JhabbuIntent | null {
+  if (view.phase === 'setup') return { type: 'start' };
+  if (view.phase === 'playing') {
+    if (!view.isHumanTurn) return { type: 'botStep' };
+    const [cardId] = view.playableCardIds;
+    if (cardId !== undefined) return { type: 'playCard', cardId };
+    if (view.canDrawFromWaste) return { type: 'drawFromWaste' };
+  }
+  return null;
 }
 
 function rankKey(rank: Card['rank']) {
@@ -784,6 +801,16 @@ export function JhabbuComputerGame({
       reducedMotion: initialConfig?.reducedMotion ?? prefersReducedMotion(),
       hasHydratedSession: initialConfig ? true : controller.initialState.hasHydratedSession,
     },
+    (base) =>
+      previewResultRequested()
+        ? driveToResult({
+            initialState: base,
+            dispatch: controller.dispatch,
+            selectView: selectJhabbuViewState,
+            pickIntent: pickPreviewIntent,
+            isResult: (view) => view.phase === 'result',
+          })
+        : base,
   );
   const view = selectJhabbuViewState(state);
 
