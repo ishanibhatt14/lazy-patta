@@ -58,3 +58,58 @@ export function SettingsIcon(props: IconProps): ReactElement {
     </svg>
   );
 }
+
+export function CardsIcon(props: IconProps): ReactElement {
+  return (
+    <svg {...base(props)}>
+      <rect x="3" y="6" width="10" height="14" rx="2" transform="rotate(-8 8 13)" />
+      <rect x="11" y="4" width="10" height="14" rx="2" transform="rotate(8 16 11)" />
+    </svg>
+  );
+}
+
+export function KeyIcon(props: IconProps): ReactElement {
+  return (
+    <svg {...base(props)}>
+      <circle cx="8" cy="8" r="4" />
+      <path d="M11 11l8 8M16 16l2-2M18 18l2-2" />
+    </svg>
+  );
+}
+
+export function PlayIcon(props: IconProps): ReactElement {
+  return (
+    <svg {...base(props)}>
+      <path d="M7 4.5v15l12-7.5z" />
+    </svg>
+  );
+}
+
+export function GlobeIcon(props: IconProps): ReactElement {
+  return (
+    <svg {...base(props)}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18" />
+      <path d="M12 3c2.5 2.5 3.8 5.7 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.7-3.8-9S9.5 5.5 12 3Z" />
+    </svg>
+  );
+}
+
+export function PaletteIcon(props: IconProps): ReactElement {
+  return (
+    <svg {...base(props)}>
+      <path d="M12 3a9 9 0 0 0 0 18c1.4 0 2-1 2-2 0-1.4-1-1.6-1-2.6 0-.8.7-1.4 1.6-1.4H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8Z" />
+      <circle cx="7.5" cy="11.5" r="1" />
+      <circle cx="10.5" cy="7.5" r="1" />
+      <circle cx="15" cy="8" r="1" />
+    </svg>
+  );
+}
+
+export function MotionIcon(props: IconProps): ReactElement {
+  return (
+    <svg {...base(props)}>
+      <path d="M3 12h4l2-6 4 14 2-8h6" />
+    </svg>
+  );
+}

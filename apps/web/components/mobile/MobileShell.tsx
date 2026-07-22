@@ -50,7 +50,7 @@ export function MobileShell({ children }: { readonly children: ReactNode }): Rea
 
       <nav
         aria-label={t('mobileNav.home')}
-        className="fixed inset-x-0 bottom-0 z-30 mx-auto flex w-full max-w-md justify-around border-t border-action-primary/12 bg-surface-primary/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
+        className="fixed inset-x-0 bottom-0 z-30 mx-auto flex w-full max-w-md justify-around border-t border-action-secondary/25 bg-surface-primary/90 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.25)] backdrop-blur-lg"
       >
         {NAV_ITEMS.map(({ href, labelKey, Icon }) => {
           const active = isActive(pathname, href);
@@ -60,11 +60,24 @@ export function MobileShell({ children }: { readonly children: ReactNode }): Rea
               href={href}
               aria-current={active ? 'page' : undefined}
               className={[
-                'flex min-h-14 flex-1 flex-col items-center justify-center gap-1 py-2 text-[0.7rem] font-bold transition',
-                active ? 'text-action-primary' : 'text-text-primary/60',
+                'relative flex min-h-14 flex-1 flex-col items-center justify-center gap-1 py-2 text-[0.7rem] font-bold transition',
+                active ? 'text-action-primary' : 'text-text-primary/55',
               ].join(' ')}
             >
-              <Icon aria-hidden width={22} height={22} />
+              {active ? (
+                <span
+                  aria-hidden
+                  className="absolute inset-x-6 top-0 h-0.5 rounded-full bg-action-secondary"
+                />
+              ) : null}
+              <span
+                className={[
+                  'flex h-9 w-9 items-center justify-center rounded-xl transition',
+                  active ? 'bg-action-primary/12' : '',
+                ].join(' ')}
+              >
+                <Icon aria-hidden width={22} height={22} />
+              </span>
               {t(labelKey)}
             </Link>
           );

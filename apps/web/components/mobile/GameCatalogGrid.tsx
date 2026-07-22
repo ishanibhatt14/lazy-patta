@@ -4,11 +4,16 @@ import Link from 'next/link';
 import { useState, type ReactElement } from 'react';
 
 import type { Translator } from '../../lib/i18n';
+import { recordGameLaunch } from '../../lib/mobile/daily-activity';
 import { rememberRecentGame } from '../../lib/mobile/recent';
 import type { MobileCatalogItem } from '../../lib/mobile-catalog';
 
+import { ACCENT_CLASSES } from './accent';
+import { GameTileArtwork } from './artwork/GameTileArtwork';
+import { PatternBackground } from './artwork/PatternBackground';
 import { BottomSheet } from './BottomSheet';
 import { GameTile } from './GameTile';
+import { CardsIcon, LearnIcon, PlayIcon } from './icons';
 
 /**
  * The shared game grid used by both Home and `/mobile/games`. It owns the setup
@@ -56,8 +61,85 @@ export function GameCatalogGrid({
   );
 }
 
-const ACTION_CLASS =
-  'flex flex-col rounded-xl border border-action-primary/15 bg-background-canvas px-4 py-3 text-left transition active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent';
+/** The accent artwork band shared by the setup and coming-soon sheets. */
+function SheetArtworkHeader({
+  item,
+  t,
+}: {
+  readonly item: MobileCatalogItem;
+  readonly t: Translator;
+}): ReactElement {
+  const accent = ACCENT_CLASSES[item.accent];
+  return (
+    <div
+      className={`relative mt-4 flex items-center gap-4 overflow-hidden rounded-2xl border border-action-secondary/25 ${accent.fill} px-4 py-3`}
+    >
+      <PatternBackground className="text-text-onAccent" opacity={0.14} />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+      <GameTileArtwork gameId={item.id} size="sm" className="relative z-10 drop-shadow-lg" />
+      <div className="relative z-10 flex flex-col">
+        <span className="text-xs font-semibold text-text-onAccent/80">
+          {t.t(item.alternateNamesKey)}
+        </span>
+        <span className="text-xs font-black uppercase tracking-wide text-text-onAccent">
+          {t.format('mobile.game.playersRange', { min: item.minPlayers, max: item.maxPlayers })}
+          {' · '}
+          {t.format('mobile.game.durationRange', {
+            min: item.durationMinutes.min,
+            max: item.durationMinutes.max,
+          })}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+type ActionIcon = typeof PlayIcon;
+
+/** One premium action row in the setup sheet: icon disc + title + hint. */
+function ActionRow({
+  href,
+  Icon,
+  title,
+  hint,
+  onClick,
+  primary = false,
+}: {
+  readonly href: string;
+  readonly Icon: ActionIcon;
+  readonly title: string;
+  readonly hint: string;
+  readonly onClick?: () => void;
+  readonly primary?: boolean;
+}): ReactElement {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      className={[
+        'flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent',
+        primary
+          ? 'border-transparent bg-action-primary text-text-onBrand shadow-md'
+          : 'border-action-secondary/25 bg-background-canvas/60 text-action-primary',
+      ].join(' ')}
+    >
+      <span
+        className={[
+          'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+          primary ? 'bg-white/20' : 'bg-action-primary/10',
+        ].join(' ')}
+      >
+        <Icon aria-hidden width={22} height={22} />
+      </span>
+      <span className="flex flex-col">
+        <span className="text-base font-black leading-tight">{title}</span>
+        <span className={`text-xs ${primary ? 'text-text-onBrand/85' : 'text-text-primary/75'}`}>
+          {hint}
+        </span>
+      </span>
+    </Link>
+  );
+}
 
 function SetupBody({
   item,
@@ -69,54 +151,44 @@ function SetupBody({
   readonly onLaunch: () => void;
 }): ReactElement {
   return (
-    <div className="mt-2">
-      <p className="text-sm leading-6 text-text-primary">{t.t(item.taglineKey)}</p>
-      <p className="mt-2 text-xs font-bold uppercase tracking-wide text-brand-accent">
-        {t.format('mobile.game.playersRange', { min: item.minPlayers, max: item.maxPlayers })}
-        {' · '}
-        {t.format('mobile.game.durationRange', {
-          min: item.durationMinutes.min,
-          max: item.durationMinutes.max,
-        })}
-      </p>
+    <div>
+      <p className="mt-2 text-sm leading-6 text-text-primary/90">{t.t(item.taglineKey)}</p>
+      <SheetArtworkHeader item={item} t={t} />
 
       <div className="mt-4 grid gap-2">
         {item.practiceRoute ? (
-          <Link
+          <ActionRow
             href={item.practiceRoute}
+            Icon={PlayIcon}
+            title={t.t('action.playComputer')}
+            hint={t.t('mobile.setup.practiceHint')}
+            primary
             onClick={() => {
               rememberRecentGame(item.id);
+              recordGameLaunch();
               onLaunch();
             }}
-            className={ACTION_CLASS}
-          >
-            <span className="text-base font-black text-action-primary">
-              {t.t('action.playComputer')}
-            </span>
-            <span className="text-xs text-text-primary/80">{t.t('mobile.setup.practiceHint')}</span>
-          </Link>
+          />
         ) : null}
 
         {item.roomGameKey ? (
-          <Link
+          <ActionRow
             href={`/mobile/rooms?game=${item.roomGameKey}`}
+            Icon={CardsIcon}
+            title={t.t('action.createRoom')}
+            hint={t.t('mobile.setup.roomHint')}
             onClick={onLaunch}
-            className={ACTION_CLASS}
-          >
-            <span className="text-base font-black text-action-primary">
-              {t.t('action.createRoom')}
-            </span>
-            <span className="text-xs text-text-primary/80">{t.t('mobile.setup.roomHint')}</span>
-          </Link>
+          />
         ) : null}
 
         {item.rulesRoute ? (
-          <Link href={item.rulesRoute} onClick={onLaunch} className={ACTION_CLASS}>
-            <span className="text-base font-black text-action-primary">
-              {t.t('action.howToPlay')}
-            </span>
-            <span className="text-xs text-text-primary/80">{t.t('mobile.setup.learnHint')}</span>
-          </Link>
+          <ActionRow
+            href={item.rulesRoute}
+            Icon={LearnIcon}
+            title={t.t('action.howToPlay')}
+            hint={t.t('mobile.setup.learnHint')}
+            onClick={onLaunch}
+          />
         ) : null}
       </div>
     </div>
@@ -133,9 +205,10 @@ function ComingSoonBody({
   readonly onClose: () => void;
 }): ReactElement {
   return (
-    <div className="mt-2">
-      <p className="text-sm leading-6 text-text-primary">{t.t(item.taglineKey)}</p>
-      <p className="mt-2 text-sm leading-6 text-text-primary/80">{t.t('mobile.comingSoon.body')}</p>
+    <div>
+      <p className="mt-2 text-sm leading-6 text-text-primary/90">{t.t(item.taglineKey)}</p>
+      <SheetArtworkHeader item={item} t={t} />
+      <p className="mt-4 text-sm leading-6 text-text-primary/80">{t.t('mobile.comingSoon.body')}</p>
       <button
         type="button"
         onClick={onClose}
