@@ -3,19 +3,20 @@
 import Link from 'next/link';
 import { useEffect, useState, type ReactElement } from 'react';
 
+import { trackGrowthEvent } from '../../lib/growth/analytics';
 import { createTranslator } from '../../lib/i18n';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import { readRecentGame } from '../../lib/mobile/recent';
 import { MOBILE_CATALOG, type MobileCatalogItem } from '../../lib/mobile-catalog';
 import { LandingLanguageMenu } from '../home/landing/LandingLanguageMenu';
 
+import { DailyPlayCard } from './DailyPlayCard';
+import { GameCatalogGrid } from './GameCatalogGrid';
+import { InviteFamilyCard } from './InviteFamilyCard';
 import { LazyPattaLogoMark } from './artwork/LazyPattaLogoMark';
 import { PatternBackground } from './artwork/PatternBackground';
 import { PlayerAvatar } from './artwork/PlayerAvatar';
-import { DailyPlayCard } from './DailyPlayCard';
-import { GameCatalogGrid } from './GameCatalogGrid';
 import { CardsIcon, KeyIcon, SettingsIcon } from './icons';
-import { InviteFamilyCard } from './InviteFamilyCard';
 
 export function MobileHome(): ReactElement {
   const { locale } = usePreferredLocale();
@@ -23,6 +24,7 @@ export function MobileHome(): ReactElement {
   // localStorage is client-only; read after mount so SSR and first paint agree.
   const [recent, setRecent] = useState<MobileCatalogItem | undefined>(undefined);
   useEffect(() => setRecent(readRecentGame()), []);
+  useEffect(() => trackGrowthEvent({ name: 'mobile_home_viewed' }), []);
 
   return (
     <div className="flex flex-col gap-6">

@@ -3,17 +3,23 @@
 import Link from 'next/link';
 import { useState, type ReactElement } from 'react';
 
+import type { GameSlug } from '../../lib/game-discovery';
+import { trackGrowthEvent } from '../../lib/growth/analytics';
 import type { Translator } from '../../lib/i18n';
 import { recordGameLaunch } from '../../lib/mobile/daily-activity';
 import { rememberRecentGame } from '../../lib/mobile/recent';
 import type { MobileCatalogItem } from '../../lib/mobile-catalog';
 
+import { BottomSheet } from './BottomSheet';
+import { GameTile } from './GameTile';
 import { ACCENT_CLASSES } from './accent';
 import { GameTileArtwork } from './artwork/GameTileArtwork';
 import { PatternBackground } from './artwork/PatternBackground';
-import { BottomSheet } from './BottomSheet';
-import { GameTile } from './GameTile';
 import { CardsIcon, LearnIcon, PlayIcon } from './icons';
+
+function isLiveGameSlug(slug: string): slug is GameSlug {
+  return slug === 'gadha-chor' || slug === 'lal-satti' || slug === 'jhabbu' || slug === 'kachuful';
+}
 
 /**
  * The shared game grid used by both Home and `/mobile/games`. It owns the setup
@@ -34,7 +40,17 @@ export function GameCatalogGrid({
     <>
       <div className="grid grid-cols-2 gap-3">
         {items.map((item) => (
-          <GameTile key={item.id} item={item} t={t} onSelect={setSelected} />
+          <GameTile
+            key={item.id}
+            item={item}
+            t={t}
+            onSelect={(next) => {
+              if (isLiveGameSlug(next.slug)) {
+                trackGrowthEvent({ name: 'game_selected', gameSlug: next.slug });
+              }
+              setSelected(next);
+            }}
+          />
         ))}
       </div>
 

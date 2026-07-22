@@ -2,6 +2,7 @@ import type { BotDifficulty } from '@lazy-patta/game-contracts';
 import type { MessageKey } from '@lazy-patta/localization';
 
 import { GAME_DISCOVERY, type GameSlug } from '../game-discovery';
+import { getGameCapability } from '../product-capabilities';
 import type { OnlineGameKey } from '../rooms/rooms-client';
 
 export type { GameSlug };
@@ -43,16 +44,6 @@ const ROOM_GAME_KEY: Record<GameSlug, OnlineGameKey> = {
   kachuful: 'kachuful',
 };
 
-const PLAYER_LIMITS: Record<
-  GameSlug,
-  { readonly min: number; readonly max: number; readonly defaultComputer: number }
-> = {
-  'gadha-chor': { min: 2, max: 6, defaultComputer: 4 },
-  'lal-satti': { min: 3, max: 6, defaultComputer: 4 },
-  jhabbu: { min: 3, max: 6, defaultComputer: 4 },
-  kachuful: { min: 3, max: 7, defaultComputer: 4 },
-};
-
 const DEFAULT_DIFFICULTY: Record<GameSlug, BotDifficulty | undefined> = {
   'gadha-chor': undefined,
   'lal-satti': 'medium',
@@ -62,13 +53,22 @@ const DEFAULT_DIFFICULTY: Record<GameSlug, BotDifficulty | undefined> = {
 
 function defineGame(slug: GameSlug): GameDefinition {
   const discovery = GAME_DISCOVERY[slug];
-  const setup = `/mobile/game/${slug}/setup?mode=computer`;
+  const capability = getGameCapability(slug);
+  const setup = capability.routes.computer ?? `/mobile/game/${slug}/setup?mode=computer`;
   return {
     slug,
     engineId: slug,
     available: discovery.playable,
-    players: PLAYER_LIMITS[slug],
-    supportedModes: ['computer', 'private-room'],
+    players: {
+      min: capability.players.min,
+      max: capability.players.max,
+      defaultComputer: capability.players.defaultComputer ?? 4,
+    },
+    supportedModes: ['computer', 'private-room'].filter((mode) =>
+      mode === 'computer'
+        ? capability.availability.computer === 'available'
+        : capability.availability.privateRoom === 'available',
+    ) as readonly GameMode[],
     computerOptions: {
       supportsDifficulty: slug !== 'gadha-chor',
       defaultDifficulty: DEFAULT_DIFFICULTY[slug],
@@ -77,9 +77,9 @@ function defineGame(slug: GameSlug): GameDefinition {
       mobileSetup: setup,
       mobileComputer: (sessionId) => `/mobile/game/${slug}/computer/${sessionId}`,
       legacyComputer: discovery.computerHref,
-      rules: `/games/${slug}`,
+      rules: capability.routes.rules ?? `/games/${slug}`,
     },
-    roomGameKey: ROOM_GAME_KEY[slug],
+    roomGameKey: capability.roomGameKey ?? ROOM_GAME_KEY[slug],
     localization: {
       nameKey: discovery.nameKey,
       alternateNameKeys: [discovery.aliasShortKey],

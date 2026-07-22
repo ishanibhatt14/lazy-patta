@@ -10,8 +10,8 @@ import { siteConfig } from './site-config';
  * the URL so a malformed code can never inject path segments or query strings.
  */
 
-/** Uppercase letters and digits only — matches the server's room-code alphabet. */
-const ROOM_CODE_PATTERN = /^[A-Z0-9]{4,12}$/;
+/** The production room-code alphabet excludes I/O/0/1 for readability. */
+const ROOM_CODE_PATTERN = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/;
 
 export function normalizeRoomCode(code: string): string {
   return code.trim().toUpperCase();

@@ -2,6 +2,7 @@ import type { MessageKey } from '@lazy-patta/localization';
 
 import { GAME_DISCOVERY, type GameSlug } from './game-discovery';
 import { GAME_REGISTRY } from './mobile/game-registry';
+import { getGameCapability, isRoomCapable } from './product-capabilities';
 import type { OnlineGameKey } from './rooms/rooms-client';
 
 /**
@@ -93,6 +94,7 @@ const PLAYABLE_SHAPES: readonly PlayableShape[] = [
 function playableItem(shape: PlayableShape): MobileCatalogItem {
   const discovery = GAME_DISCOVERY[shape.slug];
   const game = GAME_REGISTRY[shape.slug];
+  const capability = getGameCapability(shape.slug);
   return {
     id: shape.slug,
     slug: shape.slug,
@@ -105,8 +107,12 @@ function playableItem(shape: PlayableShape): MobileCatalogItem {
     durationMinutes: shape.durationMinutes,
     minPlayers: game.players.min,
     maxPlayers: game.players.max,
-    practiceRoute: discovery.playable ? game.routes.mobileSetup : undefined,
-    roomGameKey: discovery.onlinePlayable ? game.roomGameKey : undefined,
+    practiceRoute:
+      discovery.playable && capability.availability.computer === 'available'
+        ? game.routes.mobileSetup
+        : undefined,
+    roomGameKey:
+      discovery.onlinePlayable && isRoomCapable(capability) ? game.roomGameKey : undefined,
     rulesRoute: game.routes.rules,
     accent: shape.accent,
   };
