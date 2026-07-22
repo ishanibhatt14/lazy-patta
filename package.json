@@ -30,7 +30,8 @@
   },
   "pnpm": {
     "overrides": {
-      "@expo/metro-runtime": "57.0.5"
+      "@expo/metro-runtime": "57.0.6",
+      "sharp": "^0.35.0"
     }
   }
 }

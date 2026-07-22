@@ -1,0 +1,11 @@
+-- Remove the legacy three-argument create_room overload.
+--
+-- 0005 first defined create_room(smallint, text, text) with every argument
+-- defaulted. 0008 added the game-key parameter as a NEW four-argument overload
+-- (create or replace cannot replace across a differing arity), so both signatures
+-- have lived side by side ever since. Because every argument on both overloads is
+-- defaulted, a PostgREST call such as { p_max_seats, p_locale } matches both and
+-- fails with PGRST203 ("Could not choose the best candidate function"). Dropping
+-- the obsolete three-argument version leaves the four-argument create_room
+-- (p_game_key defaulted to 'gadha_chor') as the single, unambiguous entry point.
+drop function if exists public.create_room(smallint, text, text);
