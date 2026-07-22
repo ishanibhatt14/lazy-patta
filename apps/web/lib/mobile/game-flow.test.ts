@@ -70,6 +70,26 @@ describe('transitionGameFlow', () => {
     });
   });
 
+  it('resumes recovery into the game that was actually interrupted', () => {
+    let state: MobileGameFlowState = transitionGameFlow(
+      { status: 'idle' },
+      { type: 'RECOVERY_STARTED', gameSlug: 'kachuful', sessionId: 's7' },
+    );
+    expect(state).toMatchObject({ status: 'recovering', gameSlug: 'kachuful', sessionId: 's7' });
+
+    state = transitionGameFlow(state, {
+      type: 'RECOVERY_SUCCEEDED',
+      gameSlug: 'kachuful',
+      sessionId: 's7',
+    });
+    expect(state).toEqual({
+      status: 'playing',
+      gameSlug: 'kachuful',
+      mode: 'computer',
+      sessionId: 's7',
+    });
+  });
+
   it('uses the registry player limits as the setup source of truth', () => {
     expect(GAME_REGISTRY['gadha-chor'].players).toMatchObject({ min: 2, max: 6 });
     expect(GAME_REGISTRY['lal-satti'].players).toMatchObject({ min: 3, max: 6 });

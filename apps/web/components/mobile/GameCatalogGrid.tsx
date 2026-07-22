@@ -173,18 +173,27 @@ function SetupBody({
 
       <div className="mt-4 grid gap-2">
         {item.practiceRoute ? (
-          <ActionRow
-            href={item.practiceRoute}
-            Icon={PlayIcon}
-            title={t.t('action.playComputer')}
-            hint={t.t('mobile.setup.practiceHint')}
-            primary
-            onClick={() => {
-              rememberRecentGame(item.id);
-              recordGameLaunch();
-              onLaunch();
-            }}
-          />
+          <>
+            <ActionRow
+              href={`${item.practiceRoute}&quick=1`}
+              Icon={PlayIcon}
+              title={t.t('action.quickPlay')}
+              hint={t.t('mobile.setup.quickPlayHint')}
+              primary
+              onClick={() => {
+                rememberRecentGame(item.id);
+                recordGameLaunch();
+                onLaunch();
+              }}
+            />
+            <ActionRow
+              href={item.practiceRoute}
+              Icon={CardsIcon}
+              title={t.t('action.customizeGame')}
+              hint={t.t('mobile.setup.customizeHint')}
+              onClick={onLaunch}
+            />
+          </>
         ) : null}
 
         {item.roomGameKey ? (

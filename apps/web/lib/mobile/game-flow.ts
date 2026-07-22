@@ -30,7 +30,12 @@ export type MobileGameFlowState =
       readonly sessionId: string;
       readonly requestId: string;
     }
-  | { readonly status: 'recovering'; readonly sessionId?: string; readonly roomCode?: string }
+  | {
+      readonly status: 'recovering';
+      readonly gameSlug?: GameSlug;
+      readonly sessionId?: string;
+      readonly roomCode?: string;
+    }
   | {
       readonly status: 'error';
       readonly recoverable: boolean;
@@ -53,8 +58,13 @@ export type MobileGameFlowEvent =
   | { readonly type: 'PLAY_AGAIN_REQUESTED'; readonly requestId: string }
   | { readonly type: 'NEXT_ROUND_STARTED'; readonly sessionId: string }
   | { readonly type: 'LEAVE_REQUESTED' }
-  | { readonly type: 'RECOVERY_STARTED'; readonly sessionId?: string; readonly roomCode?: string }
-  | { readonly type: 'RECOVERY_SUCCEEDED'; readonly sessionId: string }
+  | {
+      readonly type: 'RECOVERY_STARTED';
+      readonly gameSlug?: GameSlug;
+      readonly sessionId?: string;
+      readonly roomCode?: string;
+    }
+  | { readonly type: 'RECOVERY_SUCCEEDED'; readonly gameSlug: GameSlug; readonly sessionId: string }
   | { readonly type: 'RECOVERY_FAILED'; readonly message: string }
   | { readonly type: 'BACK_REQUESTED' }
   | { readonly type: 'RESET' };
@@ -82,7 +92,12 @@ export function transitionGameFlow(
         return { status: 'selecting-mode', gameSlug: event.gameSlug };
       }
       if (event.type === 'RECOVERY_STARTED') {
-        return { status: 'recovering', sessionId: event.sessionId, roomCode: event.roomCode };
+        return {
+          status: 'recovering',
+          gameSlug: event.gameSlug,
+          sessionId: event.sessionId,
+          roomCode: event.roomCode,
+        };
       }
       return invalid(state, event);
     case 'selecting-mode':
@@ -162,7 +177,7 @@ export function transitionGameFlow(
       if (event.type === 'RECOVERY_SUCCEEDED') {
         return {
           status: 'playing',
-          gameSlug: 'gadha-chor',
+          gameSlug: event.gameSlug,
           mode: 'computer',
           sessionId: event.sessionId,
         };

@@ -11,6 +11,7 @@ import {
   type ComputerGameConfig,
 } from '../../lib/mobile/computer-session';
 import { findGameDefinition } from '../../lib/mobile/game-registry';
+import { readLastConfig, writeLastConfig } from '../../lib/mobile/last-config';
 import { rememberRecentGame } from '../../lib/mobile/recent';
 import { Button } from '../Button';
 
@@ -26,8 +27,22 @@ export function MobileComputerSetupPage({ gameSlug }: { readonly gameSlug: strin
   const [error, setError] = useState<string | undefined>(undefined);
   const requestRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const startRef = useRef<(override?: ComputerGameConfig) => void>(() => {});
   const initial = useMemo(() => (game ? defaultComputerConfig(game) : null), [game]);
   const [config, setConfig] = useState<ComputerGameConfig | null>(initial);
+  const quick = searchParams.get('quick') === '1';
+  const seededRef = useRef(false);
+  const quickStartedRef = useRef(false);
+
+  // Seed the form from the last config this player confirmed for the game, so
+  // reopening setup lands on their preferred table instead of the defaults.
+  // Runs client-only (after hydration) to avoid an SSR/localStorage mismatch.
+  useEffect(() => {
+    if (!game || seededRef.current) return;
+    seededRef.current = true;
+    const remembered = readLastConfig(game.slug);
+    if (remembered) setConfig((existing) => existing ?? remembered);
+  }, [game]);
 
   useEffect(() => {
     if (!initial || typeof window === 'undefined' || !window.matchMedia) return;
@@ -38,6 +53,19 @@ export function MobileComputerSetupPage({ gameSlug }: { readonly gameSlug: strin
       return next.reducedMotion ? next : { ...next, reducedMotion: true };
     });
   }, [initial]);
+
+  // Quick Play: launch straight from the tile with the remembered (or default)
+  // table, honoring reduced motion. Guarded so it fires exactly once even if
+  // the effect re-runs, and never competes with a manual start.
+  useEffect(() => {
+    if (!quick || quickStartedRef.current || !game) return;
+    quickStartedRef.current = true;
+    const base = readLastConfig(game.slug) ?? defaultComputerConfig(game);
+    const reduced =
+      typeof window !== 'undefined' &&
+      !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    startRef.current(reduced ? { ...base, reducedMotion: true } : base);
+  }, [quick, game]);
 
   if (!game || !initial) {
     return (
@@ -52,8 +80,9 @@ export function MobileComputerSetupPage({ gameSlug }: { readonly gameSlug: strin
 
   const current = config ?? initial;
 
-  const start = async (): Promise<void> => {
+  const start = async (override?: ComputerGameConfig): Promise<void> => {
     if (busy) return;
+    const launchConfig = override ?? current;
     const requestId = requestRef.current ?? createClientRequestId();
     requestRef.current = requestId;
     abortRef.current?.abort();
@@ -62,10 +91,11 @@ export function MobileComputerSetupPage({ gameSlug }: { readonly gameSlug: strin
     setError(undefined);
     try {
       const session = await computerGameInitializer.start(
-        current,
+        launchConfig,
         requestId,
         abortRef.current.signal,
       );
+      writeLastConfig(launchConfig);
       rememberRecentGame(game.slug);
       const nextRoute = game.routes.mobileComputer(session.sessionId);
       // Preserve the visual-regression query params (`seed` pins the deal,
@@ -84,6 +114,7 @@ export function MobileComputerSetupPage({ gameSlug }: { readonly gameSlug: strin
       setBusy(false);
     }
   };
+  startRef.current = (override?: ComputerGameConfig) => void start(override);
 
   return (
     <>
