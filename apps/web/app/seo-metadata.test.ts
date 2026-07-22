@@ -20,6 +20,7 @@ describe('sitemap', () => {
     expect(urls).toContain(siteConfig.canonicalOrigin + '/mobile');
     expect(urls).toContain(siteConfig.canonicalOrigin + '/privacy');
     expect(urls).toContain(siteConfig.canonicalOrigin + '/play/gadha-chor/computer');
+    expect(urls).not.toContain(siteConfig.canonicalOrigin + '/play');
   });
 
   it('keeps every URL on the canonical origin and excludes private/preview URLs', () => {
