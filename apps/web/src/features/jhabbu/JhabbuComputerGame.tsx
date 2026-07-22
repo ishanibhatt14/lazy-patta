@@ -15,6 +15,9 @@ import { ImmersiveResultOverlay } from '../../../components/game/immersive/Immer
 import { ImmersiveScene } from '../../../components/game/immersive/ImmersiveScene';
 import { driveToResult, previewResultRequested } from '../../../lib/computer-game/preview-result';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
+import { trackGrowthEvent } from '../../../lib/growth/analytics';
+import { buildShareableGameResult } from '../../../lib/growth/results';
+import { shareGameResult } from '../../../lib/growth/share-result';
 import { fanCardStyle, useHandLayout } from '../../../lib/hand-layout';
 import { createTranslator } from '../../../lib/i18n';
 import { usePreferredLocale } from '../../../lib/locale/preferred-locale-context';
@@ -626,8 +629,23 @@ function JhabbuResult({
   readonly onRematch: () => void;
   readonly onViewScores: () => void;
 }): ReactElement | null {
-  const { t, format } = createTranslator(view.locale);
-  if (view.phase !== 'result') return null;
+  const translator = createTranslator(view.locale);
+  const { t, format } = translator;
+  const [shareNote, setShareNote] = useState<string | null>(null);
+  const isResult = view.phase === 'result';
+  const roundNumber = view.roundScores.length;
+
+  useEffect(() => {
+    if (!isResult) return;
+    trackGrowthEvent({
+      name: 'round_completed',
+      gameSlug: 'jhabbu',
+      playerCount: view.playerCount,
+      roundNumber,
+    });
+  }, [isResult, view.playerCount, roundNumber]);
+
+  if (!isResult) return null;
 
   const self = view.seats.find((seat) => seat.isSelf);
   const selfPosition = self?.isFinished ? self.finishPosition : null;
@@ -640,6 +658,20 @@ function JhabbuResult({
     view.seats.find((seat) => seat.name === firstAway) ??
     view.seats.find((seat) => seat.isFinished) ??
     null;
+
+  const onShare = async (): Promise<void> => {
+    const shareable = buildShareableGameResult({
+      gameSlug: 'jhabbu',
+      gameName: t('games.jhabbu.name'),
+      winnerDisplayName: firstAway,
+      playerCount: view.playerCount,
+      roundNumber,
+      seriesLeaderDisplayName: view.runningScores[0]?.playerName,
+      t: translator,
+    });
+    const outcome = await shareGameResult(shareable, translator);
+    if (outcome === 'copied') setShareNote(t('computer.shareCopied'));
+  };
 
   return (
     <ImmersiveResultOverlay
@@ -664,7 +696,10 @@ function JhabbuResult({
       onRematch={onRematch}
       secondaryLabel={t('jhabbu.scoresButton')}
       onSecondary={onViewScores}
+      shareLabel={t('action.shareResult')}
+      onShare={() => void onShare()}
       returnHomeLabel={t('action.returnHome')}
+      returnHomeHref="/mobile"
     >
       <ol className="w-full space-y-1 rounded-md bg-background-canvas p-4 text-left">
         {view.finishOrderNames.map((name) => (
@@ -676,6 +711,11 @@ function JhabbuResult({
           <li className="font-black text-action-primary">{view.loserName}</li>
         ) : null}
       </ol>
+      {shareNote ? (
+        <p aria-live="polite" className="text-sm font-semibold text-brand-accent">
+          {shareNote}
+        </p>
+      ) : null}
     </ImmersiveResultOverlay>
   );
 }

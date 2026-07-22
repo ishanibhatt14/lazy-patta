@@ -24,18 +24,32 @@ export function buildShareableGameResult({
   gameSlug,
   gameName,
   result,
+  winnerDisplayName: explicitWinner,
   playerCount,
+  roundNumber,
+  seriesLeaderDisplayName,
   nameFor,
   t,
 }: {
   readonly gameSlug: GameSlug;
   readonly gameName: string;
-  readonly result: OnlineResult;
+  /**
+   * The raw engine result, used to derive the winner. Online games hold one of
+   * these; the per-game result views instead pass `winnerDisplayName` directly.
+   */
+  readonly result?: OnlineResult;
+  /** An already-resolved winner name, preferred over deriving from `result`. */
+  readonly winnerDisplayName?: string;
   readonly playerCount: number;
-  readonly nameFor: (playerId: string) => string;
+  /** 1-indexed round within the family series, when the game tracks one. */
+  readonly roundNumber?: number;
+  /** The running series leader, when the game accumulates scores across rounds. */
+  readonly seriesLeaderDisplayName?: string;
+  readonly nameFor?: (playerId: string) => string;
   readonly t: Translator;
 }): ShareableGameResult {
-  const winnerDisplayName = winnerName(result, nameFor);
+  const winnerDisplayName =
+    explicitWinner ?? (result && nameFor ? winnerName(result, nameFor) : undefined);
   return {
     gameSlug,
     gameName,
@@ -43,6 +57,8 @@ export function buildShareableGameResult({
       ? t.format('results.headlineWithWinner', { name: winnerDisplayName, game: gameName })
       : t.format('results.headlineGeneric', { game: gameName }),
     ...(winnerDisplayName ? { winnerDisplayName } : {}),
+    ...(typeof roundNumber === 'number' ? { roundNumber } : {}),
+    ...(seriesLeaderDisplayName ? { seriesLeaderDisplayName } : {}),
     playerCount,
     shareUrl: siteConfig.canonicalOrigin,
   };

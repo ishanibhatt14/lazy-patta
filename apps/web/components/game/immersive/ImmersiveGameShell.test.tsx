@@ -162,7 +162,7 @@ describe('ImmersiveGameShell', () => {
     expect(screen.getByRole('button', { name: /Share result/i })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Play again/i }));
     expect(onRematch).toHaveBeenCalledOnce();
-    expect(screen.getByRole('link', { name: /Return home/i })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: /Return home/i })).toHaveAttribute('href', '/mobile');
   });
 
   it('uses the reduced-motion reveal animation when reduced motion is on', () => {

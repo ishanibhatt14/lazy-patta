@@ -15,6 +15,9 @@ import { ImmersiveResultOverlay } from '../../../components/game/immersive/Immer
 import { ImmersiveScene } from '../../../components/game/immersive/ImmersiveScene';
 import { driveToResult, previewResultRequested } from '../../../lib/computer-game/preview-result';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
+import { trackGrowthEvent } from '../../../lib/growth/analytics';
+import { buildShareableGameResult } from '../../../lib/growth/results';
+import { shareGameResult } from '../../../lib/growth/share-result';
 import { createTranslator } from '../../../lib/i18n';
 import { usePreferredLocale } from '../../../lib/locale/preferred-locale-context';
 import type { ComputerGameConfig } from '../../../lib/mobile/computer-session';
@@ -672,8 +675,22 @@ function KachufulResult({
   readonly view: KachufulViewState;
   readonly onRematch: () => void;
 }): ReactElement | null {
-  const { t, format } = createTranslator(view.locale);
-  if (view.phase !== 'result' || !view.result) return null;
+  const translator = createTranslator(view.locale);
+  const { t, format } = translator;
+  const [shareNote, setShareNote] = useState<string | null>(null);
+  const isResult = view.phase === 'result' && view.result !== null;
+
+  useEffect(() => {
+    if (!isResult) return;
+    trackGrowthEvent({
+      name: 'round_completed',
+      gameSlug: 'kachuful',
+      playerCount: view.playerCount,
+      roundNumber: view.roundNumber,
+    });
+  }, [isResult, view.playerCount, view.roundNumber]);
+
+  if (!isResult || !view.result) return null;
 
   const result = view.result;
   const heroSeat = view.seats.find((seat) => seat.id === result.winnerIds[0]) ?? null;
@@ -682,6 +699,24 @@ function KachufulResult({
     : result.winnerNames.length > 1
       ? format('kachuful.winnersAnnounce', { names: result.winnerNames.join(', ') })
       : format('kachuful.winnerAnnounce', { name: result.winnerNames[0] ?? '' });
+
+  const seriesLeader = view.scoreboard.reduce<(typeof view.scoreboard)[number] | null>(
+    (leader, row) => (!leader || row.totalScore > leader.totalScore ? row : leader),
+    null,
+  );
+  const onShare = async (): Promise<void> => {
+    const shareable = buildShareableGameResult({
+      gameSlug: 'kachuful',
+      gameName: t('games.kachuful.name'),
+      winnerDisplayName: result.winnerNames[0],
+      playerCount: view.playerCount,
+      roundNumber: view.roundNumber,
+      seriesLeaderDisplayName: seriesLeader?.playerName,
+      t: translator,
+    });
+    const outcome = await shareGameResult(shareable, translator);
+    if (outcome === 'copied') setShareNote(t('computer.shareCopied'));
+  };
 
   return (
     <ImmersiveResultOverlay
@@ -696,7 +731,10 @@ function KachufulResult({
       }
       playAgainLabel={t('kachuful.playAgain')}
       onRematch={onRematch}
+      shareLabel={t('action.shareResult')}
+      onShare={() => void onShare()}
       returnHomeLabel={t('kachuful.returnHome')}
+      returnHomeHref="/mobile"
     >
       {/* Scoreboard rows carry their own canvas fill, so they sit directly on
           the surface panel — a canvas wrapper here would flatten them into the
@@ -704,6 +742,11 @@ function KachufulResult({
       <div className="w-full">
         <Scoreboard view={view} />
       </div>
+      {shareNote ? (
+        <p aria-live="polite" className="text-sm font-semibold text-brand-accent">
+          {shareNote}
+        </p>
+      ) : null}
     </ImmersiveResultOverlay>
   );
 }

@@ -1,8 +1,11 @@
 import type { Locale } from '@lazy-patta/localization';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { ComputerGameViewState } from '../../../lib/computer-game/types';
+import { trackGrowthEvent } from '../../../lib/growth/analytics';
+import { buildShareableGameResult } from '../../../lib/growth/results';
+import { shareGameResult } from '../../../lib/growth/share-result';
 import { createTranslator } from '../../../lib/i18n';
 import { Button } from '../../Button';
 import { GadhaMascotPlaceholder } from '../art';
@@ -20,13 +23,24 @@ interface GadhaRevealProps {
  * table moment, never humiliating.
  */
 export function GadhaReveal({ locale, view, onRematch }: GadhaRevealProps): ReactElement | null {
-  const { t, format } = createTranslator(locale);
+  const translator = createTranslator(locale);
+  const { t, format } = translator;
   const [shareNote, setShareNote] = useState<string | null>(null);
+  const isResult = view.phase === 'result' && view.result !== null;
 
-  if (view.phase !== 'result' || !view.result) return null;
+  useEffect(() => {
+    if (!isResult) return;
+    trackGrowthEvent({
+      name: 'round_completed',
+      gameSlug: 'gadha-chor',
+      playerCount: view.seats.length,
+      roundNumber: 1,
+    });
+  }, [isResult, view.seats.length]);
+
+  if (!isResult || !view.result) return null;
 
   const { gadhaChorIsSelf, gadhaChorName, winnerNames } = view.result;
-  const resolvedName = gadhaChorIsSelf ? t('computer.youName') : gadhaChorName;
 
   const heading = gadhaChorIsSelf
     ? t('computer.youAreGadhaChor')
@@ -38,20 +52,15 @@ export function GadhaReveal({ locale, view, onRematch }: GadhaRevealProps): Reac
       : t('computer.revealNoSafe');
 
   const onShare = async (): Promise<void> => {
-    const text = format('computer.shareResultText', { name: resolvedName });
-    try {
-      const nav = navigator as Navigator & {
-        share?: (data: { text: string }) => Promise<void>;
-      };
-      if (typeof nav.share === 'function') {
-        await nav.share({ text });
-        return;
-      }
-      await navigator.clipboard?.writeText(text);
-      setShareNote(t('computer.shareCopied'));
-    } catch {
-      // Sharing is a nicety; never surface an error over a friendly result.
-    }
+    const shareable = buildShareableGameResult({
+      gameSlug: 'gadha-chor',
+      gameName: t('games.gadhaChor.name'),
+      ...(winnerNames[0] ? { winnerDisplayName: winnerNames[0] } : {}),
+      playerCount: view.seats.length,
+      t: translator,
+    });
+    const outcome = await shareGameResult(shareable, translator);
+    if (outcome === 'copied') setShareNote(t('computer.shareCopied'));
   };
 
   return (
@@ -88,7 +97,7 @@ export function GadhaReveal({ locale, view, onRematch }: GadhaRevealProps): Reac
         </div>
 
         <a
-          href="/"
+          href="/mobile"
           className="inline-flex min-h-12 items-center justify-center text-base font-semibold text-action-primary underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
         >
           {t('action.returnHome')}

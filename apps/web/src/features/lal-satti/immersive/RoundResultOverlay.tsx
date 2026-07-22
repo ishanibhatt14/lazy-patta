@@ -1,9 +1,12 @@
 import type { Locale } from '@lazy-patta/localization';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '../../../../components/Button';
 import { AvatarPlaceholder } from '../../../../components/game/art';
+import { trackGrowthEvent } from '../../../../lib/growth/analytics';
+import { buildShareableGameResult } from '../../../../lib/growth/results';
+import { shareGameResult } from '../../../../lib/growth/share-result';
 import { createTranslator } from '../../../../lib/i18n';
 import { LAL_SATTI_HUMAN_ID } from '../players';
 import type { LalSattiViewState } from '../types';
@@ -59,10 +62,23 @@ export function RoundResultOverlay({
   onRematch,
   onViewScores,
 }: RoundResultOverlayProps): ReactElement | null {
-  const { t, format } = createTranslator(locale);
+  const translator = createTranslator(locale);
+  const { t, format } = translator;
   const [shareNote, setShareNote] = useState<string | null>(null);
+  const isResult = view.phase === 'result';
+  const roundNumber = view.roundScores.length;
 
-  if (view.phase !== 'result') return null;
+  useEffect(() => {
+    if (!isResult) return;
+    trackGrowthEvent({
+      name: 'round_completed',
+      gameSlug: 'lal-satti',
+      playerCount: view.playerCount,
+      roundNumber,
+    });
+  }, [isResult, view.playerCount, roundNumber]);
+
+  if (!isResult) return null;
 
   const latestRound = view.roundScores.at(-1);
   const winnerLabel = view.winnerNames.map((name) => displayName(name, locale)).join(' · ');
@@ -73,18 +89,17 @@ export function RoundResultOverlay({
     null;
 
   const onShare = async (): Promise<void> => {
-    const text = format('lalSatti.shareResultText', { name: winnerLabel || t('computer.youName') });
-    try {
-      const nav = navigator as Navigator & { share?: (data: { text: string }) => Promise<void> };
-      if (typeof nav.share === 'function') {
-        await nav.share({ text });
-        return;
-      }
-      await navigator.clipboard?.writeText(text);
-      setShareNote(t('computer.shareCopied'));
-    } catch {
-      // Sharing is a nicety; never surface an error over a friendly result.
-    }
+    const shareable = buildShareableGameResult({
+      gameSlug: 'lal-satti',
+      gameName: t('games.lalSatti.name'),
+      winnerDisplayName: winnerLabel || t('computer.youName'),
+      playerCount: view.playerCount,
+      roundNumber,
+      ...(leaderName ? { seriesLeaderDisplayName: displayName(leaderName, locale) } : {}),
+      t: translator,
+    });
+    const outcome = await shareGameResult(shareable, translator);
+    if (outcome === 'copied') setShareNote(t('computer.shareCopied'));
   };
 
   return (
@@ -146,7 +161,7 @@ export function RoundResultOverlay({
             {t('action.shareResult')}
           </Button>
           <a
-            href="/"
+            href="/mobile"
             className="inline-flex min-h-12 items-center justify-center rounded-md px-4 py-2 text-sm font-semibold text-action-primary underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
           >
             {t('action.returnHome')}

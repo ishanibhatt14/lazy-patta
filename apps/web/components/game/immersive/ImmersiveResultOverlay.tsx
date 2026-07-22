@@ -24,7 +24,12 @@ interface ImmersiveResultOverlayProps {
   /** Optional secondary action (e.g. view scores). */
   readonly secondaryLabel?: string;
   readonly onSecondary?: () => void;
+  /** Optional share action (e.g. share result). */
+  readonly shareLabel?: string;
+  readonly onShare?: () => void;
   readonly returnHomeLabel: string;
+  /** Where "Return home" points — the mobile home, not marketing, in-app. */
+  readonly returnHomeHref?: string;
   readonly titleId?: string;
 }
 
@@ -46,7 +51,10 @@ export function ImmersiveResultOverlay({
   onRematch,
   secondaryLabel,
   onSecondary,
+  shareLabel,
+  onShare,
   returnHomeLabel,
+  returnHomeHref = '/',
   titleId = 'imm-result-title',
 }: ImmersiveResultOverlayProps): ReactElement | null {
   if (!open) return null;
@@ -95,8 +103,13 @@ export function ImmersiveResultOverlay({
               {secondaryLabel}
             </Button>
           ) : null}
+          {shareLabel && onShare ? (
+            <Button variant="ghost" onClick={onShare}>
+              {shareLabel}
+            </Button>
+          ) : null}
           <a
-            href="/"
+            href={returnHomeHref}
             className="inline-flex min-h-12 items-center justify-center rounded-md px-4 py-2 text-sm font-semibold text-action-primary underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
           >
             {returnHomeLabel}

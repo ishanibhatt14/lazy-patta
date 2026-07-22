@@ -45,6 +45,12 @@ export type GrowthEvent =
       readonly roundDurationSeconds: number;
     }
   | {
+      readonly name: 'round_completed';
+      readonly gameSlug: GameSlug;
+      readonly playerCount: number;
+      readonly roundNumber: number;
+    }
+  | {
       readonly name: 'rematch_panel_viewed';
       readonly gameSlug: GameSlug;
       readonly playerCount: number;
