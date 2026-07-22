@@ -73,7 +73,9 @@ export function hostCanForceStart(
   waitingPeriodExpired: boolean,
   countdownActive: boolean,
 ): boolean {
-  return derived.minimumPlayersMet && waitingPeriodExpired && !countdownActive && !derived.everyoneReady;
+  return (
+    derived.minimumPlayersMet && waitingPeriodExpired && !countdownActive && !derived.everyoneReady
+  );
 }
 
 /** Applies a single vote change, stamping the time so ordering stays stable. */

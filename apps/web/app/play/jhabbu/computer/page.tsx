@@ -1,9 +1,15 @@
+import { redirect } from 'next/navigation';
 import type { ReactElement } from 'react';
-
-import { JhabbuComputerGame } from '../../../../src/features/jhabbu/JhabbuComputerGame';
 
 import './jhabbu-game.css';
 
-export default function JhabbuComputerPage(): ReactElement {
-  return <JhabbuComputerGame />;
+export default async function JhabbuComputerPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ seed?: string }>;
+}): Promise<ReactElement> {
+  const { seed } = await searchParams;
+  redirect(
+    `/mobile/game/jhabbu/setup?mode=computer${seed ? `&seed=${encodeURIComponent(seed)}` : ''}`,
+  );
 }

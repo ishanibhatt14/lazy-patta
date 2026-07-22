@@ -13,6 +13,7 @@ import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng
 import { fanCardStyle, useHandLayout } from '../../../lib/hand-layout';
 import { createTranslator } from '../../../lib/i18n';
 import { usePreferredLocale } from '../../../lib/locale/preferred-locale-context';
+import type { ComputerGameConfig } from '../../../lib/mobile/computer-session';
 
 import { JhabbuAccountSheet } from './JhabbuAccountSheet';
 import { JhabbuScoreDrawer } from './JhabbuScoreDrawer';
@@ -799,9 +800,16 @@ function PlayingScreen({
   );
 }
 
-export function JhabbuComputerGame(): ReactElement {
+export function JhabbuComputerGame({
+  initialConfig,
+  autoStart = false,
+}: {
+  readonly initialConfig?: ComputerGameConfig;
+  readonly autoStart?: boolean;
+} = {}): ReactElement {
   const { locale: preferredLocale, setLocale: setPreferredLocale } = usePreferredLocale();
   const controllerRef = useRef<JhabbuController | null>(null);
+  const autoStartedRef = useRef(false);
 
   if (controllerRef.current === null) {
     const rng = seededRng();
@@ -810,7 +818,7 @@ export function JhabbuComputerGame(): ReactElement {
     controllerRef.current = createJhabbuController(
       rng ?? createCryptoRng(),
       preferredLocale,
-      rng ? 'hard' : 'medium',
+      initialConfig?.difficulty ?? (rng ? 'hard' : 'medium'),
     );
   }
 
@@ -819,18 +827,29 @@ export function JhabbuComputerGame(): ReactElement {
     (current: JhabbuControllerState, intent: JhabbuIntent) => controller.dispatch(current, intent),
     {
       ...controller.initialState,
-      reducedMotion: prefersReducedMotion(),
+      playerCount: initialConfig?.playerCount ?? controller.initialState.playerCount,
+      humanName: initialConfig?.humanName ?? controller.initialState.humanName,
+      difficulty: initialConfig?.difficulty ?? controller.initialState.difficulty,
+      reducedMotion: initialConfig?.reducedMotion ?? prefersReducedMotion(),
+      hasHydratedSession: initialConfig ? true : controller.initialState.hasHydratedSession,
     },
   );
   const view = selectJhabbuViewState(state);
 
   useEffect(() => {
+    if (initialConfig) return;
     dispatch({ type: 'hydrateSession', ...readStoredSession() });
-  }, []);
+  }, [initialConfig]);
 
   useEffect(() => {
     writeStoredSession(state);
   }, [state]);
+
+  useEffect(() => {
+    if (!autoStart || autoStartedRef.current || state.phase !== 'setup') return;
+    autoStartedRef.current = true;
+    dispatch({ type: 'start' });
+  }, [autoStart, state.phase]);
 
   useEffect(() => {
     if (view.phase !== 'playing' || view.isHumanTurn) return;

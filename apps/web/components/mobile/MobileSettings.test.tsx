@@ -31,7 +31,10 @@ describe('MobileSettings', () => {
     await user.click(screen.getByRole('button', { name: /ગુજરાતી/i }));
 
     expect(document.documentElement.lang).toBe('gu');
-    expect(screen.getByRole('button', { name: /ગુજરાતી/i })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /ગુજરાતી/i })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
     expect(window.localStorage.getItem('lazy-patta:preferred-locale')).toBe('gu');
   });
 

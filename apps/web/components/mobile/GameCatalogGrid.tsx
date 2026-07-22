@@ -98,7 +98,11 @@ function SetupBody({
         ) : null}
 
         {item.roomGameKey ? (
-          <Link href={`/mobile/rooms?game=${item.roomGameKey}`} onClick={onLaunch} className={ACTION_CLASS}>
+          <Link
+            href={`/mobile/rooms?game=${item.roomGameKey}`}
+            onClick={onLaunch}
+            className={ACTION_CLASS}
+          >
             <span className="text-base font-black text-action-primary">
               {t.t('action.createRoom')}
             </span>

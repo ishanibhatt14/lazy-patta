@@ -16,7 +16,9 @@ export default function MobileLearnPage(): ReactElement {
     <div className="flex flex-col gap-4">
       <header>
         <h1 className="text-2xl font-black text-action-primary">{t.t('mobile.learn.title')}</h1>
-        <p className="mt-1 text-sm leading-6 text-text-primary/80">{t.t('mobile.learn.subtitle')}</p>
+        <p className="mt-1 text-sm leading-6 text-text-primary/80">
+          {t.t('mobile.learn.subtitle')}
+        </p>
       </header>
 
       <ul className="flex flex-col gap-3">

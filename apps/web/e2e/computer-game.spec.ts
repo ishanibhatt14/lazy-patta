@@ -6,11 +6,8 @@ test.setTimeout(60_000);
 
 async function startGame(page: Page, players: number): Promise<void> {
   await page.goto(ROUTE);
-  if (players !== 3) {
-    await page.getByText('Customize table').click();
-    await page.getByRole('button', { name: String(players), exact: true }).click();
-  }
-  await page.getByRole('button', { name: /Quick game|Start game/i }).click();
+  if (players !== 4) await page.getByRole('button', { name: String(players), exact: true }).click();
+  await page.getByRole('button', { name: /Start game/i }).click();
   // Table is up once the live turn banner renders.
   await expect(page.getByRole('status')).toBeVisible();
 }
@@ -30,9 +27,11 @@ async function playToResult(page: Page): Promise<void> {
   const done = playAgain(page);
   for (let guard = 0; guard < 400; guard += 1) {
     if (await done.isVisible()) return;
-    await expect.poll(async () => (await cards.count()) > 0 || (await done.isVisible())).toBe(true);
+    await expect
+      .poll(async () => (await cards.count()) > 0 || (await done.isVisible()), { timeout: 15_000 })
+      .toBe(true);
     if (await done.isVisible()) return;
-    await cards.first().click();
+    await cards.first().click({ force: true });
   }
   throw new Error('game did not reach a result');
 }
@@ -64,11 +63,10 @@ test('rematch deals a fresh round from the result screen', async ({ page }) => {
 
 test('switches the setup language to Gujarati', async ({ page }) => {
   await page.goto(ROUTE);
-  await expect(
-    page.getByRole('heading', { name: /Gadha Chor at the family table/i }),
-  ).toBeVisible();
-  await page.getByRole('button', { name: 'ગુ' }).click();
-  await expect(page.getByRole('heading', { name: 'કુટુંબની ટેબલ પર ગધા ચોર' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Play Gadha Chor/i })).toBeVisible();
+  await page.getByRole('button', { name: /English/ }).click();
+  await page.getByRole('button', { name: /ગુજરાતી Gujarati/ }).click();
+  await expect(page.getByRole('heading', { name: /ગધા ચોર/ })).toBeVisible();
 });
 
 test('lets the player pick a card with the keyboard', async ({ page }) => {

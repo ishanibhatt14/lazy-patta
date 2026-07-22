@@ -50,7 +50,9 @@ export function GameTile({
       </div>
 
       <div>
-        <h3 className="text-lg font-black leading-tight text-action-primary">{t.t(item.nameKey)}</h3>
+        <h3 className="text-lg font-black leading-tight text-action-primary">
+          {t.t(item.nameKey)}
+        </h3>
         <p className="mt-1 text-xs font-semibold text-text-primary/80">
           {t.format('mobile.game.playersRange', {
             min: item.minPlayers,

@@ -15,6 +15,7 @@ import type { ComputerGameIntent } from '../../lib/computer-game/types';
 import { selectViewState } from '../../lib/computer-game/view-model';
 import { createTranslator } from '../../lib/i18n';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
+import type { ComputerGameConfig } from '../../lib/mobile/computer-session';
 import { playCue } from '../../lib/sound';
 
 import { ComputerGameSetup } from './ComputerGameSetup';
@@ -41,7 +42,13 @@ function seededRngFactory(): (() => ReturnType<typeof createCryptoRng>) | null {
   return () => createSeededRng(seed);
 }
 
-export function ComputerGameExperience(): ReactElement {
+export function ComputerGameExperience({
+  initialConfig,
+  autoStart = false,
+}: {
+  readonly initialConfig?: ComputerGameConfig;
+  readonly autoStart?: boolean;
+} = {}): ReactElement {
   const { locale: preferredLocale, setLocale: setPreferredLocale } = usePreferredLocale();
   const rngFactoryRef = useRef<() => ReturnType<typeof createCryptoRng>>(
     seededRngFactory() ?? createCryptoRng,
@@ -49,14 +56,15 @@ export function ComputerGameExperience(): ReactElement {
   const controllerRef = useRef<ComputerGameController | null>(null);
   const pacingRngRef = useRef(rngFactoryRef.current());
   const startedRef = useRef(false);
+  const autoStartedRef = useRef(false);
   const lastDrawSeqRef = useRef<string | null>(null);
   const [tutorialOpen, setTutorialOpen] = useState(false);
 
   if (controllerRef.current === null) {
     controllerRef.current = createComputerGameController(rngFactoryRef.current(), {
-      playerCount: 4,
+      playerCount: initialConfig?.playerCount ?? 4,
       locale: preferredLocale,
-      reducedMotion: prefersReducedMotion(),
+      reducedMotion: initialConfig?.reducedMotion ?? prefersReducedMotion(),
       soundEnabled: true,
     });
   }
@@ -70,6 +78,12 @@ export function ComputerGameExperience(): ReactElement {
   const view = selectViewState(state);
   const { reducedMotion, soundEnabled, locale } = state.settings;
   const pacing = pacingFor(reducedMotion);
+
+  useEffect(() => {
+    if (!autoStart || autoStartedRef.current || state.phase !== 'setup') return;
+    autoStartedRef.current = true;
+    dispatch({ type: 'start' });
+  }, [autoStart, state.phase]);
 
   // Intro sequence: dealing → initial pairs → play. Timed presentation only.
   useEffect(() => {

@@ -47,6 +47,10 @@ export function OnlineHub(): ReactElement {
   );
   const [busy, setBusy] = useState<'create' | 'join' | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
+  const lobbyPath = (roomCode: string): string =>
+    typeof window !== 'undefined' && window.location.pathname.startsWith('/mobile')
+      ? `/mobile/rooms/${roomCode}/lobby`
+      : `/play/online/${roomCode}`;
 
   if (state.status !== 'signed-in') {
     return (
@@ -63,7 +67,7 @@ export function OnlineHub(): ReactElement {
     setError(undefined);
     try {
       const room = await createRoom(getSupabaseBrowserClient(), { displayName, gameKey, locale });
-      router.push(`/play/online/${room.code}`);
+      router.push(lobbyPath(room.code));
     } catch (caught) {
       setError(messageFor(caught, t.t('rooms.errorGeneric')));
       setBusy(undefined);
@@ -76,7 +80,7 @@ export function OnlineHub(): ReactElement {
     setError(undefined);
     try {
       const room = await joinRoomByCode(getSupabaseBrowserClient(), code, displayName);
-      router.push(`/play/online/${room.code}`);
+      router.push(lobbyPath(room.code));
     } catch (caught) {
       setError(messageFor(caught, t.t('rooms.errorGeneric')));
       setBusy(undefined);
