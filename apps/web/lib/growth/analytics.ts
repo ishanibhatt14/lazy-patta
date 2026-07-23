@@ -9,6 +9,10 @@ export type GrowthEvent =
   | { readonly name: 'family_detail_viewed'; readonly favoriteCount: number }
   | { readonly name: 'family_game_night_scheduled'; readonly gameSlug?: GameSlug }
   | { readonly name: 'family_game_night_reminder_saved'; readonly gameSlug?: GameSlug }
+  | {
+      readonly name: 'family_feedback_submitted';
+      readonly category: 'idea' | 'problem' | 'praise';
+    }
   | { readonly name: 'family_group_create_started' }
   | { readonly name: 'family_group_created' }
   | { readonly name: 'family_group_join_started' }

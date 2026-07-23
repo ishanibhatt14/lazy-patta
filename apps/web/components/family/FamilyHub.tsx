@@ -9,6 +9,7 @@ import {
   joinFamilyGroupByCode,
   type FamilyGroup,
 } from '../../lib/family/family-groups-client';
+import { isFounderFamily } from '../../lib/family/founder';
 import { trackGrowthEvent } from '../../lib/growth/analytics';
 import { createTranslator } from '../../lib/i18n';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
@@ -16,6 +17,7 @@ import { getSupabaseBrowserClient } from '../../lib/supabase/browser-client';
 import { Button } from '../Button';
 import { LoginPanel } from '../auth/LoginPanel';
 
+import { FamilyFeedbackForm } from './FamilyFeedbackForm';
 import { FamilyGameNights } from './FamilyGameNights';
 import { FamilyTablePanel } from './FamilyTablePanel';
 
@@ -159,7 +161,14 @@ export function FamilyHub(): ReactElement {
                   className="flex flex-col gap-2 rounded-md border border-action-primary/20 bg-background-canvas px-3 py-2"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-semibold text-text-primary">{family.name}</span>
+                    <span className="flex items-center gap-2">
+                      <span className="font-semibold text-text-primary">{family.name}</span>
+                      {isFounderFamily(family.created_at) ? (
+                        <span className="rounded-full bg-action-secondary/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-action-primary">
+                          {t.t('family.founderBadge')}
+                        </span>
+                      ) : null}
+                    </span>
                     <span className="text-xs uppercase tracking-wide text-text-primary/70">
                       {t.format('family.codeOnCard', { code: family.join_code })}
                     </span>
@@ -176,6 +185,7 @@ export function FamilyHub(): ReactElement {
                     <div className="flex flex-col gap-4">
                       <FamilyTablePanel groupId={family.id} />
                       <FamilyGameNights groupId={family.id} familyName={family.name} />
+                      <FamilyFeedbackForm groupId={family.id} />
                     </div>
                   ) : null}
                 </li>

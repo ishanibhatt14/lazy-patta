@@ -9,6 +9,7 @@ import {
   fetchFamilyRecentTables,
   fetchFamilySeriesResults,
   cancelFamilyGameNight,
+  fetchFamilyFeedback,
   fetchMyFamilyGroups,
   fetchUpcomingFamilyGameNights,
   joinFamilyGroupByCode,
@@ -18,6 +19,7 @@ import {
   removeFamilyFavoriteGame,
   renameFamilyGroup,
   scheduleFamilyGameNight,
+  submitFamilyFeedback,
 } from './family-groups-client';
 
 function clientWithRpc(result: { data?: unknown; error?: { message: string } | null } = {}) {
@@ -323,5 +325,39 @@ describe('game nights', () => {
     await expect(
       scheduleFamilyGameNight(client, 'g1', { scheduledFor: '2026-08-02T19:30:00Z' }),
     ).rejects.toThrow('not a member of this family');
+  });
+});
+
+describe('founder feedback', () => {
+  it('submits feedback through the submit_family_feedback RPC', async () => {
+    const row = { id: 'f1', group_id: 'g1', category: 'idea', message: 'Add rummy' };
+    const { client, rpc } = clientWithRpc({ data: row });
+    const result = await submitFamilyFeedback(client, 'g1', {
+      category: 'idea',
+      message: 'Add rummy',
+    });
+    expect(rpc).toHaveBeenCalledWith('submit_family_feedback', {
+      p_group_id: 'g1',
+      p_category: 'idea',
+      p_message: 'Add rummy',
+    });
+    expect(result).toEqual(row);
+  });
+
+  it('propagates a non-member rejection when submitting', async () => {
+    const { client } = clientWithRpc({ error: { message: 'not a member of this family' } });
+    await expect(
+      submitFamilyFeedback(client, 'g1', { category: 'problem', message: 'stuck' }),
+    ).rejects.toThrow('not a member of this family');
+  });
+
+  it('reads feedback newest first', async () => {
+    const feedback = [{ id: 'f1', group_id: 'g1', category: 'praise', message: 'love it' }];
+    const { client, from, builder } = clientWithQuery({ data: feedback });
+    const result = await fetchFamilyFeedback(client, 'g1');
+    expect(from).toHaveBeenCalledWith('family_group_feedback');
+    expect(builder.eq).toHaveBeenCalledWith('group_id', 'g1');
+    expect(builder.order).toHaveBeenCalledWith('created_at', { ascending: false });
+    expect(result).toEqual(feedback);
   });
 });

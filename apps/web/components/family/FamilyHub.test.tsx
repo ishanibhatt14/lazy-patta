@@ -29,9 +29,15 @@ vi.mock('../../lib/family/family-groups-client', () => ({
 }));
 // LoginPanel is only rendered in the signed-out branch, which these tests avoid.
 vi.mock('../auth/LoginPanel', () => ({ LoginPanel: () => <div>login</div> }));
-// The activity panel has its own test; here we only assert it mounts on toggle.
+// The activity panels have their own tests; here we only assert they mount on toggle.
 vi.mock('./FamilyTablePanel', () => ({
   FamilyTablePanel: ({ groupId }: { groupId: string }) => <div>activity for {groupId}</div>,
+}));
+vi.mock('./FamilyGameNights', () => ({
+  FamilyGameNights: ({ groupId }: { groupId: string }) => <div>nights for {groupId}</div>,
+}));
+vi.mock('./FamilyFeedbackForm', () => ({
+  FamilyFeedbackForm: ({ groupId }: { groupId: string }) => <div>feedback for {groupId}</div>,
 }));
 
 const GROUP = { id: 'g1', name: 'Bhatt Family', join_code: 'BH2026', created_by: 'u1' };
@@ -66,6 +72,14 @@ describe('FamilyHub', () => {
         familyCount: 1,
       }),
     );
+  });
+
+  it('marks an early family with the founder badge', async () => {
+    family.fetchMyFamilyGroups.mockResolvedValue([
+      { ...GROUP, created_at: '2026-07-01T00:00:00Z' },
+    ]);
+    render(<FamilyHub />);
+    expect(await screen.findByText(/Founder family/i)).toBeVisible();
   });
 
   it('toggles the activity panel for a family', async () => {

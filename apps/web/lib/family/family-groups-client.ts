@@ -328,3 +328,52 @@ export async function fetchUpcomingFamilyGameNights(
   if (error) throw new Error(error.message);
   return (data ?? []) as FamilyGameNight[];
 }
+
+// ---------------------------------------------------------------------------
+// Founder feedback (migration 0025): a member's idea, problem, or praise.
+// ---------------------------------------------------------------------------
+
+export type FamilyFeedbackCategory = 'idea' | 'problem' | 'praise';
+
+export interface FamilyFeedback {
+  readonly id: string;
+  readonly group_id: string;
+  readonly category: FamilyFeedbackCategory;
+  readonly message: string;
+  readonly created_by: string | null;
+  readonly created_at?: string;
+}
+
+export interface SubmitFamilyFeedbackInput {
+  readonly category: FamilyFeedbackCategory;
+  readonly message: string;
+}
+
+/** Leave one piece of feedback for the family. Members only. Returns the row. */
+export async function submitFamilyFeedback(
+  client: SupabaseClient,
+  groupId: string,
+  input: SubmitFamilyFeedbackInput,
+): Promise<FamilyFeedback> {
+  return unwrap<FamilyFeedback>(
+    await client.rpc('submit_family_feedback', {
+      p_group_id: groupId,
+      p_category: input.category,
+      p_message: input.message,
+    }),
+  );
+}
+
+/** The family's feedback, newest first. RLS-scoped to members. */
+export async function fetchFamilyFeedback(
+  client: SupabaseClient,
+  groupId: string,
+): Promise<readonly FamilyFeedback[]> {
+  const { data, error } = await client
+    .from('family_group_feedback')
+    .select('*')
+    .eq('group_id', groupId)
+    .order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as FamilyFeedback[];
+}
