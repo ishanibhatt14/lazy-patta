@@ -22,9 +22,9 @@ const COMING_SOON_SLUGS = ['mendicot', '3-2-5'] as const satisfies readonly Prod
 
 describe('GAME_CAPABILITIES', () => {
   it('is the authoritative availability source for live and coming-soon games', () => {
-    // Family rooms are not reliably live yet — the honest status is coming-soon
-    // until the PR 8 vertical slice passes.
-    expect(GAME_CAPABILITIES['gadha-chor'].availability.privateRoom).toBe('coming-soon');
+    // Private family rooms are verified live against production Supabase, so the
+    // four live games are now 'available'; unbuilt games stay coming-soon.
+    expect(GAME_CAPABILITIES['gadha-chor'].availability.privateRoom).toBe('available');
     expect(GAME_CAPABILITIES.mendicot.availability.privateRoom).toBe('coming-soon');
     expect(GAME_CAPABILITIES['3-2-5'].routes.createRoom).toBeUndefined();
   });
@@ -59,10 +59,10 @@ describe.each(PLAYABLE_SLUGS)('capability contract for %s', (slug) => {
     expect(capability.reasonKeys?.roomUnavailable).toBe('rooms.unavailableComingSoon');
   });
 
-  it('does not yet promise a live family room (honest until PR 8)', () => {
-    expect(capability.availability.privateRoom).toBe('coming-soon');
-    expect(canUseMode(capability, 'private-room')).toBe(false);
-    expect(isRoomCapable(capability)).toBe(false);
+  it('promises a live family room now that private rooms are verified', () => {
+    expect(capability.availability.privateRoom).toBe('available');
+    expect(canUseMode(capability, 'private-room')).toBe(true);
+    expect(isRoomCapable(capability)).toBe(true);
   });
 });
 
@@ -94,12 +94,20 @@ describe('cross-registry consistency (LP-103)', () => {
     expect(cap.routes.createRoom).toBeUndefined();
   });
 
-  it('exposes no live family room on any surface yet', () => {
-    for (const capability of Object.values(GAME_CAPABILITIES)) {
-      expect(isRoomCapable(capability)).toBe(false);
+  it('exposes a live family room for the four live games and none for coming-soon games', () => {
+    for (const slug of PLAYABLE_SLUGS) {
+      expect(isRoomCapable(GAME_CAPABILITIES[slug])).toBe(true);
     }
-    for (const item of MOBILE_CATALOG) {
+    for (const slug of COMING_SOON_SLUGS) {
+      expect(isRoomCapable(GAME_CAPABILITIES[slug])).toBe(false);
+    }
+    // Coming-soon games never surface a room key in the mobile catalog.
+    for (const item of MOBILE_CATALOG.filter((g) => g.availability === 'coming-soon')) {
       expect(item.roomGameKey).toBeUndefined();
+    }
+    // Every live game does surface its room key now.
+    for (const item of MOBILE_CATALOG.filter((g) => g.availability === 'available')) {
+      expect(item.roomGameKey).toBeTruthy();
     }
   });
 });

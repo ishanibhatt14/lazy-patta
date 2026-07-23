@@ -31,8 +31,8 @@ describe('MOBILE_CATALOG', () => {
     for (const game of PLAYABLE_CATALOG) {
       expect(game.availability).toBe('available');
       expect(game.practiceRoute).toMatch(/^\/mobile\/game\/.+\/setup\?mode=computer$/);
-      // Family rooms are not reliably live yet, so no game exposes a room key.
-      expect(game.roomGameKey).toBeUndefined();
+      // Family rooms are verified live, so every live game exposes a room key.
+      expect(game.roomGameKey).toBeTruthy();
     }
   });
 

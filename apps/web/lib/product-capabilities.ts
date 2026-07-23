@@ -40,10 +40,11 @@ export const GAME_CAPABILITIES: Record<ProductGameSlug, GameCapability> = {
     availability: {
       game: 'available',
       computer: 'available',
-      // Family rooms are not reliably live yet (see /mobile/rooms and
-      // GAME_DISCOVERY.onlinePlayable). PR 8 flips this to 'available' once the
-      // vertical slice passes; until then no surface may promise private rooms.
-      privateRoom: 'coming-soon',
+      // Private family rooms are verified live against production Supabase:
+      // a 2-device create -> join -> shared-lobby round-trip on lazypatta.com
+      // (both players Ready in room L43TZM). Pass-and-play is a distinct mode
+      // that has not been verified, so it stays gated until its own slice lands.
+      privateRoom: 'available',
       passAndPlay: 'coming-soon',
     },
     players: { min: 2, max: 6, defaultComputer: 4 },
@@ -61,10 +62,11 @@ export const GAME_CAPABILITIES: Record<ProductGameSlug, GameCapability> = {
     availability: {
       game: 'available',
       computer: 'available',
-      // Family rooms are not reliably live yet (see /mobile/rooms and
-      // GAME_DISCOVERY.onlinePlayable). PR 8 flips this to 'available' once the
-      // vertical slice passes; until then no surface may promise private rooms.
-      privateRoom: 'coming-soon',
+      // Private family rooms are verified live against production Supabase:
+      // a 2-device create -> join -> shared-lobby round-trip on lazypatta.com
+      // (both players Ready in room L43TZM). Pass-and-play is a distinct mode
+      // that has not been verified, so it stays gated until its own slice lands.
+      privateRoom: 'available',
       passAndPlay: 'coming-soon',
     },
     players: { min: 3, max: 6, defaultComputer: 4 },
@@ -82,10 +84,11 @@ export const GAME_CAPABILITIES: Record<ProductGameSlug, GameCapability> = {
     availability: {
       game: 'available',
       computer: 'available',
-      // Family rooms are not reliably live yet (see /mobile/rooms and
-      // GAME_DISCOVERY.onlinePlayable). PR 8 flips this to 'available' once the
-      // vertical slice passes; until then no surface may promise private rooms.
-      privateRoom: 'coming-soon',
+      // Private family rooms are verified live against production Supabase:
+      // a 2-device create -> join -> shared-lobby round-trip on lazypatta.com
+      // (both players Ready in room L43TZM). Pass-and-play is a distinct mode
+      // that has not been verified, so it stays gated until its own slice lands.
+      privateRoom: 'available',
       passAndPlay: 'coming-soon',
     },
     players: { min: 3, max: 6, defaultComputer: 4 },
@@ -103,10 +106,11 @@ export const GAME_CAPABILITIES: Record<ProductGameSlug, GameCapability> = {
     availability: {
       game: 'available',
       computer: 'available',
-      // Family rooms are not reliably live yet (see /mobile/rooms and
-      // GAME_DISCOVERY.onlinePlayable). PR 8 flips this to 'available' once the
-      // vertical slice passes; until then no surface may promise private rooms.
-      privateRoom: 'coming-soon',
+      // Private family rooms are verified live against production Supabase:
+      // a 2-device create -> join -> shared-lobby round-trip on lazypatta.com
+      // (both players Ready in room L43TZM). Pass-and-play is a distinct mode
+      // that has not been verified, so it stays gated until its own slice lands.
+      privateRoom: 'available',
       passAndPlay: 'coming-soon',
     },
     players: { min: 3, max: 7, defaultComputer: 4 },

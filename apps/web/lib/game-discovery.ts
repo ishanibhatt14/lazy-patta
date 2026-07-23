@@ -45,7 +45,7 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
   'gadha-chor': {
     slug: 'gadha-chor',
     playable: true,
-    onlinePlayable: false,
+    onlinePlayable: true,
     nameKey: 'games.gadhaChor.name',
     pageHeadingKey: 'games.gadhaChor.pageHeading',
     descriptionKey: 'games.gadhaChor.description',
@@ -83,7 +83,7 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
   'lal-satti': {
     slug: 'lal-satti',
     playable: true,
-    onlinePlayable: false,
+    onlinePlayable: true,
     nameKey: 'games.lalSatti.name',
     pageHeadingKey: 'games.lalSatti.pageHeading',
     descriptionKey: 'games.lalSatti.description',
@@ -123,7 +123,7 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
     // Single-player (computer) is live; online/family rooms are not reliably
     // live yet, so the online CTA renders as a "coming soon" affordance.
     playable: true,
-    onlinePlayable: false,
+    onlinePlayable: true,
     nameKey: 'games.jhabbu.name',
     pageHeadingKey: 'games.jhabbu.pageHeading',
     descriptionKey: 'games.jhabbu.description',
@@ -165,7 +165,7 @@ export const GAME_DISCOVERY: Record<GameSlug, GameDiscoveryConfig> = {
     // The single-player (computer) experience is live; online/family rooms are
     // not reliably live yet, so the online CTA renders as "coming soon".
     playable: true,
-    onlinePlayable: false,
+    onlinePlayable: true,
     nameKey: 'games.kachuful.name',
     pageHeadingKey: 'games.kachuful.pageHeading',
     descriptionKey: 'games.kachuful.description',
