@@ -9,6 +9,7 @@ import { trackGrowthEvent } from '../../lib/growth/analytics';
 import { createTranslator } from '../../lib/i18n';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import { startGame } from '../../lib/online-game/games-client';
+import { fetchBlockedUserIds } from '../../lib/rooms/moderation-client';
 import { subscribeToRoom } from '../../lib/rooms/realtime';
 import { rememberRecentRoom } from '../../lib/rooms/recent-rooms';
 import { classifyRoomError, type ClassifiedRoomError } from '../../lib/rooms/room-error';
@@ -26,6 +27,7 @@ import { Button } from '../Button';
 import { LoginPanel } from '../auth/LoginPanel';
 
 import { GameBoard } from './GameBoard';
+import { PlayerSafetyMenu } from './PlayerSafetyMenu';
 import { ReconnectBanner } from './ReconnectBanner';
 import { RoomSharePanel } from './RoomSharePanel';
 
@@ -75,6 +77,7 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
   const [error, setError] = useState<string | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const [joined, setJoined] = useState(false);
+  const [blockedIds, setBlockedIds] = useState<ReadonlySet<string>>(() => new Set());
   const [initState, setInitState] = useState<AsyncViewState<RoomWithSeats>>({
     status: 'loading',
     startedAt: Date.now(),
@@ -155,6 +158,21 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
   // Advertise our own presence while seated (covers both lobby and live game,
   // since this component stays mounted and hosts the board once play starts).
   useSeatHeartbeat(roomId, joined);
+
+  // The caller's own block list, so opponents already blocked show as such and
+  // offer "Unblock". Refetched after any block/unblock from a seat's menu.
+  const loadBlocked = useCallback(async (): Promise<void> => {
+    try {
+      setBlockedIds(await fetchBlockedUserIds(getSupabaseBrowserClient()));
+    } catch {
+      // A failed block-list read is non-fatal — safety actions still work, we
+      // just fall back to offering "Block" until the next successful load.
+    }
+  }, []);
+  useEffect(() => {
+    if (!joined) return;
+    void loadBlocked();
+  }, [joined, loadBlocked]);
 
   useEffect(() => {
     if (initState.status !== 'loading') return;
@@ -343,9 +361,21 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
                   {room && seat.user_id === room.host_id ? ` · ${t.t('rooms.host')}` : ''}
                 </span>
               </div>
-              <span className="text-xs text-text-primary">
-                {seat.is_ready ? t.t('rooms.ready') : t.t('rooms.notReady')}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-text-primary">
+                  {seat.is_ready ? t.t('rooms.ready') : t.t('rooms.notReady')}
+                </span>
+                {seat.occupant === 'human' && seat.user_id && !isYou ? (
+                  <PlayerSafetyMenu
+                    reportedUserId={seat.user_id}
+                    name={seat.display_name ?? t.t('rooms.seatPlayer')}
+                    roomId={seat.room_id}
+                    locale={locale}
+                    isBlocked={blockedIds.has(seat.user_id)}
+                    onBlockChange={() => void loadBlocked()}
+                  />
+                ) : null}
+              </div>
             </li>
           );
         })}
