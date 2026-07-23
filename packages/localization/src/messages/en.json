@@ -498,6 +498,8 @@
   "rooms.markNotReady": "Not ready yet",
   "rooms.addBot": "Add computer player",
   "rooms.leave": "Leave room",
+  "rooms.reconnectingSelf": "Reconnecting to the table…",
+  "rooms.reconnectingOthers": "{names} reconnecting…",
   "rooms.errorGeneric": "Something went wrong. Please try again.",
   "rooms.startGame": "Start game",
   "rooms.starting": "Starting…",

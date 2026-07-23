@@ -498,6 +498,8 @@
   "rooms.markNotReady": "હજી તૈયાર નથી",
   "rooms.addBot": "કમ્પ્યુટર ખેલાડી ઉમેરો",
   "rooms.leave": "રૂમ છોડો",
+  "rooms.reconnectingSelf": "ટેબલ સાથે ફરી જોડાઈ રહ્યા છીએ…",
+  "rooms.reconnectingOthers": "{names} ફરી જોડાઈ રહ્યા છે…",
   "rooms.errorGeneric": "કંઈક ખોટું થયું. ફરી પ્રયાસ કરો.",
   "rooms.startGame": "રમત શરૂ કરો",
   "rooms.starting": "શરૂ થાય છે…",

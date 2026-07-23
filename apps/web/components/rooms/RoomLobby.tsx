@@ -20,11 +20,13 @@ import {
   setSeatReady,
   type RoomWithSeats,
 } from '../../lib/rooms/rooms-client';
+import { useSeatHeartbeat } from '../../lib/rooms/use-heartbeat';
 import { getSupabaseBrowserClient } from '../../lib/supabase/browser-client';
 import { Button } from '../Button';
 import { LoginPanel } from '../auth/LoginPanel';
 
 import { GameBoard } from './GameBoard';
+import { ReconnectBanner } from './ReconnectBanner';
 import { RoomSharePanel } from './RoomSharePanel';
 
 /**
@@ -150,6 +152,10 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
     return subscribeToRoom(getSupabaseBrowserClient(), roomId, () => void refresh());
   }, [joined, roomId, refresh]);
 
+  // Advertise our own presence while seated (covers both lobby and live game,
+  // since this component stays mounted and hosts the board once play starts).
+  useSeatHeartbeat(roomId, joined);
+
   useEffect(() => {
     if (initState.status !== 'loading') return;
     setSlowInit(false);
@@ -175,6 +181,15 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
 
   const room = data?.room;
   const seats = data?.seats ?? [];
+  // A fixed top overlay so the "reconnecting…" note is visible over both the
+  // lobby column and the full-screen live board.
+  const presenceBanner = userId ? (
+    <div className="pointer-events-none fixed inset-x-0 top-2 z-[60] flex justify-center px-4">
+      <div className="pointer-events-auto w-full max-w-md">
+        <ReconnectBanner seats={seats} userId={userId} locale={locale} />
+      </div>
+    </div>
+  ) : null;
   const isHost = room ? room.host_id === userId : false;
   const mySeat = seats.find((s) => s.user_id === userId);
   const occupiedSeats = seats.filter((s) => s.occupant !== 'empty');
@@ -269,24 +284,28 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
   // only reads + draws, and owns its own room-code header and leave control.
   if (room && room.status !== 'lobby') {
     return (
-      <GameBoard
-        roomId={room.id}
-        seats={seats}
-        userId={state.session.user.userId}
-        locale={room.locale}
-        code={code}
-        onLeave={() =>
-          withBusy(async () => {
-            await leaveRoom(getSupabaseBrowserClient(), room.id);
-            router.push('/play/online');
-          })
-        }
-      />
+      <>
+        {presenceBanner}
+        <GameBoard
+          roomId={room.id}
+          seats={seats}
+          userId={state.session.user.userId}
+          locale={room.locale}
+          code={code}
+          onLeave={() =>
+            withBusy(async () => {
+              await leaveRoom(getSupabaseBrowserClient(), room.id);
+              router.push('/play/online');
+            })
+          }
+        />
+      </>
     );
   }
 
   return (
     <div className="flex w-full max-w-md flex-col gap-6">
+      {presenceBanner}
       <header className="flex flex-col items-center gap-1">
         <span className="text-sm text-text-primary">{t.t('rooms.roomCodeLabel')}</span>
         <span className="text-3xl font-bold tracking-[0.3em] text-action-primary">{code}</span>

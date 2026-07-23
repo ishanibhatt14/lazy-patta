@@ -32,6 +32,8 @@ export interface RoomSeat {
   readonly display_name: string | null;
   readonly is_ready: boolean;
   readonly joined_at?: string;
+  /** Liveness stamp refreshed by the seat's own client heartbeat (0017). */
+  readonly last_seen_at?: string;
 }
 
 export interface RoomWithSeats {
@@ -108,6 +110,17 @@ export async function addBotSeat(
 
 export async function leaveRoom(client: SupabaseClient, roomId: string): Promise<void> {
   const { error } = await client.rpc('leave_room', { p_room_id: roomId });
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Refresh the caller's own seat presence stamp. Called on a heartbeat interval
+ * so other members can tell this player is still connected. Failures are the
+ * caller's to swallow — a missed heartbeat is expected on a flaky link and is
+ * handled by the grace window, not surfaced as an error.
+ */
+export async function heartbeatSeat(client: SupabaseClient, roomId: string): Promise<void> {
+  const { error } = await client.rpc('heartbeat_seat', { p_room_id: roomId });
   if (error) throw new Error(error.message);
 }
 
