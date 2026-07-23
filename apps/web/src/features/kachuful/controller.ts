@@ -8,6 +8,11 @@ import {
 } from '@lazy-patta/kachuful-engine';
 import type { Locale, MessageKey, MessageValues } from '@lazy-patta/localization';
 
+import {
+  EMPTY_FAMILY_SERIES,
+  familySeriesLeader,
+  recordFamilySeriesGame,
+} from '../../../lib/computer-game/family-series';
 import { createCryptoRng } from '../../../lib/computer-game/rng';
 import { createTranslator } from '../../../lib/i18n';
 
@@ -50,6 +55,7 @@ function setupState(
     reducedMotion: false,
     game: null,
     events: [],
+    series: EMPTY_FAMILY_SERIES,
     hasHydratedSession: false,
     seq: 0,
   };
@@ -165,7 +171,18 @@ function reduceEngineAction(
   const phase: KachufulControllerState['phase'] =
     nextGame.phase === 'match_complete' ? 'result' : 'playing';
 
-  return { ...state, phase, game: nextGame, seq, events };
+  // Fold the finished match into the family series exactly once — on the single
+  // transition into `match_complete`, not on every later re-render of the result.
+  const justCompleted =
+    nextGame.phase === 'match_complete' && state.game.phase !== 'match_complete';
+  const series = justCompleted
+    ? recordFamilySeriesGame(
+        state.series,
+        nextGame.matchWinnerIds.map((id) => playerDisplayName(state, id)),
+      )
+    : state.series;
+
+  return { ...state, phase, game: nextGame, seq, events, series };
 }
 
 function dispatchWithRng(
@@ -190,6 +207,7 @@ function dispatchWithRng(
       return {
         ...state,
         humanName: intent.humanName?.slice(0, 32) ?? state.humanName,
+        series: intent.series ?? state.series,
         hasHydratedSession: true,
       };
     case 'toggleReducedMotion':
@@ -234,6 +252,7 @@ function dispatchWithRng(
           ...setupState(state.locale, state.playerCount, state.difficulty),
           humanName: state.humanName,
           reducedMotion: state.reducedMotion,
+          series: state.series,
           hasHydratedSession: state.hasHydratedSession,
         },
         rng,
@@ -397,6 +416,8 @@ export function selectKachufulViewState(state: KachufulControllerState): Kachufu
     events: state.events,
     scoreboard: scoreboardFor(state),
     result: resultFor(state),
+    series: state.series,
+    seriesLeaderName: familySeriesLeader(state.series)?.name ?? null,
   };
 }
 

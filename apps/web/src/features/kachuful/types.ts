@@ -2,6 +2,8 @@ import type { BotDifficulty, Card, Suit } from '@lazy-patta/game-contracts';
 import type { KachufulState, KachufulTrump } from '@lazy-patta/kachuful-engine';
 import type { Locale, MessageKey, MessageValues } from '@lazy-patta/localization';
 
+import type { FamilySeries } from '../../../lib/computer-game/family-series';
+
 /** Coarse controller phase; the fine engine sub-phase is derived in the view. */
 export type KachufulComputerPhase = 'setup' | 'playing' | 'result';
 
@@ -56,6 +58,7 @@ export interface KachufulControllerState {
   readonly reducedMotion: boolean;
   readonly game: KachufulState | null;
   readonly events: readonly KachufulViewEvent[];
+  readonly series: FamilySeries;
   readonly hasHydratedSession: boolean;
   readonly seq: number;
 }
@@ -89,6 +92,10 @@ export interface KachufulViewState {
   readonly events: readonly KachufulViewEvent[];
   readonly scoreboard: readonly KachufulScoreRow[];
   readonly result: KachufulResultView | null;
+  /** Running games-won tally for this sitting, surviving Play Again. */
+  readonly series: FamilySeries;
+  /** The sole family-series leader tonight, or null when tied / unplayed. */
+  readonly seriesLeaderName: string | null;
 }
 
 export type KachufulIntent =
@@ -96,7 +103,11 @@ export type KachufulIntent =
   | { readonly type: 'setHumanName'; readonly humanName: string }
   | { readonly type: 'setDifficulty'; readonly difficulty: BotDifficulty }
   | { readonly type: 'setLocale'; readonly locale: Locale }
-  | { readonly type: 'hydrateSession'; readonly humanName?: string }
+  | {
+      readonly type: 'hydrateSession';
+      readonly humanName?: string;
+      readonly series?: FamilySeries;
+    }
   | { readonly type: 'toggleReducedMotion' }
   | { readonly type: 'start' }
   | { readonly type: 'placeBid'; readonly bid: number }

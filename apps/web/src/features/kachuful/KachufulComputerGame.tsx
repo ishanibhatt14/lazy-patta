@@ -13,6 +13,10 @@ import { LocaleSwitcher } from '../../../components/game/LocaleSwitcher';
 import { ImmersivePod } from '../../../components/game/immersive/ImmersivePod';
 import { ImmersiveResultOverlay } from '../../../components/game/immersive/ImmersiveResultOverlay';
 import { ImmersiveScene } from '../../../components/game/immersive/ImmersiveScene';
+import {
+  type FamilySeries,
+  normalizeFamilySeries,
+} from '../../../lib/computer-game/family-series';
 import { driveToResult, previewResultRequested } from '../../../lib/computer-game/preview-result';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
 import { trackGrowthEvent } from '../../../lib/growth/analytics';
@@ -42,21 +46,32 @@ const DIFFICULTY_LABEL_KEY: Record<
 };
 const SESSION_STORAGE_KEY = 'lazy-patta:kachuful-session:v1';
 
-function readStoredName(): string | undefined {
-  if (typeof window === 'undefined') return undefined;
+interface StoredKachufulSession {
+  readonly humanName?: string;
+  readonly series?: FamilySeries;
+}
+
+function readStoredSession(): StoredKachufulSession {
+  if (typeof window === 'undefined') return {};
   const raw = window.localStorage.getItem(SESSION_STORAGE_KEY);
-  if (!raw) return undefined;
+  if (!raw) return {};
   try {
-    const parsed = JSON.parse(raw) as { humanName?: string };
-    return typeof parsed.humanName === 'string' ? parsed.humanName : undefined;
+    const parsed = JSON.parse(raw) as { humanName?: unknown; series?: unknown };
+    return {
+      humanName: typeof parsed.humanName === 'string' ? parsed.humanName : undefined,
+      series: parsed.series === undefined ? undefined : normalizeFamilySeries(parsed.series),
+    };
   } catch {
-    return undefined;
+    return {};
   }
 }
 
-function writeStoredName(state: KachufulControllerState): void {
+function writeStoredSession(state: KachufulControllerState): void {
   if (typeof window === 'undefined' || !state.hasHydratedSession) return;
-  window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ humanName: state.humanName }));
+  window.localStorage.setItem(
+    SESSION_STORAGE_KEY,
+    JSON.stringify({ humanName: state.humanName, series: state.series }),
+  );
 }
 
 /** A `?seed=` query param makes the deal reproducible for visual-regression runs. */
@@ -700,10 +715,7 @@ function KachufulResult({
       ? format('kachuful.winnersAnnounce', { names: result.winnerNames.join(', ') })
       : format('kachuful.winnerAnnounce', { name: result.winnerNames[0] ?? '' });
 
-  const seriesLeader = view.scoreboard.reduce<(typeof view.scoreboard)[number] | null>(
-    (leader, row) => (!leader || row.totalScore > leader.totalScore ? row : leader),
-    null,
-  );
+  const seriesLeaderName = view.seriesLeaderName;
   const onShare = async (): Promise<void> => {
     const shareable = buildShareableGameResult({
       gameSlug: 'kachuful',
@@ -711,7 +723,7 @@ function KachufulResult({
       winnerDisplayName: result.winnerNames[0],
       playerCount: view.playerCount,
       roundNumber: view.roundNumber,
-      seriesLeaderDisplayName: seriesLeader?.playerName,
+      seriesLeaderDisplayName: seriesLeaderName ?? undefined,
       t: translator,
     });
     const outcome = await shareGameResult(shareable, translator);
@@ -728,6 +740,9 @@ function KachufulResult({
         heroSeat
           ? { seatId: heroSeat.id, initial: heroSeat.avatarInitial, isSelf: heroSeat.isSelf }
           : null
+      }
+      highlight={
+        seriesLeaderName ? format('series.leaderLine', { name: seriesLeaderName }) : undefined
       }
       playAgainLabel={t('kachuful.playAgain')}
       onRematch={onRematch}
@@ -963,11 +978,12 @@ export function KachufulComputerGame({
 
   useEffect(() => {
     if (initialConfig) return;
-    dispatch({ type: 'hydrateSession', humanName: readStoredName() });
+    const stored = readStoredSession();
+    dispatch({ type: 'hydrateSession', humanName: stored.humanName, series: stored.series });
   }, [initialConfig]);
 
   useEffect(() => {
-    writeStoredName(state);
+    writeStoredSession(state);
   }, [state]);
 
   useEffect(() => {

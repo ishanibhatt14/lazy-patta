@@ -897,6 +897,8 @@
   "results.headlineWithWinner": "{name} Lazy Patta પર {game} જીત્યા",
   "results.headlineGeneric": "અમે Lazy Patta પર {game} પૂરી કરી",
   "results.shareText": "{headline}\n\nખેલાડીઓ: {count}\n\nઅમને હરાવી શકો છો?\n{url}",
+  "series.leaderLine": "આજે રાત્રે {name} આગળ છે",
+  "series.gamesPlayed": "આજે રાત્રે {count} રમતો",
   "settings.confirmBeforePlay": "રમતાં પહેલાં ખાતરી કરો",
   "settings.confirmBeforePlayHint": "કાર્ડ એકવાર ટૅપ કરીને ગોઠવો, પછી રમવા માટે ફરી ટૅપ કરો.",
   "settings.confirmTapAgain": "રમવા માટે ફરી ટૅપ કરો.",

@@ -897,6 +897,8 @@
   "results.headlineWithWinner": "{name} won {game} on Lazy Patta",
   "results.headlineGeneric": "We finished {game} on Lazy Patta",
   "results.shareText": "{headline}\n\nPlayers: {count}\n\nThink you can beat us?\n{url}",
+  "series.leaderLine": "{name} is ahead tonight",
+  "series.gamesPlayed": "{count} games tonight",
   "settings.confirmBeforePlay": "Confirm before playing",
   "settings.confirmBeforePlayHint": "Tap a card once to line it up, then tap again to play it.",
   "settings.confirmTapAgain": "Tap again to play.",
