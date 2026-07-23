@@ -859,6 +859,7 @@
   "mobile.install.title": "Add Lazy Patta to your home screen",
   "mobile.install.body": "Open the family table in one tap, even offline.",
   "mobile.install.cta": "Add to home screen",
+  "mobile.install.iosStep": "Tap the Share button, then choose “Add to Home Screen.”",
   "mobile.install.dismiss": "Not now",
   "mobile.setup.learnHint": "Read how to play first.",
   "mobile.rooms.title": "Family rooms",

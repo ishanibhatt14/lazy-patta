@@ -859,6 +859,7 @@
   "mobile.install.title": "Lazy Patta को होम स्क्रीन पर जोड़ें",
   "mobile.install.body": "परिवार की मेज़ एक टैप में खोलें, ऑफ़लाइन भी।",
   "mobile.install.cta": "होम स्क्रीन पर जोड़ें",
+  "mobile.install.iosStep": "शेयर बटन दबाएँ, फिर “होम स्क्रीन पर जोड़ें” चुनें।",
   "mobile.install.dismiss": "अभी नहीं",
   "mobile.setup.learnHint": "पहले नियम पढ़ें।",
   "mobile.rooms.title": "परिवार के कमरे",

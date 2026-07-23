@@ -1,5 +1,6 @@
 import { Suspense, type ReactElement } from 'react';
 
+import { RoomsInstallNudge } from '../../../components/mobile/RoomsInstallNudge';
 import { OnlineHub } from '../../../components/rooms/OnlineHub';
 import { AuthContextProvider } from '../../../lib/auth/auth-context';
 
@@ -14,9 +15,12 @@ import { AuthContextProvider } from '../../../lib/auth/auth-context';
 export default function MobileRoomsPage(): ReactElement {
   return (
     <AuthContextProvider>
-      <Suspense fallback={null}>
-        <OnlineHub />
-      </Suspense>
+      <div className="flex flex-col items-center gap-4">
+        <RoomsInstallNudge />
+        <Suspense fallback={null}>
+          <OnlineHub />
+        </Suspense>
+      </div>
     </AuthContextProvider>
   );
 }
