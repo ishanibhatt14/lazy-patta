@@ -73,6 +73,21 @@ describe('Lal Satti web controller', () => {
     expect(view.events[0]?.messageKey).toBe('lalSatti.eventStarted');
   });
 
+  it('honors the all-sevens-open preset by opening every suit with its seven', () => {
+    const controller = createLalSattiController(seededRng(2));
+    const state = controller.dispatch(
+      { ...controller.initialState, presetId: 'lal-satti-all-sevens-open' },
+      { type: 'start' },
+    );
+    const view = selectLalSattiViewState(state);
+
+    expect(view.lanes.every((lane) => lane.cards.length === 1)).toBe(true);
+    expect(view.lanes.every((lane) => lane.cards[0]?.rank === '7')).toBe(true);
+    const hands = state.game?.players.flatMap((player) => player.hand) ?? [];
+    expect(hands).toHaveLength(48);
+    expect(hands.some((card) => card.rank === '7')).toBe(false);
+  });
+
   it('applies a human legal play through the engine boundary', () => {
     const { controller, state: started } = startedController(4);
     const state = advanceToHumanTurn(controller, started);

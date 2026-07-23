@@ -950,6 +950,7 @@
   "family.memberBadge": "Member",
   "family.unavailableTitle": "Families are unavailable",
   "family.unavailableBody": "We couldn't reach the family service. Try again in a moment.",
+  "houseRules.pickerLabel": "House rules",
   "houseRules.gadhaChor.classicGulamChor.label": "Classic Gulam Chor",
   "houseRules.gadhaChor.classicGulamChor.description": "One Jack is set aside so a single odd card is left; make pairs and pass to avoid being the Gadha Chor.",
   "houseRules.lalSatti.classicSevenOfHearts.label": "Seven of Hearts opens",

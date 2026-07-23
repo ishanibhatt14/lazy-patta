@@ -1,6 +1,7 @@
 'use client';
 
-import type { BotDifficulty } from '@lazy-patta/game-contracts';
+import { defaultPresetFor, presetsFor, type BotDifficulty } from '@lazy-patta/game-contracts';
+import type { MessageKey } from '@lazy-patta/localization';
 import Link from 'next/link';
 import type { ReactElement } from 'react';
 
@@ -39,6 +40,7 @@ export function defaultComputerConfig(game: GameDefinition): ComputerGameConfig 
     difficulty: game.computerOptions.defaultDifficulty,
     reducedMotion: false,
     confirmBeforePlay: false,
+    presetId: defaultPresetFor(game.slug).id,
   };
 }
 
@@ -61,6 +63,8 @@ export function MobileComputerGameSetup({
 }): ReactElement {
   const valid = config.gameSlug === game.slug && isValidPlayerCount(game, config.playerCount);
   const title = t.format('mobile.setup.title', { name: t.t(game.localization.nameKey) });
+  const presets = presetsFor(game.slug);
+  const activePresetId = config.presetId ?? defaultPresetFor(game.slug).id;
 
   return (
     <main className="flex min-h-[calc(100dvh-7rem)] flex-col justify-between gap-5">
@@ -81,6 +85,45 @@ export function MobileComputerGameSetup({
         </div>
 
         <div className="grid gap-5">
+          {presets.length > 1 ? (
+            <fieldset className="grid gap-2">
+              <legend className="text-sm font-black text-action-primary">
+                {t.t('houseRules.pickerLabel')}
+              </legend>
+              <div className="grid gap-2" role="group">
+                {presets.map((preset) => {
+                  const selected = preset.id === activePresetId;
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      aria-pressed={selected}
+                      className={[
+                        'grid gap-1 rounded-xl border px-4 py-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent',
+                        selected
+                          ? 'border-action-primary bg-action-primary text-text-onBrand'
+                          : 'border-action-primary/25 bg-background-canvas text-action-primary',
+                      ].join(' ')}
+                      onClick={() => onChange({ ...config, presetId: preset.id })}
+                    >
+                      <span className="text-sm font-black">
+                        {t.t(preset.labelKey as MessageKey)}
+                      </span>
+                      <span
+                        className={[
+                          'text-xs leading-5',
+                          selected ? 'text-text-onBrand/85' : 'text-text-primary/75',
+                        ].join(' ')}
+                      >
+                        {t.t(preset.descriptionKey as MessageKey)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
+          ) : null}
+
           <fieldset className="grid gap-2">
             <legend className="text-sm font-black text-action-primary">
               {t.t('computer.playerCount')}

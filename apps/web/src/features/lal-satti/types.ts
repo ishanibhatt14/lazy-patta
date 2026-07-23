@@ -58,6 +58,8 @@ export interface LalSattiControllerState {
   readonly difficulty: BotDifficulty;
   readonly locale: Locale;
   readonly reducedMotion: boolean;
+  /** Selected house-rule preset id (a real lal-satti rule pack id). */
+  readonly presetId: string;
   readonly game: LalSattiState | null;
   readonly events: readonly LalSattiViewEvent[];
   readonly roundScores: readonly LalSattiRoundScore[];

@@ -4,8 +4,11 @@ import {
   createEmptyTableau,
   lalSattiHandPoints,
   LalSattiEngine,
+  LAL_SATTI_ALL_SEVENS_OPEN,
+  LAL_SATTI_CLASSIC,
   sortCards,
   toTableauLanes,
+  type LalSattiRulePack,
 } from '@lazy-patta/lal-satti-engine';
 import type { Locale, MessageKey, MessageValues } from '@lazy-patta/localization';
 
@@ -28,6 +31,13 @@ const engine = new LalSattiEngine();
 const MIN_PLAYERS = 3;
 const MAX_PLAYERS = 6;
 
+const RULE_PACKS: readonly LalSattiRulePack[] = [LAL_SATTI_CLASSIC, LAL_SATTI_ALL_SEVENS_OPEN];
+
+/** Map a preset id to its rule pack, defaulting to the classic seven-of-hearts. */
+function rulePackFor(presetId: string): LalSattiRulePack {
+  return RULE_PACKS.find((pack) => pack.id === presetId) ?? LAL_SATTI_CLASSIC;
+}
+
 export interface LalSattiController {
   readonly initialState: LalSattiControllerState;
   dispatch(state: LalSattiControllerState, intent: LalSattiIntent): LalSattiControllerState;
@@ -41,6 +51,7 @@ function setupState(
   locale: Locale,
   playerCount = 4,
   difficulty: BotDifficulty = 'medium',
+  presetId: string = LAL_SATTI_CLASSIC.id,
 ): LalSattiControllerState {
   return {
     phase: 'setup',
@@ -49,6 +60,7 @@ function setupState(
     difficulty,
     locale,
     reducedMotion: false,
+    presetId,
     game: null,
     events: [],
     roundScores: [],
@@ -95,7 +107,7 @@ function startGame(state: LalSattiControllerState, rng: Rng): LalSattiController
   const game = engine.init(
     roster.map((entry) => entry.id),
     rng,
-    undefined,
+    rulePackFor(state.presetId),
     roster.filter((entry) => entry.isBot).map((entry) => entry.id),
   );
 
@@ -267,7 +279,7 @@ function dispatchWithRng(
       if (state.phase !== 'result') return state;
       return startGame(
         {
-          ...setupState(state.locale, state.playerCount, state.difficulty),
+          ...setupState(state.locale, state.playerCount, state.difficulty, state.presetId),
           humanName: state.humanName,
           reducedMotion: state.reducedMotion,
           roundScores: state.roundScores,

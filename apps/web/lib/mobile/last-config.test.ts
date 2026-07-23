@@ -10,6 +10,7 @@ const jhabbu: ComputerGameConfig = {
   difficulty: 'hard',
   reducedMotion: true,
   confirmBeforePlay: true,
+  presetId: 'gujarati-family-v1',
 };
 
 afterEach(() => {
@@ -20,6 +21,19 @@ describe('last-config persistence', () => {
   it('round-trips a confirmed config per game', () => {
     writeLastConfig(jhabbu);
     expect(readLastConfig('jhabbu')).toEqual(jhabbu);
+  });
+
+  it('remembers the chosen house-rule preset', () => {
+    writeLastConfig({ ...jhabbu, presetId: 'classic-bhabho-v1' });
+    expect(readLastConfig('jhabbu')?.presetId).toBe('classic-bhabho-v1');
+  });
+
+  it('falls back to the default preset for an unknown stored id', () => {
+    window.localStorage.setItem(
+      'lazy-patta:mobile-last-config:v1:jhabbu',
+      JSON.stringify({ ...jhabbu, presetId: 'not-a-real-preset' }),
+    );
+    expect(readLastConfig('jhabbu')?.presetId).toBe('gujarati-family-v1');
   });
 
   it('scopes memory per game slug', () => {

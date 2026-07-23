@@ -64,6 +64,8 @@ export interface JhabbuControllerState {
   readonly difficulty: BotDifficulty;
   readonly locale: Locale;
   readonly reducedMotion: boolean;
+  /** Selected house-rule preset id (a real jhabbu rule pack id). */
+  readonly presetId: string;
   readonly game: JhabbuState | null;
   readonly events: readonly JhabbuViewEvent[];
   readonly roundScores: readonly JhabbuRoundScore[];

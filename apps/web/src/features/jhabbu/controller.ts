@@ -1,5 +1,12 @@
 import { type BotDifficulty, type Card, type Rng } from '@lazy-patta/game-contracts';
-import { chooseJhabbuBotAction, JhabbuEngine, type JhabbuAction } from '@lazy-patta/jhabbu-engine';
+import {
+  chooseJhabbuBotAction,
+  JhabbuEngine,
+  JHABBU_CLASSIC_BHABHO,
+  JHABBU_GUJARATI_FAMILY,
+  type JhabbuAction,
+  type JhabbuRulePack,
+} from '@lazy-patta/jhabbu-engine';
 import type { Locale, MessageKey, MessageValues } from '@lazy-patta/localization';
 
 import { createCryptoRng } from '../../../lib/computer-game/rng';
@@ -21,6 +28,13 @@ const engine = new JhabbuEngine();
 const MIN_PLAYERS = 3;
 const MAX_PLAYERS = 6;
 
+const RULE_PACKS: readonly JhabbuRulePack[] = [JHABBU_GUJARATI_FAMILY, JHABBU_CLASSIC_BHABHO];
+
+/** Map a preset id to its rule pack, defaulting to the Gujarati family pack. */
+function rulePackFor(presetId: string): JhabbuRulePack {
+  return RULE_PACKS.find((pack) => pack.id === presetId) ?? JHABBU_GUJARATI_FAMILY;
+}
+
 export interface JhabbuController {
   readonly initialState: JhabbuControllerState;
   dispatch(state: JhabbuControllerState, intent: JhabbuIntent): JhabbuControllerState;
@@ -34,6 +48,7 @@ function setupState(
   locale: Locale,
   playerCount = 4,
   difficulty: BotDifficulty = 'medium',
+  presetId: string = JHABBU_GUJARATI_FAMILY.id,
 ): JhabbuControllerState {
   return {
     phase: 'setup',
@@ -42,6 +57,7 @@ function setupState(
     difficulty,
     locale,
     reducedMotion: false,
+    presetId,
     game: null,
     events: [],
     roundScores: [],
@@ -90,7 +106,7 @@ function startGame(state: JhabbuControllerState, rng: Rng): JhabbuControllerStat
   const game = engine.init(
     roster.map((entry) => entry.id),
     rng,
-    undefined,
+    rulePackFor(state.presetId),
     roster.filter((entry) => entry.isBot).map((entry) => entry.id),
   );
   const nextSeq = state.seq + 1;
@@ -335,7 +351,7 @@ function dispatchWithRng(
       if (state.phase !== 'result') return state;
       return startGame(
         {
-          ...setupState(state.locale, state.playerCount, state.difficulty),
+          ...setupState(state.locale, state.playerCount, state.difficulty, state.presetId),
           humanName: state.humanName,
           reducedMotion: state.reducedMotion,
           roundScores: state.roundScores,

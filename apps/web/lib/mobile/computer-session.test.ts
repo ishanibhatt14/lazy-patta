@@ -4,6 +4,7 @@ import {
   ComputerGameInitializer,
   ComputerGameSessionService,
   normalizeComputerGameConfig,
+  validateComputerGameConfig,
   type ComputerGameConfig,
 } from './computer-session';
 
@@ -31,6 +32,37 @@ describe('ComputerGameSessionService', () => {
     expect(() =>
       normalizeComputerGameConfig({ ...config, gameSlug: 'gadha-chor', difficulty: 'hard' }),
     ).not.toThrow();
+  });
+
+  it('resolves a valid house-rule preset and defaults an unknown one', () => {
+    expect(
+      normalizeComputerGameConfig({
+        ...config,
+        gameSlug: 'lal-satti',
+        playerCount: 4,
+        presetId: 'lal-satti-all-sevens-open',
+      }).presetId,
+    ).toBe('lal-satti-all-sevens-open');
+
+    expect(
+      normalizeComputerGameConfig({
+        ...config,
+        gameSlug: 'lal-satti',
+        playerCount: 4,
+        presetId: 'not-a-real-preset',
+      }).presetId,
+    ).toBe('lal-satti-classic-seven-of-hearts');
+  });
+
+  it('rejects a config carrying a preset id from another game', () => {
+    expect(() =>
+      validateComputerGameConfig({
+        ...config,
+        gameSlug: 'lal-satti',
+        playerCount: 4,
+        presetId: 'gujarati-family-v1',
+      }),
+    ).toThrow(/preset/i);
   });
 
   it('creates and restores a versioned local computer session', async () => {

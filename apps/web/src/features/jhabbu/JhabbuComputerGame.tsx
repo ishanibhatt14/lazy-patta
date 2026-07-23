@@ -937,6 +937,7 @@ export function JhabbuComputerGame({
       playerCount: initialConfig?.playerCount ?? controller.initialState.playerCount,
       humanName: initialConfig?.humanName ?? controller.initialState.humanName,
       difficulty: initialConfig?.difficulty ?? controller.initialState.difficulty,
+      presetId: initialConfig?.presetId ?? controller.initialState.presetId,
       reducedMotion: initialConfig?.reducedMotion ?? prefersReducedMotion(),
       hasHydratedSession: initialConfig ? true : controller.initialState.hasHydratedSession,
     },

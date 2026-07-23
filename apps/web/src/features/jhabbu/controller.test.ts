@@ -66,6 +66,16 @@ describe('Jhabbu web controller', () => {
     expect(view.events[0]?.messageKey).toBe('jhabbu.eventStarted');
   });
 
+  it('threads the selected house-rule preset into the engine rule pack', () => {
+    const controller = createJhabbuController(seededRng(12));
+    const state = controller.dispatch(
+      { ...controller.initialState, presetId: 'classic-bhabho-v1' },
+      { type: 'start' },
+    );
+
+    expect(state.game?.rulePack.id).toBe('classic-bhabho-v1');
+  });
+
   it('highlights only legal human cards and applies a play through the engine boundary', () => {
     const { controller, state: started } = startedController(14);
     const state = advanceToHumanTurn(controller, started);

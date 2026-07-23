@@ -1,4 +1,4 @@
-import type { BotDifficulty } from '@lazy-patta/game-contracts';
+import { isKnownPreset, resolvePreset, type BotDifficulty } from '@lazy-patta/game-contracts';
 
 import {
   clampPlayerCount,
@@ -14,6 +14,8 @@ export interface ComputerGameConfig {
   readonly difficulty?: BotDifficulty;
   readonly reducedMotion: boolean;
   readonly confirmBeforePlay: boolean;
+  /** Regional house-rule preset id; resolves to a real engine rule pack. */
+  readonly presetId?: string;
 }
 
 export interface ComputerGameSession {
@@ -77,6 +79,9 @@ export function normalizeComputerGameConfig(config: ComputerGameConfig): Compute
       : undefined,
     reducedMotion: config.reducedMotion,
     confirmBeforePlay: config.confirmBeforePlay,
+    // Always resolve to a real, engine-backed preset (falls back to the game's
+    // default when the requested id is missing or unknown).
+    presetId: resolvePreset(game.slug, config.presetId).id,
   };
 }
 
@@ -86,6 +91,9 @@ export function validateComputerGameConfig(config: ComputerGameConfig): void {
   if (!isValidPlayerCount(game, config.playerCount)) throw new Error('Invalid player count.');
   if (config.difficulty !== undefined && !['easy', 'medium', 'hard'].includes(config.difficulty)) {
     throw new Error('Invalid difficulty.');
+  }
+  if (config.presetId !== undefined && !isKnownPreset(game.slug, config.presetId)) {
+    throw new Error('Invalid house-rule preset.');
   }
 }
 

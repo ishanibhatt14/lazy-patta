@@ -43,6 +43,7 @@ export function readLastConfig(slug: GameSlug): ComputerGameConfig | null {
       difficulty: parsed.difficulty,
       reducedMotion: parsed.reducedMotion === true,
       confirmBeforePlay: parsed.confirmBeforePlay === true,
+      presetId: typeof parsed.presetId === 'string' ? parsed.presetId : undefined,
     });
     validateComputerGameConfig(normalized);
     return normalized;
