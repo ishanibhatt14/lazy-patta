@@ -949,5 +949,17 @@
   "family.organizerBadge": "आयोजक",
   "family.memberBadge": "सदस्य",
   "family.unavailableTitle": "परिवार उपलब्ध नहीं हैं",
-  "family.unavailableBody": "हम परिवार सेवा तक नहीं पहुँच सके। थोड़ी देर में फिर कोशिश करें।"
+  "family.unavailableBody": "हम परिवार सेवा तक नहीं पहुँच सके। थोड़ी देर में फिर कोशिश करें।",
+  "houseRules.gadhaChor.classicGulamChor.label": "क्लासिक गुलाम चोर",
+  "houseRules.gadhaChor.classicGulamChor.description": "एक गुलाम अलग रख दिया जाता है ताकि एक अकेला पत्ता बचे; जोड़ी बनाएँ और पास करें ताकि आप गधा चोर न बनें.",
+  "houseRules.lalSatti.classicSevenOfHearts.label": "लाल सत्ती से शुरुआत",
+  "houseRules.lalSatti.classicSevenOfHearts.description": "7♥ टेबल शुरू करता है, हर रंग अपने सत्ते से आगे बढ़ता है, और सभी अपना हाथ खाली करने की होड़ में लगते हैं.",
+  "houseRules.lalSatti.allSevensOpen.label": "सभी सत्ते खुले",
+  "houseRules.lalSatti.allSevensOpen.description": "हर रंग अपने सत्ते के साथ टेबल पर पहले से शुरू होता है, जिससे राउंड तेज़ और ज़्यादा खुला बनता है.",
+  "houseRules.jhabbu.gujaratiFamily.label": "गुजराती परिवार",
+  "houseRules.jhabbu.gujaratiFamily.description": "हुकुम का इक्का शुरू करता है, पहली चाल छोड़ दी जाती है, और थुल्ला चाल को तुरंत खत्म कर देता है — हमारे घर के नियम.",
+  "houseRules.jhabbu.classicBhabho.label": "क्लासिक भाभो",
+  "houseRules.jhabbu.classicBhabho.description": "वही फ़ॉलो-द-सूट खेल और दंड सीमा वाला जाना-पहचाना भाभो प्रकार.",
+  "houseRules.kachuful.familyDescending.label": "परिवार अवरोही",
+  "houseRules.kachuful.familyDescending.description": "हर राउंड में कम पत्ते बाँटें, अपनी चालें बिल्कुल सही बताएँ, और अंक के लिए अपना बोल ठीक-ठीक पूरा करें."
 }

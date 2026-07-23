@@ -949,5 +949,17 @@
   "family.organizerBadge": "Organizer",
   "family.memberBadge": "Member",
   "family.unavailableTitle": "Families are unavailable",
-  "family.unavailableBody": "We couldn't reach the family service. Try again in a moment."
+  "family.unavailableBody": "We couldn't reach the family service. Try again in a moment.",
+  "houseRules.gadhaChor.classicGulamChor.label": "Classic Gulam Chor",
+  "houseRules.gadhaChor.classicGulamChor.description": "One Jack is set aside so a single odd card is left; make pairs and pass to avoid being the Gadha Chor.",
+  "houseRules.lalSatti.classicSevenOfHearts.label": "Seven of Hearts opens",
+  "houseRules.lalSatti.classicSevenOfHearts.description": "The 7♥ starts the table, each suit builds out from its own seven, and everyone races to empty their hand.",
+  "houseRules.lalSatti.allSevensOpen.label": "All sevens open",
+  "houseRules.lalSatti.allSevensOpen.description": "Every suit begins with its seven already on the table for a faster, more open round.",
+  "houseRules.jhabbu.gujaratiFamily.label": "Gujarati family",
+  "houseRules.jhabbu.gujaratiFamily.description": "The Ace of Spades leads, the first trick is discarded, and a Thulla ends the trick at once — our home-table rules.",
+  "houseRules.jhabbu.classicBhabho.label": "Classic Bhabho",
+  "houseRules.jhabbu.classicBhabho.description": "The familiar Bhabho variant with the same follow-the-suit play and penalty limit.",
+  "houseRules.kachuful.familyDescending.label": "Family descending",
+  "houseRules.kachuful.familyDescending.description": "Deal fewer cards each round, call your tricks exactly, and hit your bid on the nose to score."
 }

@@ -1,5 +1,6 @@
 export * from './cards';
 export * from './rule-pack';
+export * from './house-rules';
 export * from './rng';
 export * from './difficulty';
 export * from './state';

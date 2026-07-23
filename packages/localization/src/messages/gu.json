@@ -949,5 +949,17 @@
   "family.organizerBadge": "આયોજક",
   "family.memberBadge": "સભ્ય",
   "family.unavailableTitle": "કુટુંબો ઉપલબ્ધ નથી",
-  "family.unavailableBody": "અમે કુટુંબ સેવા સુધી પહોંચી શક્યા નહીં. થોડી વારમાં ફરી પ્રયાસ કરો."
+  "family.unavailableBody": "અમે કુટુંબ સેવા સુધી પહોંચી શક્યા નહીં. થોડી વારમાં ફરી પ્રયાસ કરો.",
+  "houseRules.gadhaChor.classicGulamChor.label": "ક્લાસિક ગુલામ ચોર",
+  "houseRules.gadhaChor.classicGulamChor.description": "એક ગુલામ બાજુ પર મૂકાય છે જેથી એક એકલું પત્તું બચે; જોડી બનાવો અને પાસ કરો જેથી તમે ગધા ચોર ન બનો.",
+  "houseRules.lalSatti.classicSevenOfHearts.label": "લાલ સત્તીથી શરૂઆત",
+  "houseRules.lalSatti.classicSevenOfHearts.description": "7♥ ટેબલ શરૂ કરે છે, દરેક રંગ પોતાના સાત્તાથી આગળ વધે છે, અને બધા પોતાનો હાથ ખાલી કરવાની હોડમાં લાગે છે.",
+  "houseRules.lalSatti.allSevensOpen.label": "બધા સાત્તા ખુલ્લા",
+  "houseRules.lalSatti.allSevensOpen.description": "દરેક રંગ પોતાના સાત્તા સાથે ટેબલ પર પહેલેથી શરૂ થાય, જેથી રાઉન્ડ ઝડપી અને વધુ ખુલ્લો બને.",
+  "houseRules.jhabbu.gujaratiFamily.label": "ગુજરાતી કુટુંબ",
+  "houseRules.jhabbu.gujaratiFamily.description": "એક્કો કાળી શરૂ કરે છે, પહેલી હાથ પડતી મૂકાય છે, અને થુલ્લા હાથને તરત જ પૂરો કરે છે — આપણા ઘરના નિયમો.",
+  "houseRules.jhabbu.classicBhabho.label": "ક્લાસિક ભાભો",
+  "houseRules.jhabbu.classicBhabho.description": "એ જ ફોલો-ધ-સૂટ રમત અને દંડ મર્યાદા સાથેનો જાણીતો ભાભો પ્રકાર.",
+  "houseRules.kachuful.familyDescending.label": "કુટુંબ ઉતરતું",
+  "houseRules.kachuful.familyDescending.description": "દરેક રાઉન્ડમાં ઓછા પત્તા વહેંચો, તમારા હાથ ચોક્કસ કહો, અને પોઈન્ટ માટે તમારો બોલ બરાબર પૂરો કરો."
 }
