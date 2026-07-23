@@ -60,12 +60,20 @@ export function PlayLauncher(): ReactElement {
             <p className="mt-4 text-base leading-7 text-text-primary">{t('mobile.games.body')}</p>
           </div>
 
-          <Link
-            href="/play/online"
-            className="inline-flex min-h-12 items-center justify-center rounded-md border border-action-primary/30 bg-surface-primary px-5 text-sm font-bold text-action-primary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-          >
-            {t('mobile.hero.secondaryCta')}
-          </Link>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Link
+              href="/play/online"
+              className="inline-flex min-h-12 items-center justify-center rounded-md border border-action-primary/30 bg-surface-primary px-5 text-sm font-bold text-action-primary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+            >
+              {t('mobile.hero.secondaryCta')}
+            </Link>
+            <Link
+              href="/play/family"
+              className="inline-flex min-h-12 items-center justify-center rounded-md border border-action-primary/30 bg-surface-primary px-5 text-sm font-bold text-action-primary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+            >
+              {t('family.hubTitle')}
+            </Link>
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3" id="games">

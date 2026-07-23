@@ -49,6 +49,14 @@ describe('PlayLauncher', () => {
     ).toHaveAttribute('href', '/play/online?game=jhabbu');
   });
 
+  it('links to the Family Hub from the launcher header', () => {
+    renderLauncher();
+    expect(screen.getByRole('link', { name: /Your families/i })).toHaveAttribute(
+      'href',
+      '/play/family',
+    );
+  });
+
   it('keeps the app launcher out of search indexing', () => {
     expect(metadata.robots).toMatchObject({
       index: false,
