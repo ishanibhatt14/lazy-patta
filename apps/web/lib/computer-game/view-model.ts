@@ -3,6 +3,7 @@ import { GadhaChorEngine } from '@lazy-patta/game-engine';
 import type { MessageKey } from '@lazy-patta/localization';
 
 import type { ControllerState } from './controller';
+import { familySeriesLeader } from './family-series';
 import { HUMAN_ID, rosterName, type RosterEntry } from './players';
 import type {
   ComputerGameResult,
@@ -152,5 +153,6 @@ export function selectViewState(state: ControllerState): ComputerGameViewState {
     statusValues: text.statusValues,
     events: state.events,
     recoverableError: state.recoverableError,
+    seriesLeaderName: familySeriesLeader(state.series)?.name ?? null,
   };
 }

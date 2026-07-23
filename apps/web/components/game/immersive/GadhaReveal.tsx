@@ -51,12 +51,14 @@ export function GadhaReveal({ locale, view, onRematch }: GadhaRevealProps): Reac
       ? format('computer.revealSafeCount', { count: winnerNames.length })
       : t('computer.revealNoSafe');
 
+  const seriesLeaderName = view.seriesLeaderName;
   const onShare = async (): Promise<void> => {
     const shareable = buildShareableGameResult({
       gameSlug: 'gadha-chor',
       gameName: t('games.gadhaChor.name'),
       ...(winnerNames[0] ? { winnerDisplayName: winnerNames[0] } : {}),
       playerCount: view.seats.length,
+      ...(seriesLeaderName ? { seriesLeaderDisplayName: seriesLeaderName } : {}),
       t: translator,
     });
     const outcome = await shareGameResult(shareable, translator);
@@ -78,6 +80,12 @@ export function GadhaReveal({ locale, view, onRematch }: GadhaRevealProps): Reac
 
         <h2 className="text-2xl font-bold text-action-primary">{heading}</h2>
         <p className="text-sm leading-6 text-text-primary">{t('computer.gadhaChorReveal')}</p>
+
+        {seriesLeaderName ? (
+          <p className="w-full rounded-xl bg-brand-accent px-4 py-2 text-sm font-bold text-text-onBrand">
+            {format('series.leaderLine', { name: seriesLeaderName })}
+          </p>
+        ) : null}
 
         <div className="w-full rounded-md bg-background-canvas px-4 py-3 text-sm text-text-primary">
           <p className="font-semibold text-action-primary">{t('computer.revealSafeTitle')}</p>

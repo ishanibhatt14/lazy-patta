@@ -1,6 +1,9 @@
 import type { GameAction, GameEvent, GameState, Rng } from '@lazy-patta/game-contracts';
 import { GadhaChorEngine, resolvePositionToken } from '@lazy-patta/game-engine';
 
+import { createTranslator } from '../i18n';
+
+import { EMPTY_FAMILY_SERIES, recordFamilySeriesGame, type FamilySeries } from './family-series';
 import { buildRoster, clampPlayerCount, HUMAN_ID, rosterName, type RosterEntry } from './players';
 import { createCryptoRng } from './rng';
 import { CLASSIC_GULAM_CHOR } from './rule-pack';
@@ -24,6 +27,8 @@ export interface ControllerState {
   readonly draw: DrawReveal | null;
   readonly events: readonly ComputerGameViewEvent[];
   readonly recoverableError: boolean;
+  /** Session-scoped games-won tally, surviving Play Again (keyed by name). */
+  readonly series: FamilySeries;
   /** Monotonic counter for stable event ids. */
   readonly seq: number;
 }
@@ -64,8 +69,36 @@ function setupState(settings: ComputerGameSettings): ControllerState {
     draw: null,
     events: [],
     recoverableError: false,
+    series: EMPTY_FAMILY_SERIES,
     seq: 0,
   };
+}
+
+/**
+ * The human seat carries an empty roster name (it renders as a localized "You"),
+ * so the family series must key it by that localized word — otherwise the human
+ * would never be credited a win.
+ */
+function seriesName(state: ControllerState, id: string): string {
+  if (id === HUMAN_ID) return createTranslator(state.settings.locale).t('computer.youName');
+  return rosterName(state.roster, id);
+}
+
+/**
+ * Enter the result phase, folding the finished game's safe players (everyone but
+ * the gadha chor) into the running family series. Called on the single
+ * transition into `result`, so each game is tallied exactly once.
+ */
+function enterResult(state: ControllerState): ControllerState {
+  const game = state.game;
+  const outcome = game ? engine.result(game) : null;
+  const series = outcome
+    ? recordFamilySeriesGame(
+        state.series,
+        outcome.winners.map((id) => seriesName(state, id)),
+      )
+    : state.series;
+  return { ...state, phase: 'result', series };
 }
 
 function appendEvent(
@@ -192,8 +225,8 @@ function botStep(state: ControllerState, rng: Rng): ControllerState {
 
 function clearDraw(state: ControllerState): ControllerState {
   if (!state.game || !state.draw) return state;
-  const complete = engine.isComplete(state.game);
-  return { ...state, draw: null, phase: complete ? 'result' : 'playing' };
+  const cleared: ControllerState = { ...state, draw: null };
+  return engine.isComplete(state.game) ? enterResult(cleared) : { ...cleared, phase: 'playing' };
 }
 
 function reduce(state: ControllerState, intent: ComputerGameIntent, rng: Rng): ControllerState {
@@ -228,8 +261,7 @@ function reduce(state: ControllerState, intent: ComputerGameIntent, rng: Rng): C
         };
       }
       if (state.phase === 'initialPairs' && state.game) {
-        const complete = engine.isComplete(state.game);
-        return { ...state, phase: complete ? 'result' : 'playing' };
+        return engine.isComplete(state.game) ? enterResult(state) : { ...state, phase: 'playing' };
       }
       return state;
     }
@@ -239,9 +271,12 @@ function reduce(state: ControllerState, intent: ComputerGameIntent, rng: Rng): C
       return botStep(state, rng);
     case 'clearDraw':
       return clearDraw(state);
-    case 'rematch':
+    case 'rematch': {
       if (state.phase !== 'result') return state;
-      return startGame(setupState(state.settings), rng);
+      // Deal a fresh game but carry the family series across Play Again.
+      const fresh = startGame(setupState(state.settings), rng);
+      return { ...fresh, series: state.series };
+    }
     case 'recover':
       return setupState(state.settings);
   }

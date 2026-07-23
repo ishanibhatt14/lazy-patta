@@ -50,6 +50,7 @@ function makeView(overrides: Partial<ComputerGameViewState> = {}): ComputerGameV
     statusKey: 'turn.yours',
     events: [],
     recoverableError: false,
+    seriesLeaderName: null,
     ...overrides,
   };
 }

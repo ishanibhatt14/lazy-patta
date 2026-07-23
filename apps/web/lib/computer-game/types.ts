@@ -88,6 +88,8 @@ export interface ComputerGameViewState {
   readonly statusValues?: Readonly<Record<string, string | number>>;
   readonly events: readonly ComputerGameViewEvent[];
   readonly recoverableError: boolean;
+  /** The sole family-series leader this sitting, or null when tied / unplayed. */
+  readonly seriesLeaderName: string | null;
 }
 
 export type ComputerGameIntent =

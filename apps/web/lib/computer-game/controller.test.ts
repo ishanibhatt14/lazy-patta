@@ -92,6 +92,21 @@ describe('computer game controller', () => {
     void controller;
   });
 
+  it('folds each finished game into the family series exactly once', () => {
+    const finished = drive(3, 99);
+    // One game played; every safe player (all but the Gadha Chor) is credited.
+    expect(finished.series.gamesPlayed).toBe(1);
+    const totalWins = Object.values(finished.series.winsByName).reduce((sum, n) => sum + n, 0);
+    expect(totalWins).toBe(2);
+  });
+
+  it('carries the family series across a rematch', () => {
+    const finished = drive(3, 99);
+    const controller = createComputerGameController(seededRng(99), finished.settings);
+    const again = controller.dispatch(finished, { type: 'rematch' });
+    expect(again.series).toEqual(finished.series);
+  });
+
   it('ignores an unknown position token instead of crashing', () => {
     const controller = createComputerGameController(seededRng(5));
     let state = controller.dispatch(controller.initialState, { type: 'start' });
