@@ -18,6 +18,7 @@ import {
   fetchRoomByCode,
   joinRoomByCode,
   leaveRoom,
+  rematchRoom,
   setSeatReady,
   type RoomWithSeats,
 } from '../../lib/rooms/rooms-client';
@@ -316,6 +317,12 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
               router.push('/play/online');
             })
           }
+          {...(isHost
+            ? {
+                onRematch: () =>
+                  withBusy(() => rematchRoom(getSupabaseBrowserClient(), room.id)),
+              }
+            : {})}
         />
       </>
     );

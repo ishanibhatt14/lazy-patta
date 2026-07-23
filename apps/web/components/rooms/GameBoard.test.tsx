@@ -137,6 +137,43 @@ describe('GameBoard (online, immersive felt table)', () => {
   });
 });
 
+describe('GameBoard (online, game-over overlay)', () => {
+  const COMPLETE_GADHA: GameRow = {
+    ...GADHA_GAME,
+    status: 'complete',
+    public_snapshot: { ...GADHA_SNAPSHOT, phase: 'completed', currentPlayerId: null },
+    result: { winners: ['u1', 'bot:1'], loser: 'bot:2' },
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    fetchLatestGame.mockResolvedValue(COMPLETE_GADHA);
+    fetchMyHand.mockResolvedValue([]);
+  });
+
+  it('offers Play again to the host and reports the rematch upward', async () => {
+    const user = userEvent.setup();
+    const onRematch = vi.fn();
+    render(
+      <GameBoard roomId="r1" seats={SEATS} userId="u1" locale="en" onRematch={onRematch} />,
+    );
+
+    expect(await screen.findByText(/game over/i)).toBeVisible();
+    await user.click(screen.getByRole('button', { name: /Play again/i }));
+    expect(onRematch).toHaveBeenCalledOnce();
+    // Sharing is always available on the result card.
+    expect(screen.getByRole('button', { name: /Share result/i })).toBeVisible();
+  });
+
+  it('omits Play again for a non-host viewer', async () => {
+    render(<GameBoard roomId="r1" seats={SEATS} userId="u1" locale="en" />);
+
+    expect(await screen.findByText(/game over/i)).toBeVisible();
+    expect(screen.queryByRole('button', { name: /Play again/i })).toBeNull();
+    expect(screen.getByRole('button', { name: /Share result/i })).toBeVisible();
+  });
+});
+
 function kachufulPlayer(
   id: string,
   overrides: Partial<KachufulPublicSnapshot['players'][number]> = {},

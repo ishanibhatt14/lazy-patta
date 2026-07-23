@@ -114,6 +114,16 @@ export async function leaveRoom(client: SupabaseClient, roomId: string): Promise
 }
 
 /**
+ * Host-only: return a finished room to the lobby so the same table can deal
+ * another hand. Seats and their ready flags are preserved server-side, so the
+ * host only needs to start again. Idempotent on a room already in the lobby.
+ */
+export async function rematchRoom(client: SupabaseClient, roomId: string): Promise<void> {
+  const { error } = await client.rpc('rematch_room', { p_room_id: roomId });
+  if (error) throw new Error(error.message);
+}
+
+/**
  * Refresh the caller's own seat presence stamp. Called on a heartbeat interval
  * so other members can tell this player is still connected. Failures are the
  * caller's to swallow — a missed heartbeat is expected on a flaky link and is
