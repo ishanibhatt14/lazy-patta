@@ -2,11 +2,18 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
+  addFamilyFavoriteGame,
   createFamilyGroup,
+  fetchFamilyFavoriteGames,
   fetchFamilyGroupMembers,
+  fetchFamilyRecentTables,
+  fetchFamilySeriesResults,
   fetchMyFamilyGroups,
   joinFamilyGroupByCode,
   leaveFamilyGroup,
+  recordFamilySeriesResult,
+  recordFamilyTable,
+  removeFamilyFavoriteGame,
   renameFamilyGroup,
 } from './family-groups-client';
 
@@ -142,5 +149,110 @@ describe('fetchFamilyGroupMembers', () => {
     expect(builder.eq).toHaveBeenCalledWith('group_id', 'g1');
     expect(builder.order).toHaveBeenCalledWith('joined_at', { ascending: true });
     expect(result).toEqual(members);
+  });
+});
+
+describe('favourite games', () => {
+  it('pins a game through the add_family_favorite_game RPC', async () => {
+    const { client, rpc } = clientWithRpc();
+    await addFamilyFavoriteGame(client, 'g1', 'lal_satti');
+    expect(rpc).toHaveBeenCalledWith('add_family_favorite_game', {
+      p_group_id: 'g1',
+      p_game_key: 'lal_satti',
+    });
+  });
+
+  it('unpins a game through the remove_family_favorite_game RPC', async () => {
+    const { client, rpc } = clientWithRpc();
+    await removeFamilyFavoriteGame(client, 'g1', 'jhabbu');
+    expect(rpc).toHaveBeenCalledWith('remove_family_favorite_game', {
+      p_group_id: 'g1',
+      p_game_key: 'jhabbu',
+    });
+  });
+
+  it('propagates a non-member rejection when pinning', async () => {
+    const { client } = clientWithRpc({ error: { message: 'not a member of this family' } });
+    await expect(addFamilyFavoriteGame(client, 'g1', 'kachuful')).rejects.toThrow(
+      'not a member of this family',
+    );
+  });
+
+  it('reads favourites oldest pin first', async () => {
+    const favorites = [{ group_id: 'g1', game_key: 'gadha_chor', added_by: 'u1' }];
+    const { client, from, builder } = clientWithQuery({ data: favorites });
+    const result = await fetchFamilyFavoriteGames(client, 'g1');
+    expect(from).toHaveBeenCalledWith('family_group_favorite_games');
+    expect(builder.eq).toHaveBeenCalledWith('group_id', 'g1');
+    expect(builder.order).toHaveBeenCalledWith('added_at', { ascending: true });
+    expect(result).toEqual(favorites);
+  });
+});
+
+describe('recent tables', () => {
+  it('records a table through the record_family_table RPC', async () => {
+    const row = { id: 't1', group_id: 'g1', game_key: 'gadha_chor', room_code: 'BH2026' };
+    const { client, rpc } = clientWithRpc({ data: row });
+    const result = await recordFamilyTable(client, 'g1', 'gadha_chor', 'BH2026');
+    expect(rpc).toHaveBeenCalledWith('record_family_table', {
+      p_group_id: 'g1',
+      p_game_key: 'gadha_chor',
+      p_room_code: 'BH2026',
+    });
+    expect(result).toEqual(row);
+  });
+
+  it('reads recent tables newest first', async () => {
+    const tables = [{ id: 't1', group_id: 'g1', game_key: 'gadha_chor', room_code: 'BH2026' }];
+    const { client, from, builder } = clientWithQuery({ data: tables });
+    const result = await fetchFamilyRecentTables(client, 'g1');
+    expect(from).toHaveBeenCalledWith('family_group_recent_tables');
+    expect(builder.order).toHaveBeenCalledWith('played_at', { ascending: false });
+    expect(result).toEqual(tables);
+  });
+});
+
+describe('series results', () => {
+  it('records a series through the record_family_series_result RPC', async () => {
+    const row = { id: 's1', group_id: 'g1', game_key: 'lal_satti', winner_display_name: 'Ba' };
+    const { client, rpc } = clientWithRpc({ data: row });
+    const result = await recordFamilySeriesResult(client, 'g1', {
+      gameKey: 'lal_satti',
+      winnerUserId: 'u2',
+      winnerDisplayName: 'Ba',
+      roundsPlayed: 5,
+      summary: { scores: [1, 2] },
+    });
+    expect(rpc).toHaveBeenCalledWith('record_family_series_result', {
+      p_group_id: 'g1',
+      p_game_key: 'lal_satti',
+      p_winner_user_id: 'u2',
+      p_winner_display_name: 'Ba',
+      p_rounds_played: 5,
+      p_summary: { scores: [1, 2] },
+    });
+    expect(result).toEqual(row);
+  });
+
+  it('defaults optional fields to null and an empty summary', async () => {
+    const { client, rpc } = clientWithRpc({ data: { id: 's2' } });
+    await recordFamilySeriesResult(client, 'g1', { gameKey: 'kachuful' });
+    expect(rpc).toHaveBeenCalledWith('record_family_series_result', {
+      p_group_id: 'g1',
+      p_game_key: 'kachuful',
+      p_winner_user_id: null,
+      p_winner_display_name: null,
+      p_rounds_played: null,
+      p_summary: {},
+    });
+  });
+
+  it('reads series history newest first', async () => {
+    const results = [{ id: 's1', group_id: 'g1', game_key: 'lal_satti' }];
+    const { client, from, builder } = clientWithQuery({ data: results });
+    const result = await fetchFamilySeriesResults(client, 'g1');
+    expect(from).toHaveBeenCalledWith('family_group_series_results');
+    expect(builder.order).toHaveBeenCalledWith('recorded_at', { ascending: false });
+    expect(result).toEqual(results);
   });
 });

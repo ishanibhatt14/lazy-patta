@@ -1,14 +1,20 @@
 import { type SupabaseClient } from '@supabase/supabase-js';
 
+import { type OnlineGameKey } from '../rooms/rooms-client';
+
 /**
- * Typed wrappers over the family-group RPCs (migration 0020). A family group is
- * an optional, persistent circle ("Bhatt Family") that outlives any single room.
- * Every mutation goes through a SECURITY DEFINER function — clients hold no write
- * grants — so this module never issues an INSERT/UPDATE/DELETE directly. Reads
- * rely on RLS to scope rows to the caller's own memberships.
+ * Typed wrappers over the family-group RPCs (migrations 0020 & 0021). A family
+ * group is an optional, persistent circle ("Bhatt Family") that outlives any
+ * single room, along with the attributes it keeps between sessions: favourite
+ * games, recently-played tables, and past series results. Every mutation goes
+ * through a SECURITY DEFINER function — clients hold no write grants — so this
+ * module never issues an INSERT/UPDATE/DELETE directly. Reads rely on RLS to
+ * scope rows to the caller's own memberships.
  */
 
 export type FamilyRole = 'organizer' | 'member';
+
+export type FamilyGameKey = OnlineGameKey;
 
 export interface FamilyGroup {
   readonly id: string;
@@ -105,4 +111,146 @@ export async function fetchFamilyGroupMembers(
     .order('joined_at', { ascending: true });
   if (error) throw new Error(error.message);
   return (data ?? []) as FamilyGroupMember[];
+}
+
+// ---------------------------------------------------------------------------
+// Family attributes (migration 0021): favourite games, recent tables, series.
+// ---------------------------------------------------------------------------
+
+export interface FamilyFavoriteGame {
+  readonly group_id: string;
+  readonly game_key: FamilyGameKey;
+  readonly added_by: string | null;
+  readonly added_at?: string;
+}
+
+export interface FamilyRecentTable {
+  readonly id: string;
+  readonly group_id: string;
+  readonly game_key: FamilyGameKey;
+  readonly room_code: string;
+  readonly played_at?: string;
+  readonly recorded_by: string | null;
+}
+
+export interface FamilySeriesResult {
+  readonly id: string;
+  readonly group_id: string;
+  readonly game_key: FamilyGameKey;
+  readonly winner_user_id: string | null;
+  readonly winner_display_name: string | null;
+  readonly rounds_played: number | null;
+  readonly summary: Record<string, unknown>;
+  readonly recorded_at?: string;
+  readonly recorded_by: string | null;
+}
+
+/** Pin a game to the family's favourites (idempotent). Members only. */
+export async function addFamilyFavoriteGame(
+  client: SupabaseClient,
+  groupId: string,
+  gameKey: FamilyGameKey,
+): Promise<void> {
+  const { error } = await client.rpc('add_family_favorite_game', {
+    p_group_id: groupId,
+    p_game_key: gameKey,
+  });
+  if (error) throw new Error(error.message);
+}
+
+/** Unpin a game from the family's favourites. Members only. */
+export async function removeFamilyFavoriteGame(
+  client: SupabaseClient,
+  groupId: string,
+  gameKey: FamilyGameKey,
+): Promise<void> {
+  const { error } = await client.rpc('remove_family_favorite_game', {
+    p_group_id: groupId,
+    p_game_key: gameKey,
+  });
+  if (error) throw new Error(error.message);
+}
+
+/** The family's favourite games, oldest pin first. RLS-scoped to members. */
+export async function fetchFamilyFavoriteGames(
+  client: SupabaseClient,
+  groupId: string,
+): Promise<readonly FamilyFavoriteGame[]> {
+  const { data, error } = await client
+    .from('family_group_favorite_games')
+    .select('*')
+    .eq('group_id', groupId)
+    .order('added_at', { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as FamilyFavoriteGame[];
+}
+
+/** Record (or refresh) a table the family sat at. Deduped by code server-side. */
+export async function recordFamilyTable(
+  client: SupabaseClient,
+  groupId: string,
+  gameKey: FamilyGameKey,
+  roomCode: string,
+): Promise<FamilyRecentTable> {
+  return unwrap<FamilyRecentTable>(
+    await client.rpc('record_family_table', {
+      p_group_id: groupId,
+      p_game_key: gameKey,
+      p_room_code: roomCode,
+    }),
+  );
+}
+
+/** The family's recent tables, newest first. RLS-scoped to members. */
+export async function fetchFamilyRecentTables(
+  client: SupabaseClient,
+  groupId: string,
+): Promise<readonly FamilyRecentTable[]> {
+  const { data, error } = await client
+    .from('family_group_recent_tables')
+    .select('*')
+    .eq('group_id', groupId)
+    .order('played_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as FamilyRecentTable[];
+}
+
+export interface RecordFamilySeriesResultInput {
+  readonly gameKey: FamilyGameKey;
+  readonly winnerUserId?: string | null;
+  readonly winnerDisplayName?: string | null;
+  readonly roundsPlayed?: number | null;
+  readonly summary?: Record<string, unknown>;
+}
+
+/** Append a finished series to the family's history. Members only. */
+export async function recordFamilySeriesResult(
+  client: SupabaseClient,
+  groupId: string,
+  input: RecordFamilySeriesResultInput,
+): Promise<FamilySeriesResult> {
+  return unwrap<FamilySeriesResult>(
+    await client.rpc('record_family_series_result', {
+      p_group_id: groupId,
+      p_game_key: input.gameKey,
+      p_winner_user_id: input.winnerUserId ?? null,
+      p_winner_display_name: input.winnerDisplayName ?? null,
+      p_rounds_played: input.roundsPlayed ?? null,
+      p_summary: input.summary ?? {},
+    }),
+  );
+}
+
+/** The family's series history, newest first. RLS-scoped to members. */
+export async function fetchFamilySeriesResults(
+  client: SupabaseClient,
+  groupId: string,
+): Promise<readonly FamilySeriesResult[]> {
+  const { data, error } = await client
+    .from('family_group_series_results')
+    .select('*')
+    .eq('group_id', groupId)
+    .order('recorded_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as FamilySeriesResult[];
 }
