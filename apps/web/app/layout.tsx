@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from 'next';
 import { cookies } from 'next/headers';
 import type { ReactElement, ReactNode } from 'react';
 
+import { ServiceWorkerRegistrar } from '../components/pwa/ServiceWorkerRegistrar';
 import { PREFERRED_LOCALE_COOKIE, resolveLocale } from '../lib/locale/preference';
 import { PreferredLocaleProvider } from '../lib/locale/preferred-locale-context';
 import { THEME_BOOT_SCRIPT } from '../lib/mobile/theme';
@@ -92,6 +93,7 @@ export default async function RootLayout({
       </head>
       <body className="bg-background-canvas text-text-primary">
         <PreferredLocaleProvider initialLocale={initialLocale}>{children}</PreferredLocaleProvider>
+        <ServiceWorkerRegistrar />
       </body>
     </html>
   );
