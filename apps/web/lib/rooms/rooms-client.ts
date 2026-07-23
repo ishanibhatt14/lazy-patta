@@ -20,6 +20,8 @@ export interface Room {
   readonly max_seats: number;
   readonly locale: RoomLocale;
   readonly game_key: OnlineGameKey;
+  /** Host's chosen house-rule preset id, or null for the game's default (0022). */
+  readonly ruleset_preset?: string | null;
   readonly created_at?: string;
 }
 
@@ -53,6 +55,8 @@ export interface CreateRoomInput {
   readonly locale?: RoomLocale;
   readonly displayName?: string;
   readonly gameKey?: OnlineGameKey;
+  /** House-rule preset id; omit for the game's default variant. */
+  readonly presetId?: string;
 }
 
 export async function createRoom(
@@ -66,6 +70,7 @@ export async function createRoom(
       p_locale: input.locale ?? 'en',
       p_display_name: input.displayName ?? null,
       p_game_key: gameKey,
+      p_ruleset_preset: input.presetId ?? null,
     }),
   );
 }

@@ -2,11 +2,13 @@ import type { Card, PlayerId, Rng, Suit } from '@lazy-patta/game-contracts';
 import {
   chooseJhabbuBotAction,
   JhabbuEngine,
+  JHABBU_CLASSIC_BHABHO,
   JHABBU_GUJARATI_FAMILY,
   type JhabbuAction,
   type JhabbuEvent,
   type JhabbuPlayerStatus,
   type JhabbuResult,
+  type JhabbuRulePack,
   type JhabbuState,
   type JhabbuTrickCard,
 } from '@lazy-patta/jhabbu-engine';
@@ -113,9 +115,22 @@ function isVersionConflict(error: { code?: string; message?: string } | null): b
   return error.code === 'PT409' || (error.message ?? '').includes('version conflict');
 }
 
-export function initialJhabbuState(playerIds: readonly PlayerId[]): JhabbuState {
+const JHABBU_RULE_PACKS: readonly JhabbuRulePack[] = [
+  JHABBU_GUJARATI_FAMILY,
+  JHABBU_CLASSIC_BHABHO,
+];
+
+/** Resolve a room's persisted preset id to a rule pack (default: gujarati family). */
+export function jhabbuRulePackFor(presetId: string | null | undefined): JhabbuRulePack {
+  return JHABBU_RULE_PACKS.find((pack) => pack.id === presetId) ?? JHABBU_GUJARATI_FAMILY;
+}
+
+export function initialJhabbuState(
+  playerIds: readonly PlayerId[],
+  rulePack: JhabbuRulePack = JHABBU_GUJARATI_FAMILY,
+): JhabbuState {
   const botIds = playerIds.filter(isBotId);
-  return withBotFlags(engine.init(playerIds, cryptoRng(), JHABBU_GUJARATI_FAMILY, botIds));
+  return withBotFlags(engine.init(playerIds, cryptoRng(), rulePack, botIds));
 }
 
 export async function persistJhabbuStart(

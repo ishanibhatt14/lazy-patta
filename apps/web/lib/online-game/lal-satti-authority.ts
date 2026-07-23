@@ -2,11 +2,13 @@ import type { Card, PlayerId, Rng } from '@lazy-patta/game-contracts';
 import {
   chooseLalSattiBotAction,
   LalSattiEngine,
+  LAL_SATTI_ALL_SEVENS_OPEN,
   LAL_SATTI_CLASSIC,
   type LalSattiAction,
   type LalSattiEvent,
   type LalSattiPlayerStatus,
   type LalSattiResult,
+  type LalSattiRulePack,
   type LalSattiState,
   type LalSattiTableau,
 } from '@lazy-patta/lal-satti-engine';
@@ -87,9 +89,22 @@ function isVersionConflict(error: { code?: string; message?: string } | null): b
   return error.code === 'PT409' || (error.message ?? '').includes('version conflict');
 }
 
-export function initialLalSattiState(playerIds: readonly PlayerId[]): LalSattiState {
+const LAL_SATTI_RULE_PACKS: readonly LalSattiRulePack[] = [
+  LAL_SATTI_CLASSIC,
+  LAL_SATTI_ALL_SEVENS_OPEN,
+];
+
+/** Resolve a room's persisted preset id to a rule pack (default: classic). */
+export function lalSattiRulePackFor(presetId: string | null | undefined): LalSattiRulePack {
+  return LAL_SATTI_RULE_PACKS.find((pack) => pack.id === presetId) ?? LAL_SATTI_CLASSIC;
+}
+
+export function initialLalSattiState(
+  playerIds: readonly PlayerId[],
+  rulePack: LalSattiRulePack = LAL_SATTI_CLASSIC,
+): LalSattiState {
   const botIds = playerIds.filter(isBotId);
-  return withBotFlags(engine.init(playerIds, cryptoRng(), LAL_SATTI_CLASSIC, botIds));
+  return withBotFlags(engine.init(playerIds, cryptoRng(), rulePack, botIds));
 }
 
 export async function persistLalSattiStart(

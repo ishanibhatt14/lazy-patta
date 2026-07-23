@@ -16,6 +16,7 @@ const migrationsDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'migra
 const schema = readFileSync(join(migrationsDir, '0004_rooms.sql'), 'utf8');
 const rpcs = readFileSync(join(migrationsDir, '0005_room_rpcs.sql'), 'utf8');
 const onlineGameKeys = readFileSync(join(migrationsDir, '0008_online_game_keys.sql'), 'utf8');
+const houseRules = readFileSync(join(migrationsDir, '0022_room_house_rules.sql'), 'utf8');
 
 const ROOM_TABLES = [
   'public.rooms',
@@ -104,5 +105,57 @@ describe('online room game keys (structural)', () => {
     );
     expect(lower).toContain('insert into public.games (room_id, game_key, status');
     expect(lower).toContain('v_room.game_key');
+  });
+});
+
+describe('room house-rule preset (structural, 0022)', () => {
+  it('adds a nullable ruleset_preset column to rooms', () => {
+    const lower = houseRules.toLowerCase();
+    expect(lower).toContain('alter table public.rooms');
+    expect(lower).toContain('add column if not exists ruleset_preset text');
+  });
+
+  it('constrains each preset id to its own game_key (or NULL)', () => {
+    const match = houseRules.match(
+      /add constraint rooms_ruleset_preset_check check \([\s\S]*?\);/i,
+    );
+    expect(match).not.toBeNull();
+    const body = match?.[0].toLowerCase() ?? '';
+    expect(body).toContain('ruleset_preset is null');
+    expect(body).toContain("game_key = 'lal_satti'");
+    expect(body).toContain("'lal-satti-classic-seven-of-hearts', 'lal-satti-all-sevens-open'");
+    expect(body).toContain("game_key = 'jhabbu'");
+    expect(body).toContain("'gujarati-family-v1', 'classic-bhabho-v1'");
+  });
+
+  it('drops the old 4-arg create_room so the 5-arg overload is unambiguous', () => {
+    expect(houseRules.toLowerCase()).toContain(
+      'drop function if exists public.create_room(smallint, text, text, text)',
+    );
+  });
+
+  it('recreates create_room with a defaulted preset arg, pinned search_path, and auth check', () => {
+    const match = houseRules.match(
+      /create or replace function public\.create_room\b[\s\S]*?\$\$;/i,
+    );
+    expect(match).not.toBeNull();
+    const body = match?.[0].toLowerCase() ?? '';
+    expect(body).toContain('p_ruleset_preset text default null');
+    expect(body).toContain('security definer');
+    expect(body).toContain('set search_path = public');
+    expect(body).toContain('auth.uid()');
+    expect(body).toContain('unsupported house-rule preset for game');
+    expect(body).toContain(
+      'insert into public.rooms (code, host_id, max_seats, locale, game_key, ruleset_preset)',
+    );
+  });
+
+  it('revokes the 5-arg create_room from public and grants it to authenticated', () => {
+    expect(houseRules).toMatch(
+      /revoke all on function public\.create_room\(smallint, text, text, text, text\)[\s\S]*?from public/i,
+    );
+    expect(houseRules).toMatch(
+      /grant execute on function public\.create_room\(smallint, text, text, text, text\)[\s\S]*?to authenticated/i,
+    );
   });
 });

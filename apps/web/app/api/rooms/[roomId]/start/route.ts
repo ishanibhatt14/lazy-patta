@@ -10,6 +10,7 @@ import {
 import {
   advanceJhabbuBots,
   initialJhabbuState,
+  jhabbuRulePackFor,
   JHABBU_GUJARATI_FAMILY,
   persistJhabbuStart,
 } from '../../../../../lib/online-game/jhabbu-authority';
@@ -22,6 +23,7 @@ import {
 import {
   advanceLalSattiBots,
   initialLalSattiState,
+  lalSattiRulePackFor,
   LAL_SATTI_CLASSIC,
   persistLalSattiStart,
 } from '../../../../../lib/online-game/lal-satti-authority';
@@ -127,14 +129,14 @@ export async function POST(request: Request, ctx: Context): Promise<Response> {
 
   try {
     if (gameKey === 'lal_satti') {
-      const opening = initialLalSattiState(playerIds);
+      const opening = initialLalSattiState(playerIds, lalSattiRulePackFor(room.ruleset_preset));
       const gameId = await persistLalSattiStart(admin, roomId, opening);
       const finalState = await advanceLalSattiBots(admin, gameId, opening);
       return NextResponse.json({ ok: true, gameId, stateVersion: finalState.stateVersion });
     }
 
     if (gameKey === 'jhabbu') {
-      const opening = initialJhabbuState(playerIds);
+      const opening = initialJhabbuState(playerIds, jhabbuRulePackFor(room.ruleset_preset));
       const gameId = await persistJhabbuStart(admin, roomId, opening);
       const finalState = await advanceJhabbuBots(admin, gameId, opening);
       return NextResponse.json({ ok: true, gameId, stateVersion: finalState.stateVersion });
