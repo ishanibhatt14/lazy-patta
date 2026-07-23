@@ -153,12 +153,23 @@ describe('fetchFamilyGroupMembers', () => {
 });
 
 describe('favourite games', () => {
-  it('pins a game through the add_family_favorite_game RPC', async () => {
+  it('pins a game through the add_family_favorite_game RPC (default preset)', async () => {
     const { client, rpc } = clientWithRpc();
     await addFamilyFavoriteGame(client, 'g1', 'lal_satti');
     expect(rpc).toHaveBeenCalledWith('add_family_favorite_game', {
       p_group_id: 'g1',
       p_game_key: 'lal_satti',
+      p_ruleset_preset: null,
+    });
+  });
+
+  it('carries the chosen house-rule preset when pinning', async () => {
+    const { client, rpc } = clientWithRpc();
+    await addFamilyFavoriteGame(client, 'g1', 'lal_satti', 'lal-satti-all-sevens-open');
+    expect(rpc).toHaveBeenCalledWith('add_family_favorite_game', {
+      p_group_id: 'g1',
+      p_game_key: 'lal_satti',
+      p_ruleset_preset: 'lal-satti-all-sevens-open',
     });
   });
 

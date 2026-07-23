@@ -120,6 +120,8 @@ export async function fetchFamilyGroupMembers(
 export interface FamilyFavoriteGame {
   readonly group_id: string;
   readonly game_key: FamilyGameKey;
+  /** The family's preferred house-rule preset for this game, or null for default (0023). */
+  readonly ruleset_preset?: string | null;
   readonly added_by: string | null;
   readonly added_at?: string;
 }
@@ -145,15 +147,21 @@ export interface FamilySeriesResult {
   readonly recorded_by: string | null;
 }
 
-/** Pin a game to the family's favourites (idempotent). Members only. */
+/**
+ * Pin a game to the family's favourites (idempotent). Members only. An optional
+ * preset id records the family's preferred house-rule variant for that game;
+ * re-pinning the same game refreshes the preset. Omit for the game's default.
+ */
 export async function addFamilyFavoriteGame(
   client: SupabaseClient,
   groupId: string,
   gameKey: FamilyGameKey,
+  presetId?: string,
 ): Promise<void> {
   const { error } = await client.rpc('add_family_favorite_game', {
     p_group_id: groupId,
     p_game_key: gameKey,
+    p_ruleset_preset: presetId ?? null,
   });
   if (error) throw new Error(error.message);
 }
