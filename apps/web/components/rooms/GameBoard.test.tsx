@@ -15,9 +15,21 @@ const drawCard = vi.fn();
 const submitLalSattiAction = vi.fn();
 const submitKachufulAction = vi.fn();
 
-vi.mock('../../lib/supabase/browser-client', () => ({
-  getSupabaseBrowserClient: (): Record<string, never> => ({}),
-}));
+// A stub browser client with just enough Realtime surface for the board's
+// subscribeToGame call: a chainable channel that records nothing, plus
+// removeChannel for teardown. Reads/writes are mocked separately below.
+vi.mock('../../lib/supabase/browser-client', () => {
+  const channel = {
+    on: (): unknown => channel,
+    subscribe: (): unknown => channel,
+  };
+  return {
+    getSupabaseBrowserClient: (): Record<string, unknown> => ({
+      channel: () => channel,
+      removeChannel: () => Promise.resolve({ status: 'ok' }),
+    }),
+  };
+});
 
 vi.mock('../../lib/online-game/games-client', () => ({
   fetchLatestGame: (...args: unknown[]) => fetchLatestGame(...args),

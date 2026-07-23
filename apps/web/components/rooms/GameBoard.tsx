@@ -47,6 +47,7 @@ import type {
   KachufulPublicSnapshot,
 } from '../../lib/online-game/kachuful-authority';
 import type { LalSattiPublicSnapshot } from '../../lib/online-game/lal-satti-authority';
+import { subscribeToGame } from '../../lib/rooms/realtime';
 import type { RoomSeat } from '../../lib/rooms/rooms-client';
 import { getSupabaseBrowserClient } from '../../lib/supabase/browser-client';
 import { PlayerHandFan as LalSattiHandFan } from '../../src/features/lal-satti/immersive/PlayerHandFan';
@@ -77,7 +78,7 @@ import '../../app/play/jhabbu/computer/jhabbu-game.css';
  * next active seat after the current player.
  */
 
-const POLL_MS = 2000;
+const POLL_MS = 15000;
 const CLOCKWISE_STEP = 1;
 const INVALID_CLEAR_MS = 700;
 
@@ -260,6 +261,13 @@ export function GameBoard({
     const id = setInterval(() => void refresh(), POLL_MS);
     return () => clearInterval(id);
   }, [refresh]);
+
+  // Live game updates: refetch the snapshot + own hand whenever the game row or
+  // the viewer's own private hand changes (RLS keeps the hand stream scoped to
+  // this user). The interval above stays on as a slower backstop.
+  useEffect(() => {
+    return subscribeToGame(getSupabaseBrowserClient(), roomId, userId, () => void refresh());
+  }, [roomId, userId, refresh]);
 
   const snapshot = game?.public_snapshot;
   const isActive = game?.status === 'active';

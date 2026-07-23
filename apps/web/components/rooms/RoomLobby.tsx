@@ -9,6 +9,7 @@ import { trackGrowthEvent } from '../../lib/growth/analytics';
 import { createTranslator } from '../../lib/i18n';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import { startGame } from '../../lib/online-game/games-client';
+import { subscribeToRoom } from '../../lib/rooms/realtime';
 import { rememberRecentRoom } from '../../lib/rooms/recent-rooms';
 import { classifyRoomError, type ClassifiedRoomError } from '../../lib/rooms/room-error';
 import {
@@ -29,10 +30,12 @@ import { RoomSharePanel } from './RoomSharePanel';
 /**
  * Room lobby. Joining is idempotent, so landing here (via create, join, or a
  * shared code link) simply ensures a seat and then reflects the room. Seat state
- * is polled on an interval — live realtime updates are a deferred follow-up.
+ * arrives over a Supabase Realtime subscription (see subscribeToRoom); a slow
+ * interval poll stays on as a backstop for a dropped socket or an environment
+ * without Realtime enabled.
  */
 
-const POLL_MS = 3000;
+const POLL_MS = 15000;
 
 function messageFor(error: unknown, fallback: string): string {
   return error instanceof Error && error.message ? error.message : fallback;
@@ -137,6 +140,15 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
     const id = setInterval(() => void refresh(), POLL_MS);
     return () => clearInterval(id);
   }, [joined, refresh]);
+
+  // Live seat/room updates. Refetch on any change to the room or its seats so a
+  // family member joining, readying up, or the host starting shows instantly —
+  // the interval above stays on as a slower backstop.
+  const roomId = data?.room.id;
+  useEffect(() => {
+    if (!joined || !roomId) return;
+    return subscribeToRoom(getSupabaseBrowserClient(), roomId, () => void refresh());
+  }, [joined, roomId, refresh]);
 
   useEffect(() => {
     if (initState.status !== 'loading') return;
