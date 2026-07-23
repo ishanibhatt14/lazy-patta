@@ -175,6 +175,27 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
     void loadBlocked();
   }, [joined, loadBlocked]);
 
+  // Early-funnel release telemetry: a lobby becoming visible, and the moment it
+  // first holds enough players to start, are the roadmap's "family is gathering"
+  // signals. Fire each once per room so a poll/Realtime refetch cannot
+  // double-count; the analytics layer strips any identifying fields on dispatch.
+  const firedLobbyView = useRef<Set<string>>(new Set());
+  const firedMinPlayers = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const lobbyRoom = data?.room;
+    if (!lobbyRoom || lobbyRoom.status !== 'lobby') return;
+    const slug = gameSlug(lobbyRoom.game_key);
+    const occupied = (data?.seats ?? []).filter((s) => s.occupant !== 'empty').length;
+    if (!firedLobbyView.current.has(lobbyRoom.id)) {
+      firedLobbyView.current.add(lobbyRoom.id);
+      trackGrowthEvent({ name: 'lobby_viewed', gameSlug: slug, playerCount: occupied });
+    }
+    if (occupied >= 2 && !firedMinPlayers.current.has(lobbyRoom.id)) {
+      firedMinPlayers.current.add(lobbyRoom.id);
+      trackGrowthEvent({ name: 'minimum_players_reached', gameSlug: slug, playerCount: occupied });
+    }
+  }, [data]);
+
   useEffect(() => {
     if (initState.status !== 'loading') return;
     setSlowInit(false);
@@ -320,7 +341,14 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
           {...(isHost
             ? {
                 onRematch: () =>
-                  withBusy(() => rematchRoom(getSupabaseBrowserClient(), room.id)),
+                  withBusy(async () => {
+                    await rematchRoom(getSupabaseBrowserClient(), room.id);
+                    trackGrowthEvent({
+                      name: 'rematch_started',
+                      gameSlug: gameSlug(room.game_key),
+                      playerCount: humanCount,
+                    });
+                  }),
               }
             : {})}
         />
@@ -426,7 +454,16 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
                   gameSlug: gameSlug(room.game_key),
                   playerCount: humanCount,
                 });
-                await startGame(getSupabaseBrowserClient(), room.id);
+                try {
+                  await startGame(getSupabaseBrowserClient(), room.id);
+                } catch (caught) {
+                  trackGrowthEvent({
+                    name: 'game_start_failed',
+                    gameSlug: gameSlug(room.game_key),
+                    code: classifyRoomError(caught).code,
+                  });
+                  throw caught;
+                }
                 trackGrowthEvent({
                   name: 'game_start_succeeded',
                   gameSlug: gameSlug(room.game_key),

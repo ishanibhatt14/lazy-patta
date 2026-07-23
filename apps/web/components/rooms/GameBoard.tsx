@@ -22,6 +22,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactElement,
   type ReactNode,
@@ -29,6 +30,8 @@ import {
 
 import type { HiddenCardSlot } from '../../lib/computer-game/types';
 import type { GameSlug } from '../../lib/game-discovery';
+import { trackGrowthEvent } from '../../lib/growth/analytics';
+import { gameLifecycleEvent, startedAtMsOf } from '../../lib/growth/room-telemetry';
 import { createTranslator } from '../../lib/i18n';
 import {
   drawCard,
@@ -282,6 +285,31 @@ export function GameBoard({
   useEffect(() => {
     return subscribeToGame(getSupabaseBrowserClient(), roomId, userId, () => void refresh());
   }, [roomId, userId, refresh]);
+
+  // Release telemetry: emit "family match started" once a live game is observed
+  // active, and "family match completed" (with the round duration) once it
+  // finishes — the roadmap's core signal that a real multi-device hand ran end to
+  // end. Fire-once per game id per phase so a poll/Realtime refetch cannot
+  // double-count; every seated client emits, and the analytics layer strips any
+  // identifying fields before dispatch.
+  const firedLifecycle = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!game || game.status === 'abandoned') return;
+    const key = `${game.id}:${game.status}`;
+    if (firedLifecycle.current.has(key)) return;
+    const playerCount = seats.filter((seat) => seat.occupant === 'human').length;
+    const event = gameLifecycleEvent({
+      status: game.status,
+      gameSlug: slugForGameKey(game.game_key),
+      playerCount,
+      startedAtMs: startedAtMsOf(game.created_at),
+      nowMs: Date.now(),
+    });
+    if (event) {
+      firedLifecycle.current.add(key);
+      trackGrowthEvent(event);
+    }
+  }, [game, seats]);
 
   const snapshot = game?.public_snapshot;
   const isActive = game?.status === 'active';
