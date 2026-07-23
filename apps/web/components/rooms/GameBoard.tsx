@@ -28,6 +28,7 @@ import {
 } from 'react';
 
 import type { HiddenCardSlot } from '../../lib/computer-game/types';
+import type { GameSlug } from '../../lib/game-discovery';
 import { createTranslator } from '../../lib/i18n';
 import {
   drawCard,
@@ -60,6 +61,8 @@ import { CourtyardBackdropPlaceholder } from '../game/art';
 import { OpponentDrawFan } from '../game/immersive/OpponentDrawFan';
 import { PlayerHandFan as GadhaHandFan } from '../game/immersive/PlayerHandFan';
 import { PlayerPod as GadhaPod } from '../game/immersive/PlayerPod';
+
+import { RoomEndActions } from './RoomEndActions';
 
 // The immersive felt/pod/hand primitives live in the solo game stylesheets; the
 // online board reuses those exact classes so both surfaces share one look.
@@ -94,6 +97,14 @@ function newActionId(): string {
 function initialFor(name: string): string {
   const trimmed = name.trim();
   return trimmed ? trimmed[0]!.toUpperCase() : '?';
+}
+
+/** Map the persisted room game key to the discovery slug used by share text. */
+function slugForGameKey(gameKey: string): GameSlug {
+  if (gameKey === 'lal_satti') return 'lal-satti';
+  if (gameKey === 'jhabbu') return 'jhabbu';
+  if (gameKey === 'kachuful') return 'kachuful';
+  return 'gadha-chor';
 }
 
 /** Honour the OS reduced-motion setting so the felt animations can rest. */
@@ -217,6 +228,8 @@ export interface GameBoardProps {
   readonly locale: Locale;
   readonly code?: string;
   readonly onLeave?: () => void;
+  /** Host-only: return the room to the lobby to deal a fresh hand. */
+  readonly onRematch?: () => void;
 }
 
 export function GameBoard({
@@ -226,6 +239,7 @@ export function GameBoard({
   locale,
   code,
   onLeave,
+  onRematch,
 }: GameBoardProps): ReactElement {
   const t = useMemo(() => createTranslator(locale), [locale]);
   const reducedMotion = usePrefersReducedMotion();
@@ -333,6 +347,7 @@ export function GameBoard({
           ? t.t('rooms.gameKachuful')
           : t.t('rooms.gameGadhaChor');
   const leaveLabel = t.t('rooms.leave');
+  const slug = slugForGameKey(game.game_key);
 
   if (game.game_key === 'jhabbu') {
     return (
@@ -353,6 +368,8 @@ export function GameBoard({
         leaveLabel={leaveLabel}
         code={code}
         onLeave={onLeave}
+        onRematch={onRematch}
+        slug={slug}
       />
     );
   }
@@ -377,6 +394,8 @@ export function GameBoard({
         leaveLabel={leaveLabel}
         code={code}
         onLeave={onLeave}
+        onRematch={onRematch}
+        slug={slug}
       />
     );
   }
@@ -401,6 +420,8 @@ export function GameBoard({
         leaveLabel={leaveLabel}
         code={code}
         onLeave={onLeave}
+        onRematch={onRematch}
+        slug={slug}
       />
     );
   }
@@ -429,7 +450,7 @@ export function GameBoard({
   const gadhaOverlay =
     game.status === 'complete' && result ? (
       <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 p-4">
-        <div className="flex max-w-sm flex-col items-center gap-1 rounded-lg bg-surface-primary px-5 py-4 text-center shadow-md">
+        <div className="flex max-w-sm flex-col items-center gap-3 rounded-lg bg-surface-primary px-5 py-4 text-center shadow-md">
           <span className="text-lg font-bold text-action-primary">{t.t('rooms.gameOver')}</span>
           <span className="text-sm text-text-primary">
             {result.winners.includes(userId)
@@ -438,6 +459,15 @@ export function GameBoard({
                 ? t.t('rooms.youAreGadhaChor')
                 : t.format('rooms.gadhaChorIs', { name: nameFor(result.loser) })}
           </span>
+          <RoomEndActions
+            locale={locale}
+            gameSlug={slug}
+            gameName={gameLabel}
+            {...(result.winners[0] ? { winnerDisplayName: nameFor(result.winners[0]) } : {})}
+            playerCount={gadhaSnapshot.players.length}
+            onRematch={onRematch}
+            busy={busy}
+          />
         </div>
       </div>
     ) : null;
@@ -526,6 +556,8 @@ interface LalSattiOnlineBoardProps {
   readonly leaveLabel: string;
   readonly code?: string;
   readonly onLeave?: () => void;
+  readonly onRematch?: () => void;
+  readonly slug: GameSlug;
 }
 
 function LalSattiOnlineBoard({
@@ -546,6 +578,8 @@ function LalSattiOnlineBoard({
   leaveLabel,
   code,
   onLeave,
+  onRematch,
+  slug,
 }: LalSattiOnlineBoardProps): ReactElement {
   const t = useMemo(() => createTranslator(locale), [locale]);
   const isActive = game.status === 'active';
@@ -634,6 +668,15 @@ function LalSattiOnlineBoard({
               ))}
             </ul>
           ) : null}
+          <RoomEndActions
+            locale={locale}
+            gameSlug={slug}
+            gameName={gameLabel}
+            {...(result.winnerIds[0] ? { winnerDisplayName: nameFor(result.winnerIds[0]) } : {})}
+            playerCount={snapshot.players.length}
+            onRematch={onRematch}
+            busy={busy}
+          />
         </div>
       </div>
     ) : null;
@@ -757,6 +800,8 @@ interface JhabbuOnlineBoardProps {
   readonly leaveLabel: string;
   readonly code?: string;
   readonly onLeave?: () => void;
+  readonly onRematch?: () => void;
+  readonly slug: GameSlug;
 }
 
 /**
@@ -785,6 +830,8 @@ function JhabbuOnlineBoard({
   leaveLabel,
   code,
   onLeave,
+  onRematch,
+  slug,
 }: JhabbuOnlineBoardProps): ReactElement {
   const t = useMemo(() => createTranslator(locale), [locale]);
   const isActive = game.status === 'active';
@@ -1041,6 +1088,17 @@ function JhabbuOnlineBoard({
                 </ol>
               </div>
             ) : null}
+            <RoomEndActions
+              locale={locale}
+              gameSlug={slug}
+              gameName={gameLabel}
+              {...(result.finishOrder[0]
+                ? { winnerDisplayName: nameFor(result.finishOrder[0]) }
+                : {})}
+              playerCount={snapshot.players.length}
+              onRematch={onRematch}
+              busy={busy}
+            />
             {onLeave ? (
               <button
                 type="button"
@@ -1075,6 +1133,8 @@ interface KachufulOnlineBoardProps {
   readonly leaveLabel: string;
   readonly code?: string;
   readonly onLeave?: () => void;
+  readonly onRematch?: () => void;
+  readonly slug: GameSlug;
 }
 
 /**
@@ -1106,6 +1166,8 @@ function KachufulOnlineBoard({
   leaveLabel,
   code,
   onLeave,
+  onRematch,
+  slug,
 }: KachufulOnlineBoardProps): ReactElement {
   const t = useMemo(() => createTranslator(locale), [locale]);
   const isActive = game.status === 'active';
@@ -1619,6 +1681,15 @@ function KachufulOnlineBoard({
                 </li>
               ))}
             </ol>
+            <RoomEndActions
+              locale={locale}
+              gameSlug={slug}
+              gameName={gameLabel}
+              {...(winnerNames[0] ? { winnerDisplayName: winnerNames[0] } : {})}
+              playerCount={snapshot.players.length}
+              onRematch={onRematch}
+              busy={busy}
+            />
             {onLeave ? (
               <button
                 type="button"
