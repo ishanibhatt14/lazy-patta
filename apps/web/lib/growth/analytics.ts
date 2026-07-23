@@ -5,6 +5,11 @@ export type ShareMethod = 'native' | 'whatsapp' | 'copy-link' | 'copy-code';
 export type GrowthEvent =
   | { readonly name: 'mobile_home_viewed' }
   | { readonly name: 'game_selected'; readonly gameSlug: GameSlug }
+  | { readonly name: 'family_hub_viewed'; readonly familyCount: number }
+  | { readonly name: 'family_group_create_started' }
+  | { readonly name: 'family_group_created' }
+  | { readonly name: 'family_group_join_started' }
+  | { readonly name: 'family_group_joined' }
   | { readonly name: 'family_room_create_started'; readonly gameSlug: GameSlug }
   | {
       readonly name: 'family_room_created';

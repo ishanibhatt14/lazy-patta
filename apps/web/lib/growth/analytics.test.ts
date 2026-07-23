@@ -14,6 +14,18 @@ describe('growth analytics contract', () => {
     ).not.toThrow();
   });
 
+  it('accepts the family-group lifecycle events without private fields', () => {
+    for (const event of [
+      { name: 'family_hub_viewed', familyCount: 2 },
+      { name: 'family_group_create_started' },
+      { name: 'family_group_created' },
+      { name: 'family_group_join_started' },
+      { name: 'family_group_joined' },
+    ] as const) {
+      expect(() => assertGrowthEventSafe(event)).not.toThrow();
+    }
+  });
+
   it('rejects forbidden analytics fields', () => {
     expect(() =>
       assertGrowthEventSafe({
