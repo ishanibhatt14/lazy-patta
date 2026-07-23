@@ -21,6 +21,14 @@ export function familyGameNameKey(gameKey: OnlineGameKey): MessageKey {
   return GAME_NAME_KEYS[gameKey];
 }
 
+/** The family game keys, in menu order, for pickers that let a member pick one. */
+export const FAMILY_GAME_KEYS: readonly OnlineGameKey[] = [
+  'gadha_chor',
+  'lal_satti',
+  'jhabbu',
+  'kachuful',
+];
+
 // The rooms allow-list uses underscores (lal_satti); the house-rules registry is
 // keyed by the hyphenated public slug (lal-satti). This bridges the two.
 const ONLINE_KEY_TO_SLUG: Record<OnlineGameKey, HouseRuleGameSlug> = {
@@ -29,6 +37,11 @@ const ONLINE_KEY_TO_SLUG: Record<OnlineGameKey, HouseRuleGameSlug> = {
   jhabbu: 'jhabbu',
   kachuful: 'kachuful',
 };
+
+/** The hyphenated public slug for a family game key (e.g. lal_satti → lal-satti). */
+export function familyGameSlug(gameKey: OnlineGameKey): HouseRuleGameSlug {
+  return ONLINE_KEY_TO_SLUG[gameKey];
+}
 
 /**
  * The message key for a stored house-rule preset's label, or null when the

@@ -262,3 +262,69 @@ export async function fetchFamilySeriesResults(
   if (error) throw new Error(error.message);
   return (data ?? []) as FamilySeriesResult[];
 }
+
+// ---------------------------------------------------------------------------
+// Scheduled game nights (migration 0024): a family's forward-looking plans.
+// ---------------------------------------------------------------------------
+
+export interface FamilyGameNight {
+  readonly id: string;
+  readonly group_id: string;
+  readonly game_key: FamilyGameKey | null;
+  readonly scheduled_for: string;
+  readonly note: string | null;
+  readonly created_by: string | null;
+  readonly created_at?: string;
+}
+
+export interface ScheduleFamilyGameNightInput {
+  /** ISO-8601 timestamp for when the family plans to play. */
+  readonly scheduledFor: string;
+  readonly gameKey?: FamilyGameKey | null;
+  readonly note?: string | null;
+}
+
+/** Propose a game night for the family. Members only. Returns the created row. */
+export async function scheduleFamilyGameNight(
+  client: SupabaseClient,
+  groupId: string,
+  input: ScheduleFamilyGameNightInput,
+): Promise<FamilyGameNight> {
+  return unwrap<FamilyGameNight>(
+    await client.rpc('schedule_family_game_night', {
+      p_group_id: groupId,
+      p_scheduled_for: input.scheduledFor,
+      p_game_key: input.gameKey ?? null,
+      p_note: input.note ?? null,
+    }),
+  );
+}
+
+/** Cancel a scheduled game night. Any member of its family may cancel; idempotent. */
+export async function cancelFamilyGameNight(
+  client: SupabaseClient,
+  nightId: string,
+): Promise<void> {
+  const { error } = await client.rpc('cancel_family_game_night', { p_night_id: nightId });
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * The family's upcoming game nights (scheduled_for from now on), soonest first.
+ * RLS-scoped to members. Past nights are filtered out client-side by the caller
+ * passing a `from` cutoff, defaulting to now.
+ */
+export async function fetchUpcomingFamilyGameNights(
+  client: SupabaseClient,
+  groupId: string,
+  from: Date = new Date(),
+): Promise<readonly FamilyGameNight[]> {
+  const { data, error } = await client
+    .from('family_group_game_nights')
+    .select('*')
+    .eq('group_id', groupId)
+    .gte('scheduled_for', from.toISOString())
+    .order('scheduled_for', { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as FamilyGameNight[];
+}

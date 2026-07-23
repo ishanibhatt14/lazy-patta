@@ -16,6 +16,7 @@ import { getSupabaseBrowserClient } from '../../lib/supabase/browser-client';
 import { Button } from '../Button';
 import { LoginPanel } from '../auth/LoginPanel';
 
+import { FamilyGameNights } from './FamilyGameNights';
 import { FamilyTablePanel } from './FamilyTablePanel';
 
 /**
@@ -171,7 +172,12 @@ export function FamilyHub(): ReactElement {
                   >
                     {expanded ? t.t('family.hideActivity') : t.t('family.viewActivity')}
                   </button>
-                  {expanded ? <FamilyTablePanel groupId={family.id} /> : null}
+                  {expanded ? (
+                    <div className="flex flex-col gap-4">
+                      <FamilyTablePanel groupId={family.id} />
+                      <FamilyGameNights groupId={family.id} familyName={family.name} />
+                    </div>
+                  ) : null}
                 </li>
               );
             })}

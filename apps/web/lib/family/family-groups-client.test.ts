@@ -8,13 +8,16 @@ import {
   fetchFamilyGroupMembers,
   fetchFamilyRecentTables,
   fetchFamilySeriesResults,
+  cancelFamilyGameNight,
   fetchMyFamilyGroups,
+  fetchUpcomingFamilyGameNights,
   joinFamilyGroupByCode,
   leaveFamilyGroup,
   recordFamilySeriesResult,
   recordFamilyTable,
   removeFamilyFavoriteGame,
   renameFamilyGroup,
+  scheduleFamilyGameNight,
 } from './family-groups-client';
 
 function clientWithRpc(result: { data?: unknown; error?: { message: string } | null } = {}) {
@@ -27,7 +30,7 @@ function clientWithRpc(result: { data?: unknown; error?: { message: string } | n
 function clientWithQuery(result: { data?: unknown; error?: { message: string } | null } = {}) {
   const resolved = { data: result.data ?? null, error: result.error ?? null };
   const builder: Record<string, unknown> = {};
-  for (const method of ['select', 'eq', 'order']) {
+  for (const method of ['select', 'eq', 'gte', 'order']) {
     builder[method] = vi.fn().mockReturnValue(builder);
   }
   // The last call in each chain is awaited; make the builder thenable.
@@ -265,5 +268,60 @@ describe('series results', () => {
     expect(from).toHaveBeenCalledWith('family_group_series_results');
     expect(builder.order).toHaveBeenCalledWith('recorded_at', { ascending: false });
     expect(result).toEqual(results);
+  });
+});
+
+describe('game nights', () => {
+  it('schedules a game night through the schedule_family_game_night RPC', async () => {
+    const row = { id: 'n1', group_id: 'g1', scheduled_for: '2026-08-02T19:30:00Z' };
+    const { client, rpc } = clientWithRpc({ data: row });
+    const result = await scheduleFamilyGameNight(client, 'g1', {
+      scheduledFor: '2026-08-02T19:30:00Z',
+      gameKey: 'lal_satti',
+      note: 'bring chai',
+    });
+    expect(rpc).toHaveBeenCalledWith('schedule_family_game_night', {
+      p_group_id: 'g1',
+      p_scheduled_for: '2026-08-02T19:30:00Z',
+      p_game_key: 'lal_satti',
+      p_note: 'bring chai',
+    });
+    expect(result).toEqual(row);
+  });
+
+  it('defaults game and note to null when omitted', async () => {
+    const { client, rpc } = clientWithRpc({ data: { id: 'n2' } });
+    await scheduleFamilyGameNight(client, 'g1', { scheduledFor: '2026-08-02T19:30:00Z' });
+    expect(rpc).toHaveBeenCalledWith('schedule_family_game_night', {
+      p_group_id: 'g1',
+      p_scheduled_for: '2026-08-02T19:30:00Z',
+      p_game_key: null,
+      p_note: null,
+    });
+  });
+
+  it('cancels a game night through the cancel_family_game_night RPC', async () => {
+    const { client, rpc } = clientWithRpc();
+    await cancelFamilyGameNight(client, 'n1');
+    expect(rpc).toHaveBeenCalledWith('cancel_family_game_night', { p_night_id: 'n1' });
+  });
+
+  it('reads upcoming game nights soonest first, filtering out the past', async () => {
+    const nights = [{ id: 'n1', group_id: 'g1', scheduled_for: '2026-08-02T19:30:00Z' }];
+    const { client, from, builder } = clientWithQuery({ data: nights });
+    const from0 = new Date('2026-07-23T00:00:00Z');
+    const result = await fetchUpcomingFamilyGameNights(client, 'g1', from0);
+    expect(from).toHaveBeenCalledWith('family_group_game_nights');
+    expect(builder.eq).toHaveBeenCalledWith('group_id', 'g1');
+    expect(builder.gte).toHaveBeenCalledWith('scheduled_for', from0.toISOString());
+    expect(builder.order).toHaveBeenCalledWith('scheduled_for', { ascending: true });
+    expect(result).toEqual(nights);
+  });
+
+  it('propagates a non-member rejection when scheduling', async () => {
+    const { client } = clientWithRpc({ error: { message: 'not a member of this family' } });
+    await expect(
+      scheduleFamilyGameNight(client, 'g1', { scheduledFor: '2026-08-02T19:30:00Z' }),
+    ).rejects.toThrow('not a member of this family');
   });
 });
