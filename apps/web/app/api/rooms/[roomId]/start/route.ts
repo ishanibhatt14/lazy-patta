@@ -26,7 +26,10 @@ import {
   persistLalSattiStart,
 } from '../../../../../lib/online-game/lal-satti-authority';
 import { getRequestUserId } from '../../../../../lib/online-game/route-context';
-import { findCapabilityByRoomGameKey, isRoomCapable } from '../../../../../lib/product-capabilities';
+import {
+  findCapabilityByRoomGameKey,
+  isRoomCapable,
+} from '../../../../../lib/product-capabilities';
 import {
   getSupabaseAdminClient,
   isAuthorityConfigured,

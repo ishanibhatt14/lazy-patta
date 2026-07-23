@@ -46,10 +46,7 @@ export async function reportPlayer(
 }
 
 /** Add a player to the caller's personal block list (idempotent). */
-export async function blockPlayer(
-  client: SupabaseClient,
-  blockedUserId: string,
-): Promise<void> {
+export async function blockPlayer(client: SupabaseClient, blockedUserId: string): Promise<void> {
   const { error } = await client.rpc('block_player', {
     p_blocked_user_id: blockedUserId,
   });
@@ -57,10 +54,7 @@ export async function blockPlayer(
 }
 
 /** Remove a player from the caller's block list. */
-export async function unblockPlayer(
-  client: SupabaseClient,
-  blockedUserId: string,
-): Promise<void> {
+export async function unblockPlayer(client: SupabaseClient, blockedUserId: string): Promise<void> {
   const { error } = await client.rpc('unblock_player', {
     p_blocked_user_id: blockedUserId,
   });

@@ -112,7 +112,10 @@ export function PlayerSafetyMenu({
           className="absolute right-0 top-9 z-10 flex w-56 flex-col gap-2 rounded-md border border-brand-accent/30 bg-surface-primary p-3 shadow-lg"
         >
           {reporting ? (
-            <div className="flex flex-col gap-2" aria-label={t.format('rooms.reportTitle', { name })}>
+            <div
+              className="flex flex-col gap-2"
+              aria-label={t.format('rooms.reportTitle', { name })}
+            >
               <p className="text-sm font-bold text-action-primary">
                 {t.format('rooms.reportTitle', { name })}
               </p>

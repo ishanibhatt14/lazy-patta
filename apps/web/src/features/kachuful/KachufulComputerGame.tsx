@@ -13,10 +13,7 @@ import { LocaleSwitcher } from '../../../components/game/LocaleSwitcher';
 import { ImmersivePod } from '../../../components/game/immersive/ImmersivePod';
 import { ImmersiveResultOverlay } from '../../../components/game/immersive/ImmersiveResultOverlay';
 import { ImmersiveScene } from '../../../components/game/immersive/ImmersiveScene';
-import {
-  type FamilySeries,
-  normalizeFamilySeries,
-} from '../../../lib/computer-game/family-series';
+import { type FamilySeries, normalizeFamilySeries } from '../../../lib/computer-game/family-series';
 import { driveToResult, previewResultRequested } from '../../../lib/computer-game/preview-result';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
 import { trackGrowthEvent } from '../../../lib/growth/analytics';
@@ -612,10 +609,7 @@ function PlayerHand({
         </div>
       </div>
       {hintKey ? (
-        <p
-          className="mt-1 text-center text-xs font-semibold text-text-onBrand"
-          aria-live="polite"
-        >
+        <p className="mt-1 text-center text-xs font-semibold text-text-onBrand" aria-live="polite">
           {t(hintKey)}
         </p>
       ) : null}

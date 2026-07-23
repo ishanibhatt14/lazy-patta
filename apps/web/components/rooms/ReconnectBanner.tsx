@@ -36,7 +36,8 @@ export function ReconnectBanner({
   const t = createTranslator(locale);
 
   const reconnecting = seats.filter(
-    (seat) => seat.occupant === 'human' && seatPresence(seat.last_seen_at, nowMs) === 'reconnecting',
+    (seat) =>
+      seat.occupant === 'human' && seatPresence(seat.last_seen_at, nowMs) === 'reconnecting',
   );
   if (reconnecting.length === 0) return null;
 
@@ -44,9 +45,7 @@ export function ReconnectBanner({
   const message = selfReconnecting
     ? t.t('rooms.reconnectingSelf')
     : t.format('rooms.reconnectingOthers', {
-        names: reconnecting
-          .map((seat) => seat.display_name ?? t.t('rooms.seatPlayer'))
-          .join(', '),
+        names: reconnecting.map((seat) => seat.display_name ?? t.t('rooms.seatPlayer')).join(', '),
       });
 
   return (
@@ -55,10 +54,7 @@ export function ReconnectBanner({
       aria-live="polite"
       className="flex items-center justify-center gap-2 rounded-md bg-brand-accent/15 px-3 py-2 text-center text-sm font-semibold text-action-primary"
     >
-      <span
-        aria-hidden
-        className="h-2 w-2 animate-pulse rounded-full bg-brand-accent"
-      />
+      <span aria-hidden className="h-2 w-2 animate-pulse rounded-full bg-brand-accent" />
       {message}
     </div>
   );

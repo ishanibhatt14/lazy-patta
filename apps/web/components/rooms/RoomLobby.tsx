@@ -132,7 +132,11 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
           const classified = classifyRoomError(caught);
           setInitError(classified);
           setError(t.t(classified.bodyKey));
-          setInitState({ status: 'error', code: classified.code, recoverable: classified.retryable });
+          setInitState({
+            status: 'error',
+            code: classified.code,
+            recoverable: classified.retryable,
+          });
         }
       }
     })();
@@ -283,9 +287,7 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
     const titleKey = isTimeout
       ? 'rooms.timeoutTitle'
       : (initError?.titleKey ?? 'rooms.unavailableTitle');
-    const bodyKey = isTimeout
-      ? 'rooms.timeoutBody'
-      : (initError?.bodyKey ?? 'rooms.errorGeneric');
+    const bodyKey = isTimeout ? 'rooms.timeoutBody' : (initError?.bodyKey ?? 'rooms.errorGeneric');
     // Non-retryable reasons (full, expired, missing) must not offer a
     // meaningless "Try Again" — only a fresh path forward.
     const canRetry = isTimeout || (initError?.retryable ?? true);

@@ -33,7 +33,10 @@ describe('gameLifecycleEvent', () => {
       playerCount: 2,
       nowMs: 5_000,
     });
-    expect(event).toMatchObject({ name: 'family_multiplayer_game_completed', roundDurationSeconds: 0 });
+    expect(event).toMatchObject({
+      name: 'family_multiplayer_game_completed',
+      roundDurationSeconds: 0,
+    });
   });
 
   it('never reports a negative duration from a clock skew', () => {

@@ -19,9 +19,7 @@ test.describe('online room surfaces', () => {
     await expect(page.locator('body')).not.toContainText(CRASH);
   });
 
-  test('degrades the online hub to sign-in or an honest unavailable fallback', async ({
-    page,
-  }) => {
+  test('degrades the online hub to sign-in or an honest unavailable fallback', async ({ page }) => {
     await page.goto('/play/online');
 
     // Whether the build has the table service configured (→ sign-in) or not

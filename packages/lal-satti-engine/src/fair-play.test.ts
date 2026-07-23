@@ -43,7 +43,11 @@ function scrambleHiddenHands(state: LalSattiState, actorIndex: number, rng: Rng)
   return { ...state, players };
 }
 
-function hiddenHandsChanged(before: LalSattiState, after: LalSattiState, actorIndex: number): boolean {
+function hiddenHandsChanged(
+  before: LalSattiState,
+  after: LalSattiState,
+  actorIndex: number,
+): boolean {
   return before.players.some((entry, index) => {
     if (index === actorIndex) return false;
     const ids = entry.hand.map((card) => card.id).join(',');

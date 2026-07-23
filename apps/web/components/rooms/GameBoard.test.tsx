@@ -154,9 +154,7 @@ describe('GameBoard (online, game-over overlay)', () => {
   it('offers Play again to the host and reports the rematch upward', async () => {
     const user = userEvent.setup();
     const onRematch = vi.fn();
-    render(
-      <GameBoard roomId="r1" seats={SEATS} userId="u1" locale="en" onRematch={onRematch} />,
-    );
+    render(<GameBoard roomId="r1" seats={SEATS} userId="u1" locale="en" onRematch={onRematch} />);
 
     expect(await screen.findByText(/game over/i)).toBeVisible();
     await user.click(screen.getByRole('button', { name: /Play again/i }));

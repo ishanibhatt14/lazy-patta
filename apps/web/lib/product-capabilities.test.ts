@@ -12,7 +12,12 @@ import {
   type ProductGameSlug,
 } from './product-capabilities';
 
-const PLAYABLE_SLUGS = ['gadha-chor', 'lal-satti', 'jhabbu', 'kachuful'] as const satisfies readonly GameSlug[];
+const PLAYABLE_SLUGS = [
+  'gadha-chor',
+  'lal-satti',
+  'jhabbu',
+  'kachuful',
+] as const satisfies readonly GameSlug[];
 const COMING_SOON_SLUGS = ['mendicot', '3-2-5'] as const satisfies readonly ProductGameSlug[];
 
 describe('GAME_CAPABILITIES', () => {
@@ -64,13 +69,10 @@ describe.each(PLAYABLE_SLUGS)('capability contract for %s', (slug) => {
 // LP-103: Home, mode sheets, game pages, Rooms and backend validation must read
 // the same status. These invariants keep the registries from drifting apart.
 describe('cross-registry consistency (LP-103)', () => {
-  it.each(PLAYABLE_SLUGS)(
-    'locks private-room availability to onlinePlayable for %s',
-    (slug) => {
-      const roomAvailable = GAME_CAPABILITIES[slug].availability.privateRoom === 'available';
-      expect(roomAvailable).toBe(GAME_DISCOVERY[slug].onlinePlayable);
-    },
-  );
+  it.each(PLAYABLE_SLUGS)('locks private-room availability to onlinePlayable for %s', (slug) => {
+    const roomAvailable = GAME_CAPABILITIES[slug].availability.privateRoom === 'available';
+    expect(roomAvailable).toBe(GAME_DISCOVERY[slug].onlinePlayable);
+  });
 
   it.each(PLAYABLE_SLUGS)('agrees on player limits across registries for %s', (slug) => {
     const cap = GAME_CAPABILITIES[slug].players;

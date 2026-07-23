@@ -1,12 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { describe, expect, it, vi } from 'vitest';
 
-import {
-  blockPlayer,
-  fetchBlockedUserIds,
-  reportPlayer,
-  unblockPlayer,
-} from './moderation-client';
+import { blockPlayer, fetchBlockedUserIds, reportPlayer, unblockPlayer } from './moderation-client';
 
 function clientWithRpc(result: { data?: unknown; error?: { message: string } | null }) {
   const rpc = vi.fn().mockResolvedValue({ data: result.data ?? null, error: result.error ?? null });
@@ -65,9 +60,10 @@ describe('blockPlayer / unblockPlayer', () => {
 
 describe('fetchBlockedUserIds', () => {
   it('returns the blocked ids as a set', async () => {
-    const select = vi
-      .fn()
-      .mockResolvedValue({ data: [{ blocked_user_id: 'a' }, { blocked_user_id: 'b' }], error: null });
+    const select = vi.fn().mockResolvedValue({
+      data: [{ blocked_user_id: 'a' }, { blocked_user_id: 'b' }],
+      error: null,
+    });
     const from = vi.fn(() => ({ select }));
     const client = { from } as unknown as SupabaseClient;
 
