@@ -16,6 +16,8 @@ import { getSupabaseBrowserClient } from '../../lib/supabase/browser-client';
 import { Button } from '../Button';
 import { LoginPanel } from '../auth/LoginPanel';
 
+import { FamilyTablePanel } from './FamilyTablePanel';
+
 /**
  * Signed-in landing for Family Groups: see the families you belong to, start a
  * new one, or join by code. A family is an optional, persistent circle that
@@ -36,6 +38,7 @@ export function FamilyHub(): ReactElement {
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState<'create' | 'join' | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
+  const [expandedId, setExpandedId] = useState<string | undefined>(undefined);
   const viewFired = useRef(false);
 
   const signedIn = state.status === 'signed-in';
@@ -147,17 +150,31 @@ export function FamilyHub(): ReactElement {
           <p className="text-sm text-text-primary">{t.t('family.empty')}</p>
         ) : (
           <ul className="flex flex-col gap-2">
-            {families.map((family) => (
-              <li
-                key={family.id}
-                className="flex items-center justify-between rounded-md border border-action-primary/20 bg-background-canvas px-3 py-2"
-              >
-                <span className="font-semibold text-text-primary">{family.name}</span>
-                <span className="text-xs uppercase tracking-wide text-text-primary/70">
-                  {t.format('family.codeOnCard', { code: family.join_code })}
-                </span>
-              </li>
-            ))}
+            {families.map((family) => {
+              const expanded = expandedId === family.id;
+              return (
+                <li
+                  key={family.id}
+                  className="flex flex-col gap-2 rounded-md border border-action-primary/20 bg-background-canvas px-3 py-2"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold text-text-primary">{family.name}</span>
+                    <span className="text-xs uppercase tracking-wide text-text-primary/70">
+                      {t.format('family.codeOnCard', { code: family.join_code })}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="self-start text-xs font-semibold text-action-primary underline"
+                    aria-expanded={expanded}
+                    onClick={() => setExpandedId(expanded ? undefined : family.id)}
+                  >
+                    {expanded ? t.t('family.hideActivity') : t.t('family.viewActivity')}
+                  </button>
+                  {expanded ? <FamilyTablePanel groupId={family.id} /> : null}
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

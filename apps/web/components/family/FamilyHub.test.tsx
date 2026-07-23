@@ -29,6 +29,10 @@ vi.mock('../../lib/family/family-groups-client', () => ({
 }));
 // LoginPanel is only rendered in the signed-out branch, which these tests avoid.
 vi.mock('../auth/LoginPanel', () => ({ LoginPanel: () => <div>login</div> }));
+// The activity panel has its own test; here we only assert it mounts on toggle.
+vi.mock('./FamilyTablePanel', () => ({
+  FamilyTablePanel: ({ groupId }: { groupId: string }) => <div>activity for {groupId}</div>,
+}));
 
 const GROUP = { id: 'g1', name: 'Bhatt Family', join_code: 'BH2026', created_by: 'u1' };
 
@@ -62,6 +66,19 @@ describe('FamilyHub', () => {
         familyCount: 1,
       }),
     );
+  });
+
+  it('toggles the activity panel for a family', async () => {
+    const user = userEvent.setup();
+    family.fetchMyFamilyGroups.mockResolvedValue([GROUP]);
+    render(<FamilyHub />);
+    await screen.findByText('Bhatt Family');
+
+    expect(screen.queryByText('activity for g1')).toBeNull();
+    await user.click(screen.getByRole('button', { name: /View activity/i }));
+    expect(screen.getByText('activity for g1')).toBeVisible();
+    await user.click(screen.getByRole('button', { name: /Hide activity/i }));
+    expect(screen.queryByText('activity for g1')).toBeNull();
   });
 
   it('shows the empty state when the caller has no families', async () => {
