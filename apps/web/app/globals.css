@@ -15,3 +15,16 @@ html[data-reduced-motion='true'] *::after {
   transition-duration: 0.001ms !important;
   scroll-behavior: auto !important;
 }
+
+/*
+ * The mobile "show suit letters" preference (Settings) sets this attribute on the
+ * document element. Every PlayingCard renders a per-suit initial that is hidden by
+ * default and revealed here, so the four suits stay distinguishable without
+ * relying on colour — a colour-blind and low-vision aid.
+ */
+.lp-suit-letter {
+  display: none;
+}
+html[data-suit-letters='true'] .lp-suit-letter {
+  display: inline-block;
+}

@@ -18,6 +18,18 @@ const SUIT_GLYPH: Record<Suit, string> = {
   spades: '♠',
 };
 
+/**
+ * Per-suit initials for the "show suit letters" accessibility preference. Kept
+ * visually present in the DOM but hidden by default; global CSS reveals them when
+ * the reader has opted in, so the four suits never rely on colour alone.
+ */
+const SUIT_LETTER: Record<Suit, string> = {
+  clubs: 'C',
+  diamonds: 'D',
+  hearts: 'H',
+  spades: 'S',
+};
+
 const RANK_LABEL: Record<Rank, string> = {
   '2': '2',
   '3': '3',
@@ -71,6 +83,7 @@ export function PlayingCard({
   const ink = isRedSuit(card.suit) ? 'text-card-suitRed' : 'text-card-suitBlack';
   const rank = RANK_LABEL[card.rank];
   const glyph = SUIT_GLYPH[card.suit];
+  const letter = SUIT_LETTER[card.suit];
 
   return (
     <div
@@ -81,6 +94,9 @@ export function PlayingCard({
       <div className={`flex flex-col items-start leading-none ${dims.corner}`}>
         <span className="font-bold">{rank}</span>
         <span aria-hidden>{glyph}</span>
+        <span aria-hidden className="lp-suit-letter font-black">
+          {letter}
+        </span>
       </div>
 
       <span aria-hidden className={`text-center ${dims.pip} leading-none`}>
@@ -90,6 +106,9 @@ export function PlayingCard({
       <div className={`flex rotate-180 flex-col items-start leading-none ${dims.corner}`}>
         <span className="font-bold">{rank}</span>
         <span aria-hidden>{glyph}</span>
+        <span aria-hidden className="lp-suit-letter font-black">
+          {letter}
+        </span>
       </div>
     </div>
   );

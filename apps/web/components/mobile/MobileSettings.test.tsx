@@ -11,6 +11,7 @@ import { MobileSettings } from './MobileSettings';
 function renderSettings(): void {
   window.localStorage.clear();
   document.documentElement.removeAttribute('data-reduced-motion');
+  document.documentElement.removeAttribute('data-suit-letters');
   document.documentElement.removeAttribute('data-theme');
   render(
     <PreferredLocaleProvider initialLocale="en">
@@ -50,6 +51,20 @@ describe('MobileSettings', () => {
     expect(toggle).toHaveAttribute('aria-checked', 'true');
     expect(document.documentElement.dataset.reducedMotion).toBe('true');
     expect(window.localStorage.getItem('lazy-patta:mobile-reduced-motion')).toBe('true');
+  });
+
+  it('toggles suit letters and applies it to the document', async () => {
+    renderSettings();
+    const user = userEvent.setup();
+
+    const toggle = screen.getByRole('switch', { name: /suit letters/i });
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+
+    await user.click(toggle);
+
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
+    expect(document.documentElement.dataset.suitLetters).toBe('true');
+    expect(window.localStorage.getItem('lazy-patta:mobile-suit-letters')).toBe('true');
   });
 
   it('applies the Dark appearance choice to the document and persists it', async () => {

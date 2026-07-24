@@ -10,7 +10,7 @@ import { useMobilePreferences } from '../../lib/mobile/preferences';
 import { type ThemeChoice, useTheme } from '../../lib/mobile/theme';
 
 import { PatternBackground } from './artwork/PatternBackground';
-import { GlobeIcon, MotionIcon, PaletteIcon, SettingsIcon } from './icons';
+import { CardsIcon, GlobeIcon, MotionIcon, PaletteIcon, SettingsIcon } from './icons';
 
 /**
  * Settings surface. Every control here has a real, persisted effect — language
@@ -23,6 +23,48 @@ const THEME_CHOICES: readonly { readonly value: ThemeChoice; readonly labelKey: 
   { value: 'light', labelKey: 'mobile.settings.theme.light' },
   { value: 'dark', labelKey: 'mobile.settings.theme.dark' },
 ];
+
+/** A labelled on/off switch row with a persisted effect (motion, suit letters). */
+function ToggleRow({
+  label,
+  hint,
+  checked,
+  onToggle,
+}: {
+  readonly label: string;
+  readonly hint: string;
+  readonly checked: boolean;
+  readonly onToggle: () => void;
+}): ReactElement {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={onToggle}
+      className="flex min-h-[52px] w-full items-center justify-between gap-4 rounded-xl border border-action-secondary/20 bg-background-canvas/40 px-4 text-left transition active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+    >
+      <span className="flex flex-col">
+        <span className="font-black text-action-primary">{label}</span>
+        <span className="text-xs text-text-primary/75">{hint}</span>
+      </span>
+      <span
+        aria-hidden
+        className={[
+          'relative h-7 w-12 shrink-0 rounded-full transition',
+          checked ? 'bg-action-primary' : 'bg-action-secondary/30',
+        ].join(' ')}
+      >
+        <span
+          className={[
+            'absolute top-1 h-5 w-5 rounded-full bg-surface-primary shadow transition-all',
+            checked ? 'left-6' : 'left-1',
+          ].join(' ')}
+        />
+      </span>
+    </button>
+  );
+}
 
 /** A grouped, elevated settings panel with an icon-badged section header. */
 function SettingsPanel({
@@ -56,7 +98,7 @@ function SettingsPanel({
 
 export function MobileSettings(): ReactElement {
   const { locale, setLocale } = usePreferredLocale();
-  const { reducedMotion, setReducedMotion } = useMobilePreferences();
+  const { reducedMotion, setReducedMotion, suitLetters, setSuitLetters } = useMobilePreferences();
   const { choice: themeChoice, setChoice: setThemeChoice } = useTheme();
   const t = createTranslator(locale);
 
@@ -159,36 +201,25 @@ export function MobileSettings(): ReactElement {
         Icon={MotionIcon}
         title={t.t('mobile.settings.motionSection')}
       >
-        <button
-          type="button"
-          role="switch"
-          aria-checked={reducedMotion}
-          onClick={() => setReducedMotion(!reducedMotion)}
-          className="flex min-h-[52px] w-full items-center justify-between gap-4 rounded-xl border border-action-secondary/20 bg-background-canvas/40 px-4 text-left transition active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-        >
-          <span className="flex flex-col">
-            <span className="font-black text-action-primary">
-              {t.t('mobile.settings.pref.reducedMotion')}
-            </span>
-            <span className="text-xs text-text-primary/75">
-              {t.t('mobile.settings.reducedMotionHint')}
-            </span>
-          </span>
-          <span
-            aria-hidden
-            className={[
-              'relative h-7 w-12 shrink-0 rounded-full transition',
-              reducedMotion ? 'bg-action-primary' : 'bg-action-secondary/30',
-            ].join(' ')}
-          >
-            <span
-              className={[
-                'absolute top-1 h-5 w-5 rounded-full bg-surface-primary shadow transition-all',
-                reducedMotion ? 'left-6' : 'left-1',
-              ].join(' ')}
-            />
-          </span>
-        </button>
+        <ToggleRow
+          label={t.t('mobile.settings.pref.reducedMotion')}
+          hint={t.t('mobile.settings.reducedMotionHint')}
+          checked={reducedMotion}
+          onToggle={() => setReducedMotion(!reducedMotion)}
+        />
+      </SettingsPanel>
+
+      <SettingsPanel
+        id="settings-accessibility"
+        Icon={CardsIcon}
+        title={t.t('mobile.settings.accessibilitySection')}
+      >
+        <ToggleRow
+          label={t.t('mobile.settings.pref.suitLetters')}
+          hint={t.t('mobile.settings.suitLettersHint')}
+          checked={suitLetters}
+          onToggle={() => setSuitLetters(!suitLetters)}
+        />
       </SettingsPanel>
 
       <p className="px-1 text-xs leading-5 text-text-primary/65">
