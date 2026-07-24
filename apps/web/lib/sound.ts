@@ -3,7 +3,7 @@
  * it is muted through settings, never autoplays before a user gesture, and every
  * cue has a visible equivalent in the UI (see docs/02-design-system/accessibility.md).
  */
-export type SoundCue = 'deal' | 'draw' | 'pair' | 'finish' | 'result';
+export type SoundCue = 'deal' | 'draw' | 'pair' | 'finish' | 'result' | 'turn';
 
 const TONES: Record<SoundCue, { readonly frequency: number; readonly durationMs: number }> = {
   deal: { frequency: 320, durationMs: 90 },
@@ -11,6 +11,8 @@ const TONES: Record<SoundCue, { readonly frequency: number; readonly durationMs:
   pair: { frequency: 660, durationMs: 180 },
   finish: { frequency: 520, durationMs: 160 },
   result: { frequency: 392, durationMs: 260 },
+  // A gentle "your move" chime — brighter than a draw, softer than a pair.
+  turn: { frequency: 587, durationMs: 130 },
 };
 
 let audioContext: AudioContext | null = null;

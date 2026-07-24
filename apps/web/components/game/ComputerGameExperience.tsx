@@ -13,6 +13,7 @@ import { HUMAN_ID } from '../../lib/computer-game/players';
 import { createCryptoRng, createSeededRng } from '../../lib/computer-game/rng';
 import type { ComputerGameIntent } from '../../lib/computer-game/types';
 import { selectViewState } from '../../lib/computer-game/view-model';
+import { playHaptic } from '../../lib/haptics';
 import { createTranslator } from '../../lib/i18n';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
 import type { ComputerGameConfig } from '../../lib/mobile/computer-session';
@@ -59,6 +60,7 @@ export function ComputerGameExperience({
   const startedRef = useRef(false);
   const autoStartedRef = useRef(false);
   const lastDrawSeqRef = useRef<string | null>(null);
+  const wasSelfTurnRef = useRef(false);
   const [tutorialOpen, setTutorialOpen] = useState(false);
 
   if (controllerRef.current === null) {
@@ -130,6 +132,19 @@ export function ComputerGameExperience({
     lastDrawSeqRef.current = key;
     playCue(state.draw.pairRemoved ? 'pair' : 'draw', soundEnabled);
   }, [state.draw, state.seq, soundEnabled]);
+
+  // "Your turn" gets a third, non-visual channel: a soft chime plus a single
+  // haptic tap the moment control passes to the human (never mid-reveal). The
+  // ring/banner already carry it visually; this reaches players who look away.
+  // Reduced motion mutes the buzz, matching the still-table promise.
+  useEffect(() => {
+    const isSelfTurn = view.phase === 'playing' && !state.draw && view.currentTurn.isSelf;
+    if (isSelfTurn && !wasSelfTurnRef.current) {
+      playCue('turn', soundEnabled);
+      playHaptic('turn', !reducedMotion);
+    }
+    wasSelfTurnRef.current = isSelfTurn;
+  }, [view.phase, view.currentTurn.isSelf, state.draw, soundEnabled, reducedMotion]);
 
   const tutorial = tutorialOpen ? (
     <HowToPlayTutorial locale={locale} onClose={() => setTutorialOpen(false)} />
