@@ -16,7 +16,7 @@ const VIEWPORTS = [
 async function startGame(page: Page, players: number): Promise<void> {
   await page.goto(ROUTE);
   if (players !== 4) await page.getByRole('button', { name: String(players), exact: true }).click();
-  await page.getByRole('button', { name: /Start game/i }).click();
+  await page.getByRole('button', { name: /Deal the cards/i }).click();
   await expect(page.getByRole('status')).toBeVisible();
   await expect(page.locator('[data-seat-id]')).toHaveCount(players);
   // Wait for the settled steady state: the intro sequence has finished, it is the

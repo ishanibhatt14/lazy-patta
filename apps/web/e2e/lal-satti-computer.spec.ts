@@ -10,7 +10,7 @@ async function startGame(page: Page, players: number, route = ROUTE): Promise<vo
   await page.goto(route);
   if (players !== 4) await page.getByRole('button', { name: String(players), exact: true }).click();
   await page.getByRole('textbox', { name: 'Table name' }).fill('Aanya');
-  await page.getByRole('button', { name: 'Start game' }).click();
+  await page.getByRole('button', { name: 'Deal the cards' }).click();
   // The table is up once the single live turn status renders.
   await expect(page.getByRole('status')).toBeVisible();
   await expect(page.locator('[data-seat-id]')).toHaveCount(players);
@@ -122,7 +122,7 @@ test('opens the scoreboard drawer from the top bar', async ({ page }) => {
 test('switches the setup language to Gujarati', async ({ page }) => {
   await page.goto(PLAIN_ROUTE);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Start game' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Deal the cards' })).toBeVisible();
 });
 
 test('is usable on a narrow mobile viewport without horizontal overflow', async ({ page }) => {
@@ -264,7 +264,7 @@ test('plays a Gujarati table on a narrow viewport without overflow', async ({ pa
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto(ROUTE);
   await page.getByRole('textbox', { name: 'Table name' }).fill('Aanya');
-  await page.getByRole('button', { name: 'Start game' }).click();
+  await page.getByRole('button', { name: 'Deal the cards' }).click();
   await expect(page.getByRole('status')).toBeVisible();
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

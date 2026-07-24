@@ -7,7 +7,7 @@ test.setTimeout(60_000);
 async function startGame(page: Page, players: number): Promise<void> {
   await page.goto(ROUTE);
   if (players !== 4) await page.getByRole('button', { name: String(players), exact: true }).click();
-  await page.getByRole('button', { name: /Start game/i }).click();
+  await page.getByRole('button', { name: /Deal the cards/i }).click();
   // Table is up once the live turn banner renders.
   await expect(page.getByRole('status')).toBeVisible();
 }

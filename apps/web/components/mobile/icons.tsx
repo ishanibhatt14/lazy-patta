@@ -85,6 +85,14 @@ export function PlayIcon(props: IconProps): ReactElement {
   );
 }
 
+export function CheckIcon(props: IconProps): ReactElement {
+  return (
+    <svg {...base(props)}>
+      <path d="M5 12.5 10 17.5 19 6.5" />
+    </svg>
+  );
+}
+
 export function GlobeIcon(props: IconProps): ReactElement {
   return (
     <svg {...base(props)}>
