@@ -6,11 +6,19 @@ import { useCallback, useEffect, useRef, useState, type ReactElement } from 'rea
 import type { Translator } from '../../lib/i18n';
 import { MOBILE_SCREENSHOTS } from '../../lib/mobile/screenshots';
 
-const GALLERY_SIZES = '(max-width: 639px) 72vw, (max-width: 1023px) 45vw, 30vw';
+// The featured banner spans the column; the thumbnails sit two/three across on
+// wider viewports and scroll as a filmstrip on phones.
+const FEATURED_SIZES = '(max-width: 767px) 92vw, 640px';
+const THUMB_SIZES = '(max-width: 639px) 72vw, (max-width: 1023px) 45vw, 30vw';
+
+const featured = MOBILE_SCREENSHOTS.find((shot) => shot.featured) ?? MOBILE_SCREENSHOTS[0];
+const thumbs = MOBILE_SCREENSHOTS.filter((shot) => shot !== featured);
+// The lightbox indexes into this ordering: featured first, then the thumbs.
+const ORDERED = [featured, ...thumbs];
 
 export function MobileScreenshotGallery({ t }: { readonly t: Translator }): ReactElement {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  // Remember which thumbnail opened the lightbox so focus returns there on close.
+  // Remember which trigger opened the lightbox so focus returns there on close.
   const triggersRef = useRef<(HTMLButtonElement | null)[]>([]);
   const closeRef = useRef<HTMLButtonElement | null>(null);
 
@@ -29,49 +37,82 @@ export function MobileScreenshotGallery({ t }: { readonly t: Translator }): Reac
     return () => document.removeEventListener('keydown', onKey);
   }, [openIndex, handleClose]);
 
-  const openShot = openIndex === null ? null : MOBILE_SCREENSHOTS[openIndex];
+  const openShot = openIndex === null ? null : ORDERED[openIndex];
 
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-lg font-black text-action-primary">{t.t('mobile.gallery.heading')}</h2>
+    <section aria-labelledby="mobile-gallery-heading" className="flex flex-col gap-4">
+      <h2 id="mobile-gallery-heading" className="text-xl font-black text-action-primary">
+        {t.t('mobile.gallery.heading')}
+      </h2>
 
+      {/* Featured: the live game table, the one shot that shows real play. Eager
+          because it is the section's anchor and usually above the fold. */}
+      <button
+        ref={(node) => {
+          triggersRef.current[0] = node;
+        }}
+        type="button"
+        onClick={() => setOpenIndex(0)}
+        aria-label={t.t(featured.altKey)}
+        aria-haspopup="dialog"
+        className="group flex flex-col gap-2 rounded-3xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+      >
+        <span
+          className="relative block w-full overflow-hidden rounded-3xl border border-action-secondary/25 bg-surface-primary shadow-md transition group-active:scale-[0.99]"
+          style={{ aspectRatio: `${featured.width} / ${featured.height}` }}
+        >
+          <Image
+            src={featured.path}
+            alt={t.t(featured.altKey)}
+            fill
+            priority
+            loading="eager"
+            sizes={FEATURED_SIZES}
+            className="object-cover"
+          />
+        </span>
+        <span className="text-sm font-bold text-text-primary/80">{t.t(featured.captionKey)}</span>
+      </button>
+
+      {/* The remaining four: a snap filmstrip on phones, a grid on desktop. */}
       <ul
-        className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3"
+        className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4"
         role="list"
       >
-        {MOBILE_SCREENSHOTS.map((shot, index) => (
-          <li
-            key={shot.path}
-            className="w-[72%] shrink-0 snap-start sm:w-auto sm:shrink"
-          >
-            <button
-              ref={(node) => {
-                triggersRef.current[index] = node;
-              }}
-              type="button"
-              onClick={() => setOpenIndex(index)}
-              aria-label={t.t(shot.altKey)}
-              aria-haspopup="dialog"
-              className="group flex w-full flex-col gap-2 rounded-2xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-            >
-              <span
-                className="relative block w-full overflow-hidden rounded-2xl border border-action-secondary/25 bg-surface-primary shadow-sm transition group-active:scale-[0.99]"
-                style={{ aspectRatio: `${shot.width} / ${shot.height}` }}
+        {thumbs.map((shot, thumbIndex) => {
+          const index = thumbIndex + 1;
+          return (
+            <li key={shot.path} className="w-[72%] shrink-0 snap-start sm:w-auto sm:shrink">
+              <button
+                ref={(node) => {
+                  triggersRef.current[index] = node;
+                }}
+                type="button"
+                onClick={() => setOpenIndex(index)}
+                aria-label={t.t(shot.altKey)}
+                aria-haspopup="dialog"
+                className="group flex w-full flex-col gap-2 rounded-2xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
               >
-                <Image
-                  src={shot.path}
-                  alt={t.t(shot.altKey)}
-                  fill
-                  priority={index === 0}
-                  loading={index === 0 ? 'eager' : 'lazy'}
-                  sizes={GALLERY_SIZES}
-                  className="object-cover"
-                />
-              </span>
-              <span className="text-sm font-bold text-text-primary/80">{t.t(shot.captionKey)}</span>
-            </button>
-          </li>
-        ))}
+                <span
+                  className="relative block w-full overflow-hidden rounded-2xl border border-action-secondary/25 bg-surface-primary shadow-sm transition group-active:scale-[0.99]"
+                  style={{ aspectRatio: `${shot.width} / ${shot.height}` }}
+                >
+                  <Image
+                    src={shot.path}
+                    alt={t.t(shot.altKey)}
+                    fill
+                    loading="lazy"
+                    sizes={THUMB_SIZES}
+                    className="object-cover"
+                  />
+                </span>
+                <span className="text-sm font-bold text-text-primary/80">
+                  {t.t(shot.captionKey)}
+                </span>
+              </button>
+            </li>
+          );
+        })}
       </ul>
 
       {openShot ? (

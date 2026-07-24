@@ -7,6 +7,8 @@ export interface MobileScreenshot {
   readonly height: number;
   readonly altKey: MessageKey;
   readonly captionKey: MessageKey;
+  /** The one shot shown as the large featured visual in "See Lazy Patta in action". */
+  readonly featured?: boolean;
 }
 
 /**
@@ -14,7 +16,7 @@ export interface MobileScreenshot {
  * is the single source of truth: `webApplicationJsonLd` derives its `screenshot`
  * array from the same list, so the schema and the on-page gallery never drift.
  */
-export const MOBILE_SCREENSHOTS: readonly MobileScreenshot[] = [
+export const MOBILE_SCREENSHOTS: readonly [MobileScreenshot, ...MobileScreenshot[]] = [
   {
     path: '/images/screenshots/lazy-patta-mobile-home.png',
     width: 863,
@@ -42,6 +44,7 @@ export const MOBILE_SCREENSHOTS: readonly MobileScreenshot[] = [
     height: 393,
     altKey: 'mobile.gallery.table.alt',
     captionKey: 'mobile.gallery.table.caption',
+    featured: true,
   },
   {
     path: '/images/screenshots/lazy-patta-win.png',
