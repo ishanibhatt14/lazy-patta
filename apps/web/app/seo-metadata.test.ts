@@ -37,14 +37,14 @@ describe('sitemap', () => {
   it('includes localized game variants with reciprocal hreflang alternates', () => {
     expect(urls).toContain(siteConfig.canonicalOrigin + '/hi/games/gadha-chor');
     expect(urls).toContain(siteConfig.canonicalOrigin + '/gu/games/lal-satti');
-    const enGadha = entries.find(
-      (e) => e.url === siteConfig.canonicalOrigin + '/en/games/gadha-chor',
-    );
-    expect(enGadha?.alternates?.languages).toMatchObject({
-      en: siteConfig.canonicalOrigin + '/en/games/gadha-chor',
+    // English game detail lives at the non-prefixed URL, so hreflang `en` and
+    // `x-default` both resolve there (not to `/en/games/...`).
+    const gadha = entries.find((e) => e.url === siteConfig.canonicalOrigin + '/games/gadha-chor');
+    expect(gadha?.alternates?.languages).toMatchObject({
+      en: siteConfig.canonicalOrigin + '/games/gadha-chor',
       hi: siteConfig.canonicalOrigin + '/hi/games/gadha-chor',
       gu: siteConfig.canonicalOrigin + '/gu/games/gadha-chor',
-      'x-default': siteConfig.canonicalOrigin + '/en/games/gadha-chor',
+      'x-default': siteConfig.canonicalOrigin + '/games/gadha-chor',
     });
   });
 

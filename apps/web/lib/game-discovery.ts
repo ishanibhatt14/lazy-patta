@@ -226,10 +226,18 @@ export function defaultGamePath(slug: GameSlug): string {
 }
 
 export function gameAlternates(slug: GameSlug, canonicalLocale?: Locale): Metadata['alternates'] {
+  // English canonical is always the short, non-prefixed `/games/{slug}`. The
+  // `/en/games/{slug}` route renders identical English content, so it
+  // cross-canonicalizes here rather than self-canonicalizing — otherwise Google
+  // sees two competing English pages. Hindi/Gujarati keep their own locale URL.
+  const canonical =
+    !canonicalLocale || canonicalLocale === 'en'
+      ? defaultGamePath(slug)
+      : localizedGamePath(canonicalLocale, slug);
   return {
-    canonical: canonicalLocale ? localizedGamePath(canonicalLocale, slug) : defaultGamePath(slug),
+    canonical,
     languages: {
-      en: localizedGamePath('en', slug),
+      en: defaultGamePath(slug),
       hi: localizedGamePath('hi', slug),
       gu: localizedGamePath('gu', slug),
       'x-default': defaultGamePath(slug),

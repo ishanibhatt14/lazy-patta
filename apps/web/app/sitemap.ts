@@ -44,6 +44,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: absolute('/'),
       changeFrequency: 'weekly',
       priority: 1,
+      // Image sitemap hints for the two images that actually live on the
+      // homepage: the family hero and the brand logo. Helps Google discover
+      // them for Images separately from page indexing.
+      images: [
+        absolute('/images/landing/gujarati-family-card-night-1448.avif'),
+        absolute('/images/lazy-patta-logo-256.png'),
+      ],
     },
     {
       url: absolute('/mobile'),
@@ -66,14 +73,33 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const gamesIndex = localizedFamily(gamesIndexPath, 0.7);
   const rulesIndex = localizedFamily(rulesIndexPath, 0.7);
 
-  const gameRoutes = GAME_SLUGS.flatMap((slug: GameSlug) => [
-    {
-      url: absolute(defaultGamePath(slug)),
-      changeFrequency: 'monthly' as const,
-      priority: 0.9,
-    },
-    ...localizedFamily((locale) => localizedGamePath(locale, slug), 0.75),
-  ]);
+  // Game detail pages consolidate English on the short `/games/{slug}` URL
+  // (see `gameAlternates`), so the sitemap lists that as the English entry and
+  // omits `/en/games/{slug}` — only Hindi/Gujarati get locale-prefixed entries.
+  const gameRoutes = GAME_SLUGS.flatMap((slug: GameSlug) => {
+    const alternates: Alternates = {
+      languages: {
+        en: absolute(defaultGamePath(slug)),
+        hi: absolute(localizedGamePath('hi', slug)),
+        gu: absolute(localizedGamePath('gu', slug)),
+        'x-default': absolute(defaultGamePath(slug)),
+      },
+    };
+    return [
+      {
+        url: absolute(defaultGamePath(slug)),
+        changeFrequency: 'monthly' as const,
+        priority: 0.9,
+        alternates,
+      },
+      ...(['hi', 'gu'] as const).map((locale) => ({
+        url: absolute(localizedGamePath(locale, slug)),
+        changeFrequency: 'monthly' as const,
+        priority: 0.75,
+        alternates,
+      })),
+    ];
+  });
 
   const rulesRoutes = GAME_SLUGS.flatMap((slug: GameSlug) =>
     localizedFamily((locale) => rulesPath(locale, slug), 0.8),

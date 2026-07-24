@@ -12,10 +12,13 @@ describe('sitemap', () => {
     expect(urls).toContain('https://lazypatta.com/play/online');
   });
 
-  it('lists non-prefixed and locale-prefixed game topic pages', () => {
+  it('lists English game topic pages only at the non-prefixed URL', () => {
     expect(urls).toContain('https://lazypatta.com/games/gadha-chor');
     expect(urls).toContain('https://lazypatta.com/games/lal-satti');
-    expect(urls).toContain('https://lazypatta.com/en/games/gadha-chor');
+    // English consolidates on `/games/{slug}`; the `/en/games/{slug}` duplicate
+    // is omitted so Google indexes a single English game page.
+    expect(urls).not.toContain('https://lazypatta.com/en/games/gadha-chor');
+    expect(urls).toContain('https://lazypatta.com/hi/games/gadha-chor');
     expect(urls).toContain('https://lazypatta.com/gu/games/lal-satti');
   });
 
@@ -36,7 +39,7 @@ describe('sitemap', () => {
 
   it('lists Jhabbu topic and rules pages now that it is live', () => {
     expect(urls).toContain('https://lazypatta.com/games/jhabbu');
-    expect(urls).toContain('https://lazypatta.com/en/games/jhabbu');
+    expect(urls).not.toContain('https://lazypatta.com/en/games/jhabbu');
     expect(urls).toContain('https://lazypatta.com/en/how-to-play/jhabbu');
     expect(urls).toContain('https://lazypatta.com/gu/how-to-play/jhabbu');
   });
@@ -52,9 +55,29 @@ describe('sitemap', () => {
 
   it('lists Kachuful topic and rules pages now that it is live', () => {
     expect(urls).toContain('https://lazypatta.com/games/kachuful');
-    expect(urls).toContain('https://lazypatta.com/en/games/kachuful');
+    expect(urls).not.toContain('https://lazypatta.com/en/games/kachuful');
     expect(urls).toContain('https://lazypatta.com/en/how-to-play/kachuful');
     expect(urls).toContain('https://lazypatta.com/gu/how-to-play/kachuful');
+  });
+
+  it('points the English game-detail hreflang at the non-prefixed URL', () => {
+    const gameEntry = entries.find(
+      (entry) => entry.url === 'https://lazypatta.com/games/gadha-chor',
+    );
+    expect(gameEntry?.alternates?.languages).toMatchObject({
+      en: 'https://lazypatta.com/games/gadha-chor',
+      hi: 'https://lazypatta.com/hi/games/gadha-chor',
+      gu: 'https://lazypatta.com/gu/games/gadha-chor',
+      'x-default': 'https://lazypatta.com/games/gadha-chor',
+    });
+  });
+
+  it('advertises the homepage hero and logo in the image sitemap', () => {
+    const home = entries.find((entry) => entry.url === 'https://lazypatta.com/');
+    expect(home?.images).toContain(
+      'https://lazypatta.com/images/landing/gujarati-family-card-night-1448.avif',
+    );
+    expect(home?.images).toContain('https://lazypatta.com/images/lazy-patta-logo-256.png');
   });
 
   it('attaches a reciprocal hreflang set to each localized entry', () => {

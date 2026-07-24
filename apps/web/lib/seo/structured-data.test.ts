@@ -5,6 +5,7 @@ import {
   faqPageJsonLd,
   organizationJsonLd,
   videoGameJsonLd,
+  webApplicationJsonLd,
   websiteJsonLd,
 } from './structured-data';
 
@@ -34,7 +35,39 @@ describe('site-wide entities', () => {
     const website = websiteJsonLd();
     const organization = organizationJsonLd();
     expect((website.publisher as { '@id': string })['@id']).toBe(organization['@id']);
-    expect(organization.logo).toBe('https://lazypatta.com/images/lazy-patta-logo-256.png');
+    expect(organization.logo).toMatchObject({
+      '@type': 'ImageObject',
+      url: 'https://lazypatta.com/icons/icon-512.png',
+      width: 512,
+      height: 512,
+    });
+  });
+});
+
+describe('webApplicationJsonLd', () => {
+  const jsonLd = webApplicationJsonLd('Play on your phone.');
+
+  it('describes a free, browser-based GameApplication linked to the Organization', () => {
+    expect(jsonLd['@type']).toBe('WebApplication');
+    expect(jsonLd.applicationCategory).toBe('GameApplication');
+    expect(jsonLd.url).toBe('https://lazypatta.com/mobile');
+    expect(jsonLd.description).toBe('Play on your phone.');
+    expect((jsonLd.publisher as { '@id': string })['@id']).toBe(organizationJsonLd()['@id']);
+    expect(jsonLd.offers).toMatchObject({ '@type': 'Offer', price: '0', priceCurrency: 'USD' });
+  });
+
+  it('lists real product screenshots as absolute URLs', () => {
+    expect(jsonLd.screenshot).toEqual([
+      'https://lazypatta.com/images/screenshots/lazy-patta-mobile-home.png',
+      'https://lazypatta.com/images/screenshots/lazy-patta-game-setup.png',
+      'https://lazypatta.com/images/screenshots/lazy-patta-lal-satti.png',
+      'https://lazypatta.com/images/screenshots/lazy-patta-win.png',
+    ]);
+  });
+
+  it('never fabricates ratings or reviews', () => {
+    expect(jsonLd).not.toHaveProperty('aggregateRating');
+    expect(jsonLd).not.toHaveProperty('review');
   });
 });
 

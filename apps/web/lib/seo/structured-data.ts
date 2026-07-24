@@ -16,7 +16,14 @@ export function organizationJsonLd(): JsonLdObject {
     '@id': ORGANIZATION_ID,
     name: 'Lazy Patta',
     url: SITE_URL,
-    logo: absoluteUrl('/images/lazy-patta-logo-256.png'),
+    // Square 512×512 ImageObject (matches the search favicon) so Google has an
+    // unambiguous, high-res brand logo rather than a bare URL string.
+    logo: {
+      '@type': 'ImageObject',
+      url: absoluteUrl('/icons/icon-512.png'),
+      width: 512,
+      height: 512,
+    },
   };
 }
 
@@ -29,6 +36,40 @@ export function websiteJsonLd(): JsonLdObject {
     url: SITE_URL,
     inLanguage: ['en', 'gu', 'hi'],
     publisher: { '@id': ORGANIZATION_ID },
+  };
+}
+
+/** Real product screenshots shown on `/mobile`, surfaced to Google via schema. */
+const MOBILE_SCREENSHOTS = [
+  '/images/screenshots/lazy-patta-mobile-home.png',
+  '/images/screenshots/lazy-patta-game-setup.png',
+  '/images/screenshots/lazy-patta-lal-satti.png',
+  '/images/screenshots/lazy-patta-win.png',
+] as const;
+
+/**
+ * WebApplication markup for the mobile-browser experience at `/mobile`. Modeled
+ * as a free, browser-based GameApplication with real product screenshots. No
+ * ratings/reviews/offers beyond the honest free price, per the no-fabrication rule.
+ */
+export function webApplicationJsonLd(description: string): JsonLdObject {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'Lazy Patta',
+    url: absoluteUrl('/mobile'),
+    applicationCategory: 'GameApplication',
+    operatingSystem: 'Any',
+    browserRequirements: 'Requires JavaScript and a modern web browser',
+    description,
+    image: absoluteUrl('/icons/icon-512.png'),
+    screenshot: MOBILE_SCREENSHOTS.map((path) => absoluteUrl(path)),
+    publisher: { '@id': ORGANIZATION_ID },
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
   };
 }
 
