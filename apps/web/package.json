@@ -22,7 +22,7 @@
     "@lazy-patta/lal-satti-engine": "workspace:*",
     "@lazy-patta/localization": "workspace:*",
     "@supabase/supabase-js": "^2.110.2",
-    "next": "^16.2.10",
+    "next": "^16.2.11",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
