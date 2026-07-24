@@ -44,6 +44,7 @@ const MOBILE_SCREENSHOTS = [
   '/images/screenshots/lazy-patta-mobile-home.png',
   '/images/screenshots/lazy-patta-game-setup.png',
   '/images/screenshots/lazy-patta-lal-satti.png',
+  '/images/screenshots/lazy-patta-game-table.png',
   '/images/screenshots/lazy-patta-win.png',
 ] as const;
 

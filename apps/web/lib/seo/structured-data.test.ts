@@ -61,6 +61,7 @@ describe('webApplicationJsonLd', () => {
       'https://lazypatta.com/images/screenshots/lazy-patta-mobile-home.png',
       'https://lazypatta.com/images/screenshots/lazy-patta-game-setup.png',
       'https://lazypatta.com/images/screenshots/lazy-patta-lal-satti.png',
+      'https://lazypatta.com/images/screenshots/lazy-patta-game-table.png',
       'https://lazypatta.com/images/screenshots/lazy-patta-win.png',
     ]);
   });
