@@ -79,6 +79,9 @@ export function GadhaReveal({ locale, view, onRematch }: GadhaRevealProps): Reac
         </div>
 
         <h2 className="text-2xl font-bold text-action-primary">{heading}</h2>
+        <p className="text-sm font-semibold leading-6 text-action-primary/90">
+          {gadhaChorIsSelf ? t('result.takeaway.heldDonkey') : t('result.takeaway.gotAwaySafe')}
+        </p>
         <p className="text-sm leading-6 text-text-primary">{t('computer.gadhaChorReveal')}</p>
 
         {seriesLeaderName ? (

@@ -16,6 +16,7 @@ import { ImmersiveScene } from '../../../components/game/immersive/ImmersiveScen
 import { type FamilySeries, normalizeFamilySeries } from '../../../lib/computer-game/family-series';
 import { driveToResult, previewResultRequested } from '../../../lib/computer-game/preview-result';
 import { createCryptoRng, createSeededRng } from '../../../lib/computer-game/rng';
+import { standingsTakeaway } from '../../../lib/computer-game/takeaway';
 import { trackGrowthEvent } from '../../../lib/growth/analytics';
 import { buildShareableGameResult } from '../../../lib/growth/results';
 import { shareGameResult } from '../../../lib/growth/share-result';
@@ -709,6 +710,8 @@ function KachufulResult({
       ? format('kachuful.winnersAnnounce', { names: result.winnerNames.join(', ') })
       : format('kachuful.winnerAnnounce', { name: result.winnerNames[0] ?? '' });
 
+  const takeaway = standingsTakeaway(result.scoreboard, result.isSelfWinner);
+
   const seriesLeaderName = view.seriesLeaderName;
   const onShare = async (): Promise<void> => {
     const shareable = buildShareableGameResult({
@@ -738,6 +741,7 @@ function KachufulResult({
       highlight={
         seriesLeaderName ? format('series.leaderLine', { name: seriesLeaderName }) : undefined
       }
+      takeaway={takeaway ? format(takeaway.key, takeaway.values ?? {}) : undefined}
       playAgainLabel={t('kachuful.playAgain')}
       onRematch={onRematch}
       shareLabel={t('action.shareResult')}

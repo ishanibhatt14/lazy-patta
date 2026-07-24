@@ -17,6 +17,8 @@ interface ImmersiveResultOverlayProps {
   } | null;
   /** Optional highlighted line under the title (e.g. match leader). */
   readonly highlight?: ReactNode;
+  /** Optional warm "one useful observation" line (e.g. "just 4 behind"). */
+  readonly takeaway?: ReactNode;
   /** Standings / stats body. */
   readonly children?: ReactNode;
   readonly playAgainLabel: string;
@@ -46,6 +48,7 @@ export function ImmersiveResultOverlay({
   title,
   hero = null,
   highlight,
+  takeaway,
   children,
   playAgainLabel,
   onRematch,
@@ -92,6 +95,10 @@ export function ImmersiveResultOverlay({
           <p className="w-full rounded-xl bg-brand-accent px-4 py-2 text-sm font-bold text-text-onBrand">
             {highlight}
           </p>
+        ) : null}
+
+        {takeaway ? (
+          <p className="text-sm font-semibold leading-6 text-action-primary/90">{takeaway}</p>
         ) : null}
 
         {children}
