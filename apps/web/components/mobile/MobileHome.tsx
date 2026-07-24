@@ -18,7 +18,7 @@ import { InviteFamilyCard } from './InviteFamilyCard';
 import { LazyPattaLogoMark } from './artwork/LazyPattaLogoMark';
 import { PatternBackground } from './artwork/PatternBackground';
 import { PlayerAvatar } from './artwork/PlayerAvatar';
-import { CardsIcon, KeyIcon, SettingsIcon } from './icons';
+import { CardsIcon, KeyIcon, PlayIcon, SettingsIcon } from './icons';
 
 export function MobileHome(): ReactElement {
   const { locale } = usePreferredLocale();
@@ -39,6 +39,10 @@ export function MobileHome(): ReactElement {
   useEffect(() => trackGrowthEvent({ name: 'mobile_home_viewed' }), []);
 
   const activeItem = active ? findCatalogItem(active.gameSlug) : undefined;
+  // Quick Play target: the last game the player touched (if it has a practice
+  // route), otherwise the easiest game, Gadha Chor. `&quick=1` deals straight
+  // from the tile, so the primary CTA reaches a working game in one tap.
+  const quickGame = recent?.practiceRoute ? recent : findCatalogItem('gadha-chor');
 
   return (
     <div className="flex flex-col gap-6">
@@ -76,73 +80,79 @@ export function MobileHome(): ReactElement {
         </div>
       </section>
 
-      {/* Primary actions. */}
-      <div className="grid gap-3">
-        <Link
-          href="/mobile/rooms"
-          className="flex items-center gap-4 rounded-2xl bg-action-primary px-5 py-4 text-text-onBrand shadow-lg transition active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-        >
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/20">
-            <CardsIcon aria-hidden width={24} height={24} />
-          </span>
-          <span className="flex flex-col">
-            <span className="text-lg font-black leading-tight">
-              {t.t('mobile.home.createRoomTitle')}
-            </span>
-            <span className="text-sm text-text-onBrand/85">
-              {t.t('mobile.home.createRoomBody')}
-            </span>
-          </span>
-        </Link>
-        <Link
-          href="/mobile/rooms"
-          className="flex items-center gap-4 rounded-2xl border border-action-secondary/30 bg-surface-primary px-5 py-4 text-action-primary shadow-sm transition active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
-        >
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-action-primary/10">
-            <KeyIcon aria-hidden width={24} height={24} />
-          </span>
-          <span className="flex flex-col">
-            <span className="text-lg font-black leading-tight">
-              {t.t('mobile.home.joinRoomTitle')}
-            </span>
-            <span className="text-sm text-text-primary/80">{t.t('mobile.home.joinRoomBody')}</span>
-          </span>
-        </Link>
-      </div>
-
+      {/* Quick Play — the fastest path to a working game. Instant bot play is
+          the primary journey; the now-live family rooms sit just beneath it. */}
       {active && activeItem ? (
         <Link
           href={`/mobile/game/${active.gameSlug}/computer/${active.sessionId}`}
-          className="flex items-center justify-between gap-3 rounded-2xl border border-brand-accent/40 bg-brand-accent/10 px-5 py-4 transition active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+          className="flex items-center gap-4 rounded-2xl bg-action-primary px-5 py-4 text-text-onBrand shadow-lg transition active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
         >
-          <span className="flex flex-col">
-            <span className="text-xs font-bold uppercase tracking-wide text-brand-accent">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/20">
+            <PlayIcon aria-hidden width={24} height={24} />
+          </span>
+          <span className="flex flex-1 flex-col">
+            <span className="text-xs font-bold uppercase tracking-wide text-text-onBrand/80">
               {t.t('mobile.home.continueGame')}
             </span>
-            <span className="text-base font-black text-action-primary">
-              {t.t(activeItem.nameKey)}
-            </span>
+            <span className="text-lg font-black leading-tight">{t.t(activeItem.nameKey)}</span>
           </span>
-          <span className="rounded-full bg-action-primary px-4 py-2 text-sm font-black text-text-onBrand">
+          <span className="shrink-0 rounded-full bg-white/20 px-4 py-2 text-sm font-black">
             {t.t('mobile.home.continueCta')}
           </span>
         </Link>
-      ) : recent?.practiceRoute ? (
+      ) : quickGame?.practiceRoute ? (
         <Link
-          href={recent.practiceRoute}
-          className="flex items-center justify-between gap-3 rounded-2xl border border-brand-accent/40 bg-brand-accent/10 px-5 py-4 transition active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+          href={`${quickGame.practiceRoute}&quick=1`}
+          className="flex items-center gap-4 rounded-2xl bg-action-primary px-5 py-4 text-text-onBrand shadow-lg transition active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
         >
-          <span className="flex flex-col">
-            <span className="text-xs font-bold uppercase tracking-wide text-brand-accent">
-              {t.t('mobile.home.recentGame')}
-            </span>
-            <span className="text-base font-black text-action-primary">{t.t(recent.nameKey)}</span>
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/20">
+            <PlayIcon aria-hidden width={24} height={24} />
           </span>
-          <span className="rounded-full bg-action-primary px-4 py-2 text-sm font-black text-text-onBrand">
-            {t.t('mobile.home.resume')}
+          <span className="flex flex-1 flex-col">
+            <span className="text-xs font-bold uppercase tracking-wide text-text-onBrand/80">
+              {recent?.practiceRoute
+                ? t.t('mobile.home.recentGame')
+                : t.t('mobile.home.quickPlayTitle')}
+            </span>
+            <span className="text-lg font-black leading-tight">{t.t(quickGame.nameKey)}</span>
+            <span className="text-sm text-text-onBrand/85">
+              {recent?.practiceRoute ? t.t(quickGame.taglineKey) : t.t('mobile.home.quickPlayBody')}
+            </span>
+          </span>
+          <span className="shrink-0 rounded-full bg-white/20 px-4 py-2 text-sm font-black">
+            {t.t('mobile.home.playCta')}
           </span>
         </Link>
       ) : null}
+
+      {/* Family rooms — now verified live, offered as a warm secondary action
+          rather than the first thing a solo player must step past. */}
+      <div className="grid grid-cols-2 gap-3">
+        <Link
+          href="/mobile/rooms"
+          className="flex flex-col gap-2 rounded-2xl border border-action-secondary/30 bg-surface-primary px-4 py-4 text-action-primary shadow-sm transition active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+        >
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-action-primary/10">
+            <CardsIcon aria-hidden width={20} height={20} />
+          </span>
+          <span className="text-sm font-black leading-tight">
+            {t.t('mobile.home.createRoomTitle')}
+          </span>
+          <span className="text-xs text-text-primary/70">{t.t('mobile.home.createRoomBody')}</span>
+        </Link>
+        <Link
+          href="/mobile/rooms"
+          className="flex flex-col gap-2 rounded-2xl border border-action-secondary/30 bg-surface-primary px-4 py-4 text-action-primary shadow-sm transition active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+        >
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-action-primary/10">
+            <KeyIcon aria-hidden width={20} height={20} />
+          </span>
+          <span className="text-sm font-black leading-tight">
+            {t.t('mobile.home.joinRoomTitle')}
+          </span>
+          <span className="text-xs text-text-primary/70">{t.t('mobile.home.joinRoomBody')}</span>
+        </Link>
+      </div>
 
       <DailyPlayCard t={t} />
 
