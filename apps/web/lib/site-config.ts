@@ -59,8 +59,6 @@ export const siteConfig = {
   canonicalOrigin,
   supportEmail,
   socialHandle: '@lazypatta',
-  /** Absolute URL used for Open Graph / Twitter social previews. */
-  socialImagePath: '/images/lazy-patta-ios-icon-opaque-maroon-1024.png',
 } as const;
 
 /** Resolves a site-relative path to an absolute canonical URL. */

@@ -16,6 +16,13 @@ const colors = resolveColors();
 
 const HOME_TITLE = 'Lazy Patta — Play Desi Indian Card Games Online';
 
+const HOME_OG_IMAGE = {
+  url: '/images/og/lazy-patta-home-1200x630.jpg',
+  width: 1200,
+  height: 630,
+  alt: 'Lazy Patta — no gambling, just pure fun, made for Indian families',
+} as const;
+
 export const metadata: Metadata = {
   // Anchors every relative canonical/OG URL emitted by child pages to the
   // permanent domain, even when the deploy runs from a *.vercel.app preview.
@@ -58,14 +65,14 @@ export const metadata: Metadata = {
     title: HOME_TITLE,
     description: siteConfig.description,
     url: '/',
-    images: [{ url: siteConfig.socialImagePath, width: 1024, height: 1024, alt: siteConfig.name }],
+    images: [HOME_OG_IMAGE],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: HOME_TITLE,
     description: siteConfig.description,
     site: siteConfig.socialHandle,
-    images: [siteConfig.socialImagePath],
+    images: [HOME_OG_IMAGE.url],
   },
 };
 
