@@ -31,6 +31,7 @@ import { GameBoard } from './GameBoard';
 import { PlayerSafetyMenu } from './PlayerSafetyMenu';
 import { ReconnectBanner } from './ReconnectBanner';
 import { RoomSharePanel } from './RoomSharePanel';
+import { RoomTableSeats, type LobbyTableSeat } from './RoomTableSeats';
 
 /**
  * Room lobby. Joining is idempotent, so landing here (via create, join, or a
@@ -44,16 +45,6 @@ const POLL_MS = 15000;
 
 function messageFor(error: unknown, fallback: string): string {
   return error instanceof Error && error.message ? error.message : fallback;
-}
-
-function seatLabel(
-  occupant: string,
-  displayName: string | null,
-  t: ReturnType<typeof createTranslator>,
-): string {
-  if (occupant === 'bot') return displayName ?? t.t('rooms.seatBot');
-  if (occupant === 'human') return displayName ?? t.t('rooms.seatPlayer');
-  return t.t('rooms.seatEmpty');
 }
 
 function gameLabel(gameKey: string | undefined, t: ReturnType<typeof createTranslator>): string {
@@ -379,44 +370,33 @@ export function RoomLobby({ code }: { code: string }): ReactElement {
         maxPlayers={room?.max_seats}
       />
 
-      <ul className="flex flex-col gap-2">
-        {seats.map((seat) => {
-          const isYou = seat.user_id === userId;
+      <RoomTableSeats
+        seats={seats.map<LobbyTableSeat>((seat) => ({
+          id: seat.id,
+          occupant: seat.occupant as LobbyTableSeat['occupant'],
+          displayName: seat.display_name,
+          isReady: seat.is_ready,
+          isYou: seat.user_id === userId,
+          isHost: Boolean(room && seat.user_id === room.host_id),
+        }))}
+        t={t}
+        safetyMenuFor={(seatId) => {
+          const seat = seats.find((s) => s.id === seatId);
+          if (!seat || seat.occupant !== 'human' || !seat.user_id || seat.user_id === userId) {
+            return null;
+          }
           return (
-            <li
-              key={seat.id}
-              className="flex items-center justify-between gap-3 rounded-md bg-surface-primary px-4 py-3 shadow-sm"
-            >
-              <div className="flex items-center gap-2">
-                <span
-                  className={`h-2 w-2 rounded-full ${seat.is_ready ? 'bg-brand-accent' : 'bg-action-primary/30'}`}
-                  aria-hidden
-                />
-                <span className="text-sm font-medium text-text-primary">
-                  {seatLabel(seat.occupant, seat.display_name, t)}
-                  {isYou ? ` (${t.t('rooms.you')})` : ''}
-                  {room && seat.user_id === room.host_id ? ` · ${t.t('rooms.host')}` : ''}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-text-primary">
-                  {seat.is_ready ? t.t('rooms.ready') : t.t('rooms.notReady')}
-                </span>
-                {seat.occupant === 'human' && seat.user_id && !isYou ? (
-                  <PlayerSafetyMenu
-                    reportedUserId={seat.user_id}
-                    name={seat.display_name ?? t.t('rooms.seatPlayer')}
-                    roomId={seat.room_id}
-                    locale={locale}
-                    isBlocked={blockedIds.has(seat.user_id)}
-                    onBlockChange={() => void loadBlocked()}
-                  />
-                ) : null}
-              </div>
-            </li>
+            <PlayerSafetyMenu
+              reportedUserId={seat.user_id}
+              name={seat.display_name ?? t.t('rooms.seatPlayer')}
+              roomId={seat.room_id}
+              locale={locale}
+              isBlocked={blockedIds.has(seat.user_id)}
+              onBlockChange={() => void loadBlocked()}
+            />
           );
-        })}
-      </ul>
+        }}
+      />
 
       <div className="flex flex-col gap-2">
         {mySeat ? (
