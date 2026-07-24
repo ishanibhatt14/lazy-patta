@@ -15,6 +15,7 @@ import { DailyPlayCard } from './DailyPlayCard';
 import { GameCatalogGrid } from './GameCatalogGrid';
 import { InstallHomeCard } from './InstallHomeCard';
 import { InviteFamilyCard } from './InviteFamilyCard';
+import { MobileScreenshotGallery } from './MobileScreenshotGallery';
 import { LazyPattaLogoMark } from './artwork/LazyPattaLogoMark';
 import { PatternBackground } from './artwork/PatternBackground';
 import { PlayerAvatar } from './artwork/PlayerAvatar';
@@ -167,6 +168,8 @@ export function MobileHome(): ReactElement {
         </div>
         <GameCatalogGrid items={MOBILE_CATALOG} t={t} />
       </section>
+
+      <MobileScreenshotGallery t={t} />
 
       <InviteFamilyCard t={t} />
     </div>

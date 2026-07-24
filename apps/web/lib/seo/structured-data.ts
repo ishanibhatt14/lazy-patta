@@ -1,6 +1,7 @@
 import type { Locale } from '@lazy-patta/localization';
 
 import { GAME_DISCOVERY, localizedGamePath, type GameSlug } from '../game-discovery';
+import { MOBILE_SCREENSHOTS } from '../mobile/screenshots';
 
 import { absoluteUrl, SITE_URL } from './site';
 
@@ -39,15 +40,6 @@ export function websiteJsonLd(): JsonLdObject {
   };
 }
 
-/** Real product screenshots shown on `/mobile`, surfaced to Google via schema. */
-const MOBILE_SCREENSHOTS = [
-  '/images/screenshots/lazy-patta-mobile-home.png',
-  '/images/screenshots/lazy-patta-game-setup.png',
-  '/images/screenshots/lazy-patta-lal-satti.png',
-  '/images/screenshots/lazy-patta-game-table.png',
-  '/images/screenshots/lazy-patta-win.png',
-] as const;
-
 /**
  * WebApplication markup for the mobile-browser experience at `/mobile`. Modeled
  * as a free, browser-based GameApplication with real product screenshots. No
@@ -64,7 +56,7 @@ export function webApplicationJsonLd(description: string): JsonLdObject {
     browserRequirements: 'Requires JavaScript and a modern web browser',
     description,
     image: absoluteUrl('/icons/icon-512.png'),
-    screenshot: MOBILE_SCREENSHOTS.map((path) => absoluteUrl(path)),
+    screenshot: MOBILE_SCREENSHOTS.map((shot) => absoluteUrl(shot.path)),
     publisher: { '@id': ORGANIZATION_ID },
     offers: {
       '@type': 'Offer',
