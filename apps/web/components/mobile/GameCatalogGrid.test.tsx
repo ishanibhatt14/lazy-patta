@@ -41,6 +41,23 @@ describe('GameCatalogGrid', () => {
     );
   });
 
+  it('shows a real detail step: difficulty, a how-it-plays explainer, and a best-for line', async () => {
+    renderGrid();
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole('button', { name: /Gadha Chor/i }));
+
+    const dialog = screen.getByRole('dialog');
+    // Difficulty joins players/time in the meta line.
+    expect(within(dialog).getByText(/Easy/)).toBeVisible();
+    // The explainer reuses the canonical public-site rules copy (howBody), so the
+    // sheet and the SEO page never drift into two inconsistent descriptions.
+    expect(within(dialog).getByRole('heading', { name: /How it plays/i })).toBeVisible();
+    expect(within(dialog).getByText(/clear matching pairs/i)).toBeVisible();
+    // "Best for" frames the emotional fit (never coins/winning).
+    expect(within(dialog).getByText(/all ages at the table/i)).toBeVisible();
+  });
+
   it('opens an info sheet with no broken links for a coming-soon game', async () => {
     renderGrid();
     const user = userEvent.setup();

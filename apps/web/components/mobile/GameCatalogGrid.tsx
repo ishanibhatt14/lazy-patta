@@ -1,5 +1,6 @@
 'use client';
 
+import type { MessageKey } from '@lazy-patta/localization';
 import Link from 'next/link';
 import { useState, type ReactElement } from 'react';
 
@@ -8,7 +9,7 @@ import { trackGrowthEvent } from '../../lib/growth/analytics';
 import type { Translator } from '../../lib/i18n';
 import { recordGameLaunch } from '../../lib/mobile/daily-activity';
 import { rememberRecentGame } from '../../lib/mobile/recent';
-import type { MobileCatalogItem } from '../../lib/mobile-catalog';
+import type { GameDifficulty, MobileCatalogItem } from '../../lib/mobile-catalog';
 
 import { BottomSheet } from './BottomSheet';
 import { GameTile } from './GameTile';
@@ -20,6 +21,13 @@ import { CardsIcon, LearnIcon, PlayIcon } from './icons';
 function isLiveGameSlug(slug: string): slug is GameSlug {
   return slug === 'gadha-chor' || slug === 'lal-satti' || slug === 'jhabbu' || slug === 'kachuful';
 }
+
+/** "Best for …" line per difficulty — the emotional fit, not a coin/win framing. */
+const BEST_FOR_KEY: Record<GameDifficulty, MessageKey> = {
+  easy: 'mobile.setup.bestFor.easy',
+  strategy: 'mobile.setup.bestFor.strategy',
+  fast: 'mobile.setup.bestFor.fast',
+};
 
 /**
  * The shared game grid used by both Home and `/mobile/games`. It owns the setup
@@ -104,6 +112,8 @@ function SheetArtworkHeader({
             min: item.durationMinutes.min,
             max: item.durationMinutes.max,
           })}
+          {' · '}
+          {t.t(item.difficultyKey)}
         </span>
       </div>
     </div>
@@ -170,6 +180,21 @@ function SetupBody({
     <div>
       <p className="mt-2 text-sm leading-6 text-text-primary/90">{t.t(item.taglineKey)}</p>
       <SheetArtworkHeader item={item} t={t} />
+
+      {item.howBodyKey ? (
+        <section className="mt-4">
+          <h3 className="text-xs font-black uppercase tracking-wide text-action-primary">
+            {t.t('mobile.setup.howItPlays')}
+          </h3>
+          <p className="mt-1 text-sm leading-6 text-text-primary/85">{t.t(item.howBodyKey)}</p>
+        </section>
+      ) : null}
+
+      <p className="mt-3 text-sm leading-6 text-text-primary/80">
+        <span className="font-black text-action-primary">{t.t('mobile.setup.bestForLabel')}</span>
+        {' · '}
+        {t.t(BEST_FOR_KEY[item.difficulty])}
+      </p>
 
       <div className="mt-4 grid gap-2">
         {item.practiceRoute ? (

@@ -30,6 +30,13 @@ export interface MobileCatalogItem {
   readonly nameKey: MessageKey;
   /** One-sentence "what is this game" line for tiles and the setup sheet. */
   readonly taglineKey: MessageKey;
+  /**
+   * Short "how it plays" explainer for the setup sheet. Reuses the canonical
+   * public-site rules copy (the game's first discovery section) so the sheet and
+   * the SEO pages never drift into two inconsistent descriptions. Playable games
+   * only; coming-soon games omit it.
+   */
+  readonly howBodyKey?: MessageKey;
   /** "Also known as …" alternate-name summary. */
   readonly alternateNamesKey: MessageKey;
   readonly difficulty: GameDifficulty;
@@ -101,6 +108,8 @@ function playableItem(shape: PlayableShape): MobileCatalogItem {
     availability: 'available',
     nameKey: discovery.nameKey,
     taglineKey: shape.taglineKey,
+    // The first discovery section is always the "how to play" explainer.
+    howBodyKey: discovery.sections[0]?.bodyKey,
     alternateNamesKey: discovery.aliasShortKey,
     difficulty: shape.difficulty,
     difficultyKey: DIFFICULTY_KEY[shape.difficulty],
