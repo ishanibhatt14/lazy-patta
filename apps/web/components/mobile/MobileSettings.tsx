@@ -1,16 +1,17 @@
 'use client';
 
 import { LOCALES, type MessageKey } from '@lazy-patta/localization';
-import type { ComponentType, ReactElement, ReactNode, SVGProps } from 'react';
+import { useEffect, useState, type ComponentType, type ReactElement, type ReactNode, type SVGProps } from 'react';
 
 import { createTranslator } from '../../lib/i18n';
 import { LOCALE_DISPLAY } from '../../lib/locale/preference';
 import { usePreferredLocale } from '../../lib/locale/preferred-locale-context';
+import { readDisplayName, saveDisplayName } from '../../lib/mobile/display-name';
 import { useMobilePreferences } from '../../lib/mobile/preferences';
 import { type ThemeChoice, useTheme } from '../../lib/mobile/theme';
 
 import { PatternBackground } from './artwork/PatternBackground';
-import { CardsIcon, GlobeIcon, MotionIcon, PaletteIcon, SettingsIcon } from './icons';
+import { CardsIcon, GlobeIcon, MotionIcon, PaletteIcon, SettingsIcon, UserIcon } from './icons';
 
 /**
  * Settings surface. Every control here has a real, persisted effect — language
@@ -102,6 +103,11 @@ export function MobileSettings(): ReactElement {
   const { choice: themeChoice, setChoice: setThemeChoice } = useTheme();
   const t = createTranslator(locale);
 
+  // localStorage is client-only; adopt the stored name after mount so SSR and
+  // first paint agree. Persist on every change — a blank value clears the name.
+  const [name, setName] = useState('');
+  useEffect(() => setName(readDisplayName()), []);
+
   return (
     <div className="flex flex-col gap-5">
       {/* Immersive header band, consistent with Home. */}
@@ -116,6 +122,27 @@ export function MobileSettings(): ReactElement {
           </h1>
         </div>
       </section>
+
+      <SettingsPanel id="settings-name" Icon={UserIcon} title={t.t('mobile.settings.nameSection')}>
+        <label htmlFor="settings-display-name" className="sr-only">
+          {t.t('mobile.settings.nameLabel')}
+        </label>
+        <input
+          id="settings-display-name"
+          type="text"
+          inputMode="text"
+          autoComplete="off"
+          maxLength={24}
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value);
+            saveDisplayName(event.target.value);
+          }}
+          placeholder={t.t('mobile.settings.namePlaceholder')}
+          className="min-h-[52px] w-full rounded-xl border border-action-secondary/20 bg-background-canvas/40 px-4 font-black text-action-primary placeholder:font-semibold placeholder:text-text-primary/45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+        />
+        <p className="mt-3 px-1 text-xs text-text-primary/75">{t.t('mobile.settings.nameHint')}</p>
+      </SettingsPanel>
 
       <SettingsPanel
         id="settings-language"

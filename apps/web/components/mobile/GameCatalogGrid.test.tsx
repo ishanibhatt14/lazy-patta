@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
 import { createTranslator } from '../../lib/i18n';
+import { readRecentPlay } from '../../lib/mobile/recent';
 import { MOBILE_CATALOG } from '../../lib/mobile-catalog';
 
 import { GameCatalogGrid } from './GameCatalogGrid';
@@ -77,6 +78,8 @@ describe('GameCatalogGrid', () => {
     await user.click(screen.getByRole('button', { name: /Kachuful/i }));
     await user.click(screen.getByRole('link', { name: /Quick Play/i }));
 
-    expect(window.localStorage.getItem('lazy-patta:mobile-recent-game')).toBe('kachuful');
+    const recent = readRecentPlay();
+    expect(recent?.item.id).toBe('kachuful');
+    expect(recent?.playedAt).toEqual(expect.any(Number));
   });
 });
