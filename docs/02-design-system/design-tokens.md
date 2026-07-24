@@ -26,16 +26,17 @@ In code these become `--lp-bg-canvas`, `bg-canvas` (Tailwind), `tokens.bg.canvas
 
 Full palette and contrast rules: [color](./color.md). Core semantic set:
 
-| Token              | Value (Classic Cream) | Role                                    |
-| ------------------ | --------------------- | --------------------------------------- |
-| `bg.canvas`        | `#FFF7E8`             | app background (cream paper)            |
-| `surface`          | `#FFFFFF`             | cards, sheets, panels                   |
-| `brand.primary`    | `#7A1F2B`             | deep maroon — primary brand/action      |
-| `brand.accent`     | `#F6A623`             | saffron — accent (dark text on it)      |
-| `action.secondary` | `#0F766E`             | teal — secondary actions, playable glow |
-| `game.felt`        | `#1F6B4F`             | felt green — the play table             |
-| `text.primary`     | `#1F1B16`             | ink — primary text                      |
-| `status.error`     | `#C62828`             | errors, destructive                     |
+| Token              | Value (Mehfil Table) | Role                                    |
+| ------------------ | -------------------- | --------------------------------------- |
+| `bg.canvas`        | `#F6F0E5`            | app background (warm cream paper)       |
+| `surface`          | `#FFFFFF`            | cards, sheets, panels                   |
+| `action.primary`   | `#0E6B63`            | deep peacock teal — primary action/head |
+| `action.secondary` | `#F6A623`            | marigold saffron — accent (dark text)   |
+| `brand.accent`     | `#0E6B63`            | teal — focus rings (offset onto cream)  |
+| `card.back`        | `#7A1F2B`            | deep maroon — heritage card backs       |
+| `game.felt`        | `#0D5B4F`            | deep felt green — the play table        |
+| `text.primary`     | `#1F1B16`            | ink — primary text                      |
+| `status.error`     | `#C62828`            | errors, destructive                     |
 
 ## Spacing scale (8-point system)
 

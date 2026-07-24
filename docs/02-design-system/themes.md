@@ -14,12 +14,14 @@ token/asset swap, not a rebuild, and what will keep every future game consistent
 - **Contrast is re-verified per theme** — a theme is not done until it passes the
   same WCAG AA rules as Classic Cream ([accessibility](./accessibility.md)).
 
-## Classic Cream — production default (MVP)
+## Mehfil Table — production default
 
 The warmest, most on-brand look; ships first (see
 [decisions D-40](../00-product-bible/decisions-log.md)).
 
-- Cream canvas (`#FFF7E8`), white surfaces, maroon/saffron/teal/felt as defined in
+- Teal-led: warm-cream canvas (`#F6F0E5`), white surfaces, a deep peacock teal
+  (`#0E6B63`) primary with marigold saffron as the small accent, deep felt (`#0D5B4F`)
+  table, and maroon held back for heritage card backs — as defined in
   [color](./color.md). Soft warm shadows, cream-paper texture, subtle Bandhani.
 
 ## Night Table — dark theme
@@ -29,15 +31,15 @@ table at night.
 
 Remapping intent (author exact values against AA):
 
-| Semantic token  | Night Table intent                                             |
-| --------------- | -------------------------------------------------------------- |
-| `bg.canvas`     | deep warm brown/near-black (not cold gray/black)               |
-| `surface`       | slightly lifted warm dark                                      |
-| `text.primary`  | warm off-white (`text.onDark`)                                 |
-| `brand.primary` | maroon lightened for contrast on dark                          |
-| `brand.accent`  | saffron holds (still dark text on saffron fills)               |
-| `game.felt`     | deeper felt green                                              |
-| shadows         | replaced by subtle light/borders (shadows read poorly on dark) |
+| Semantic token     | Night Table intent                                             |
+| ------------------ | -------------------------------------------------------------- |
+| `bg.canvas`        | deep warm brown/near-black (not cold gray/black)               |
+| `surface`          | slightly lifted warm dark                                      |
+| `text.primary`     | warm off-white (`text.onDark`)                                 |
+| `action.primary`   | teal lightened (`tealLight`) for contrast on dark              |
+| `action.secondary` | marigold gold holds (still dark text on gold fills)            |
+| `game.felt`        | deeper felt green                                              |
+| shadows            | replaced by subtle light/borders (shadows read poorly on dark) |
 
 Rules: keep neutrals **warm**; re-check every foreground/background pair; card
 faces stay high-contrast and legible; mascot/festival dressing recolor via tokens.

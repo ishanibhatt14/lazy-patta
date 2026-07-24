@@ -11,7 +11,14 @@ export const semanticColorTokens = {
   'surface.primary': 'white',
   'text.primary': 'ink',
   'text.onBrand': 'cream',
-  'action.primary': 'maroon',
+  // Mehfil Table is teal-led: the primary action/heading role is the deep peacock
+  // teal, with marigold saffron as the small warm accent (`action.secondary`).
+  // Maroon steps back to a heritage role on card backs (card.back) rather than
+  // leading the UI. Cream text on teal passes AA (see color.md). `brand.accent`
+  // stays teal: it drives focus rings, and with the components' outline-offset the
+  // teal ring reads on the cream canvas (~5.6:1) even around teal buttons — a
+  // marigold ring would fail contrast on cream/white.
+  'action.primary': 'teal',
   'action.secondary': 'saffron',
   'brand.accent': 'teal',
   'game.table': 'feltGreen',
@@ -50,17 +57,18 @@ export type SemanticColorToken = keyof typeof semanticColorTokens;
 /**
  * Dark-theme role overrides (tier-2). Theming = remapping semantic roles to
  * different primitives (ADR-0007); the dark theme changes only the roles listed
- * here and inherits every other role from the light map above. Note the deliberate
- * flip of `action.primary` to saffron and `text.onBrand` to ink: on a plum-black
- * canvas the primary role must read both as heading text on dark surfaces AND as a
- * filled button with legible text on top, which a warm saffron + ink pairing gives.
+ * here and inherits every other role from the light map above. The dark theme stays
+ * teal-led to match Mehfil Table: `action.primary` maps to the brighter `tealLight`
+ * so it reads both as heading text on the plum-black canvas AND as a filled button
+ * with dark `text.onBrand` (ink) on top. `action.secondary` is marigold `gold`;
+ * `brand.accent` (focus rings) stays `tealLight`, high-contrast on the plum canvas.
  */
 export const darkThemeOverrides = {
   'background.canvas': 'plumBlack',
   'surface.primary': 'plumRaised',
   'text.primary': 'ivory',
   'text.onBrand': 'ink',
-  'action.primary': 'saffron',
+  'action.primary': 'tealLight',
   'action.secondary': 'gold',
   'brand.accent': 'tealLight',
   'status.error': 'coralLight',
